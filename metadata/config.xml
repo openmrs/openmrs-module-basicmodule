@@ -7,13 +7,13 @@
 	<id>basicModule</id>
 	<name>@MODULE_NAME@</name>
 	<version>@MODULE_VERSION@</version>
-	<package>org.openmrs.module.basicModule</package>
+	<package>org.openmrs.module.basicmodule</package>
 	<author>Ben Wolfe</author>
 	<description>
 			Very Basic OpenMRS Module
 	</description>
 
-	<activator>org.openmrs.module.basicModule.basicModuleActivator</activator>
+	<activator>org.openmrs.module.basicmodule.BasicModuleActivator</activator>
 	
 	<!--  <library id="starterXSN" path="org/openmrs/module/basicModule" type="resources" /> -->
 	<!-- <updateURL>http://resources.openmrs.org/modules/formEntry/update.rdf</updateURL> -->
@@ -47,7 +47,7 @@
 
 	<!-- Required Global Properties 
 	<globalProperty>
-		<property>formEntry.infopath_output_dir</property> <!-- Must start with `moduleId.` -->
+		<property>formEntry.infopath_output_dir</property> <x!-- Must start with `moduleId.` --x>
 		<defaultValue></defaultValue>
 		<description>This property should point to a filesystem directory.  When an XSN is uploaded for a form it will be saved here.</description>
 	</globalProperty>
