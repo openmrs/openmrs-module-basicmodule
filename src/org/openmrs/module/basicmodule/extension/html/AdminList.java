@@ -12,14 +12,12 @@ public class AdminList extends Extension {
 	}
 	
 	public String getTitle() {
-		return "basicModule.title";
+		return "basicmodule.title";
 	}
 	
 	public Map<String, String> getLinks() {
 		
 		Map<String, String> map = new HashMap<String, String>();
-		
-		//map.put("module/helloWorld/addResponse.form", "helloWorld.addResponse");
 		
 		return map;
 	}

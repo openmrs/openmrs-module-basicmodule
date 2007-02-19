@@ -12,14 +12,14 @@ public class BasicModuleActivator implements Activator {
 	 * @see org.openmrs.module.Activator#startup()
 	 */
 	public void startup() {
-		log.info("Starting BasicModule");
+		log.info("Starting Basic Module");
 	}
 	
 	/**
 	 *  @see org.openmrs.module.Activator#shutdown()
 	 */
 	public void shutdown() {
-		log.info("Shutting down BasicModule");
+		log.info("Shutting down Basic Module");
 	}
 	
 }
