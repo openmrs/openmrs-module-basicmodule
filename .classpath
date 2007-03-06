@@ -3,7 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="web/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/openmrs-api-1.0.45.1220.jar"/>
+	<classpathentry kind="lib" path="lib/openmrs-api-1.0.54.1540.jar"/>
+	<classpathentry kind="lib" path="lib/web-openmrs-api-1.0.54.1540.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
