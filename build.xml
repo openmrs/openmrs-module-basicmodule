@@ -71,6 +71,13 @@
 			<filterset refid="variables.to.replace" />
 		</copy>
 		
+		<!-- Copy lib folder -->
+		<!-- (lib should only contain this module's required -->
+		<!-- libraries that OpenMRS doesn't contain already) -->
+		<copy todir="build/lib" failonerror="false">
+			<fileset dir="lib" includes="**/*" />
+		</copy>
+		
 		<!-- Create distributable jar file -->
 		<jar destfile="dist/${module.name}-${module.version}.omod">
 			<fileset dir="build" includes="**/*" />

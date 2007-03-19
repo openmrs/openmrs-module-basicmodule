@@ -15,15 +15,15 @@
 
 	<activator>@MODULE_PACKAGE@.BasicModuleActivator</activator>
 	
-	<!--  <library id="starterXSN" path="org/openmrs/module/@MODULE_ID@" type="resources" /> -->
-	<!-- <updateURL>http://resources.openmrs.org/modules/@MODULE_ID@/update.rdf</updateURL> -->
+	<!-- <updateURL>https://dev.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 	
+	<require_version>1.0.54.1594</require_version>
 	
 	<!-- Extensions 
 	<extension>
 		<point>org.openmrs.admin.list</point>
-		<class>@MODULE_PACKAGE@.extension.html.BasicModuleAdminExt</class>
+		<class>@MODULE_PACKAGE@.extension.html.AdminList</class>
 	</extension>
 	 /Extensions -->
 	
@@ -33,7 +33,6 @@
 		<point>org.openmrs.api.FormService</point>
 		<class>@MODULE_PACKAGE@.advice.DuplicateFormAdvisor</class>
 	</advice>
-	
 	 /AOP -->
 	
 	
