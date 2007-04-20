@@ -1,4 +1,4 @@
-package org.openmrs.module.basicmodule.extension.html;
+package org.openmrs.module.datadeletion.extension.html;
 
 import java.util.HashMap;
 import java.util.Map;
