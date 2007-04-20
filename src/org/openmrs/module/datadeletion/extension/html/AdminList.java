@@ -13,7 +13,7 @@ public class AdminList extends AdministrationSectionExt {
 	}
 	
 	public String getTitle() {
-		return "basicmodule.title";
+		return "datadeletion.title";
 	}
 	
 	public Map<String, String> getLinks() {

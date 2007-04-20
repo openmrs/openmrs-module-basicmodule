@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <!-- ********************************************************* -->
-<!-- ** Basic Module                                        ** -->
+<!-- ** Data Deletion Module                                        ** -->
 <!-- **	                                                    ** -->
 <!-- ** @author Ben Wolfe                                   ** -->
 <!-- ** @version 1.0                                        ** -->
 <!-- ********************************************************* -->
-<project name="BasicModule" default="package-module">
+<project name="DataDeletionModule" default="package-module">
 		
 	<!-- *********************************************************** -->
 	<!-- **                     TARGETS                           ** -->
