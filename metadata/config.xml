@@ -4,16 +4,16 @@
 <module configVersion="1.0">
 	
 	<!-- Base Module Properties -->
-	<id>datadeletion</id>
-	<name>Data Deletion Module</name>
+	<id>basicmodule</id>
+	<name>Basic Module</name>
 	<version>1.0</version>
 	<package>org.openmrs.module.@MODULE_ID@</package>
 	<author>Ben Wolfe</author>
 	<description>
-			Data Deletion Module. Used for deleting temporary data.
+			Basic Module. Useful for creating other modules.
 	</description>
 
-	<activator>@MODULE_PACKAGE@.DataDeletionActivator</activator>
+	<activator>@MODULE_PACKAGE@.BasicModuleActivator</activator>
 	
 	<!-- <updateURL>https://dev.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->

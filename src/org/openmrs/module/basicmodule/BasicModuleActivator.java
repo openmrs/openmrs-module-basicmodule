@@ -1,10 +1,10 @@
-package org.openmrs.module.datadeletion;
+package org.openmrs.module.basicmodule;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.Activator;
 
-public class DataDeletionActivator implements Activator {
+public class BasicModuleActivator implements Activator {
 
 	private Log log = LogFactory.getLog(this.getClass());
 
@@ -12,14 +12,14 @@ public class DataDeletionActivator implements Activator {
 	 * @see org.openmrs.module.Activator#startup()
 	 */
 	public void startup() {
-		log.info("Starting Data Deletion Module");
+		log.info("Starting Basic Module");
 	}
 	
 	/**
 	 *  @see org.openmrs.module.Activator#shutdown()
 	 */
 	public void shutdown() {
-		log.info("Shutting down Data Deletion Module");
+		log.info("Shutting down Basic Module");
 	}
 	
 }

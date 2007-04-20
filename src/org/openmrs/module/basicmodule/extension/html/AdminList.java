@@ -1,4 +1,4 @@
-package org.openmrs.module.datadeletion.extension.html;
+package org.openmrs.module.basicmodule.extension.html;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +13,7 @@ public class AdminList extends AdministrationSectionExt {
 	}
 	
 	public String getTitle() {
-		return "datadeletion.title";
+		return "basicmodule.title";
 	}
 	
 	public Map<String, String> getLinks() {
