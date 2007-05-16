@@ -59,7 +59,7 @@
 		
 	</target>
 	
-	<target name="package-module" depends="compile-module" description="Packages module into jar file">
+	<target name="package-module" depends="compile-module" description="Packages module into omod file">
 		<mkdir dir="dist" />
 		
 		<!-- Copy module metadata -->

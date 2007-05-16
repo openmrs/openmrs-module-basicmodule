@@ -1,19 +1,27 @@
 package org.openmrs.module.printing.impl;
 
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Copies;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.printing.PrintingService;
 import org.openmrs.module.printing.db.PrintingDAO;
-import org.w3c.dom.Document;
 
 /**
  * Printing-related services
@@ -36,45 +44,40 @@ public class PrintingServiceImpl implements PrintingService {
 	public void setPrintingDAO(PrintingDAO dao) {
 		this.dao = dao;
 	}
-
+	
 	/**
-	 * @see org.openmrs.module.printing.PrintingService#addPrintJob(java.lang.Byte[])
+	 * @see org.openmrs.module.printing.PrintingService#addPrintJob(java.io.InputStream)
 	 */
-	public void addPrintJob(Byte[] byteArray) {
-		log.debug("Adding byte array print job");
+	public void addPrintJob(InputStream inStream) {
 		
-		dao.addPrintJob(byteArray);
-	}
-
-	/**
-	 * @see org.openmrs.module.printing.PrintingService#addPrintJob(org.w3c.dom.Document)
-	 */
-	public void addPrintJob(Document doc) {
-		// TODO Auto-generated method stub
+		PrintService printService = getDefaultPrinter();
 		
-	}
-
-	/**
-	 * @see org.openmrs.module.printing.PrintingService#addPrintJob(java.net.URL)
-	 */
-	public void addPrintJob(URL url) {
-		// TODO Auto-generated method stub
-	}
-
-	/**
-	 * @see org.openmrs.module.printing.PrintingService#deletePrintJob(java.lang.Integer)
-	 */
-	public Boolean deletePrintJob(Integer printJobId) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/**
-	 * @see org.openmrs.module.printing.PrintingService#getPrintJobs(java.lang.Boolean)
-	 */
-	public void getPrintJobs(Boolean includePrinted) {
-		// TODO Auto-generated method stub
+		DocFlavor inFormat = DocFlavor.INPUT_STREAM.AUTOSENSE;
+		Doc myDoc = new SimpleDoc(inStream, inFormat, null);  
+		PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+		aset.add(new Copies(1));
 		
+		if (printService.isDocFlavorSupported(inFormat) == false) {
+			throw new APIException("Unable to print to " + printService.getName() + " with the current document flavor: " + inFormat);
+		}
+		
+		DocPrintJob job = printService.createPrintJob();
+		try {
+			job.print(myDoc, aset);
+		} 
+		catch (PrintException pe) {
+			log.error("Error occurred while trying to print", pe);
+		}
+	}
+
+	/**
+	 * @see org.openmrs.module.printing.PrintingService#getPrintJobs()
+	 */
+	public List<?> getPrintJobs() {
+		// TODO use a listener on the print jobs to know what jobs are outstanding
+		
+		log.warn("unimplemented");
+		return null;
 	}
 	
 	/**
@@ -109,6 +112,10 @@ public class PrintingServiceImpl implements PrintingService {
 					break;
 				}
 			}
+			
+			if (defaultPrinter == null)
+				defaultPrinter = PrintServiceLookup.lookupDefaultPrintService();
+			
 		}
 	
 		return defaultPrinter;

@@ -1,13 +1,12 @@
 package org.openmrs.module.printing;
 
-import java.net.URL;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.print.PrintService;
 
 import org.openmrs.module.printing.db.PrintingDAO;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
 
 /**
  * Defines methods for printing in openmrs.  Methods include getting available printers, 
@@ -22,36 +21,20 @@ public interface PrintingService {
 	public static final String PRINT_SERVICE_GP = "printing.defaultPrinterService";
 	
 	/**
-	 * Add print job as doc
-	 * @param doc
-	 */
-	public void addPrintJob(Document doc);
-	
-	/**
-	 * Add print job as byte array
-	 * @param byteArray
-	 */
-	public void addPrintJob(Byte[] byteArray);
-	
-	/**
-	 * Add print job as url
-	 * @param url
-	 */
-	public void addPrintJob(URL url);
-	
-	/**
+	 * Add print job as inputStream
 	 * 
-	 * @param printJobId
-	 * @return true/false whether the print job was deleted
+	 * The stream will be closed in this method
+	 * 
+	 * @param inputStream
 	 */
-	public Boolean deletePrintJob(Integer printJobId);
+	public void addPrintJob(InputStream inputStream);
 	
 	/**
 	 * 
 	 * @param includePrinted whether or not to include the already printed jobs
 	 */
 	@Transactional(readOnly=true)
-	public void getPrintJobs(Boolean includePrinted);
+	public List<?> getPrintJobs();
 	
 	/**
 	 * 
