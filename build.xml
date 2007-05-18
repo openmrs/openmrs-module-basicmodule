@@ -82,10 +82,16 @@
 		</copy>
 		
 		<!-- Create distributable jar file -->
-		<jar destfile="dist/${module.name}-${module.version}.omod">
+		<jar destfile="dist/${module.id}-${module.version}.omod">
 			<fileset dir="build" includes="**/*" />
 		</jar>
 	</target>
-
+	
+	<target name="package-jar" depends="package-module" description="Packages module into jar file">
+		<!-- Create distributable jar file -->
+		<jar destfile="dist/${module.id}-${module.version}.jar">
+			<fileset dir="build" includes="**/*" />
+		</jar>
+	</target>
+	
 </project>
-
