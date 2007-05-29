@@ -1,5 +1,6 @@
 package org.openmrs.module.printing;
 
+import java.awt.print.PrinterException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -26,8 +27,17 @@ public interface PrintingService {
 	 * The stream will be closed in this method
 	 * 
 	 * @param inputStream
+	 * @throws PrinterException 
 	 */
-	public void addPrintJob(InputStream inputStream);
+	public boolean addPrintJob(InputStream inputStream) throws PrinterException;
+	
+	/**
+	 * Add print job as Byte array
+	 * 
+	 * @param byteArray
+	 * @throws PrinterException 
+	 */
+	public boolean addPrintJob(byte[] byteArray) throws PrinterException;
 	
 	/**
 	 * 

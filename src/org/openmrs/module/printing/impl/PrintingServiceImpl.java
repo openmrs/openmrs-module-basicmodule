@@ -1,5 +1,7 @@
 package org.openmrs.module.printing.impl;
 
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -12,9 +14,15 @@ import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
+import javax.print.attribute.DocAttributeSet;
+import javax.print.attribute.HashDocAttributeSet;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.DocumentName;
+import javax.print.attribute.standard.MediaName;
+import javax.print.attribute.standard.MediaSizeName;
+import javax.print.attribute.standard.MediaTray;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,28 +54,64 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 	
 	/**
+	 * @throws PrinterException 
 	 * @see org.openmrs.module.printing.PrintingService#addPrintJob(java.io.InputStream)
 	 */
-	public void addPrintJob(InputStream inStream) {
-		
-		PrintService printService = getDefaultPrinter();
-		
+	public boolean addPrintJob(InputStream inStream) throws PrinterException {
 		DocFlavor inFormat = DocFlavor.INPUT_STREAM.AUTOSENSE;
-		Doc myDoc = new SimpleDoc(inStream, inFormat, null);  
+		
+		return addPrintJob(inStream, inFormat);
+	}
+	
+	/**
+	 * @throws PrinterException 
+	 * @see org.openmrs.module.printing.PrintingService#addPrintJob(byte[])
+	 */
+	public boolean addPrintJob(byte[] byteArray) throws PrinterException {
+		DocFlavor byteFormat = DocFlavor.BYTE_ARRAY.AUTOSENSE;
+		
+		return addPrintJob(byteArray, byteFormat);
+	}
+	
+	/**
+	 * Does the actual printing
+	 * 
+	 * @param o object to print (byteArray, input stream, etc)
+	 * @param flavor the document flavor/type
+	 * @return true/false whether it printed successfully
+	 * @throws PrinterException
+	 */
+	private boolean addPrintJob(Object o, DocFlavor flavor) throws PrinterException {
+		DocAttributeSet docAttributes = new HashDocAttributeSet();
+		docAttributes.add(MediaName.NA_LETTER_WHITE);
+		docAttributes.add(new DocumentName(Context.getAuthenticatedUser().getUsername() + "- print job", Context.getLocale()));
+		Doc myDoc = new SimpleDoc(o, flavor, docAttributes);
+		
 		PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
+		aset.add(MediaTray.MAIN);
+		aset.add(MediaSizeName.NA_LETTER);
 		aset.add(new Copies(1));
 		
-		if (printService.isDocFlavorSupported(inFormat) == false) {
-			throw new APIException("Unable to print to " + printService.getName() + " with the current document flavor: " + inFormat);
-		}
+		PrinterJob jobForAttrs = PrinterJob.getPrinterJob();
+		jobForAttrs.setPrintService(getDefaultPrinter());
+
+		if (jobForAttrs.printDialog(aset) == false)
+			return false;
 		
+		PrintService printService = jobForAttrs.getPrintService();
 		DocPrintJob job = printService.createPrintJob();
 		try {
+			if (printService.isDocFlavorSupported(flavor) == false)
+				throw new APIException("Unable to print to " + printService.getName() + " with the current document flavor: " + flavor);
+			
 			job.print(myDoc, aset);
 		} 
 		catch (PrintException pe) {
 			log.error("Error occurred while trying to print", pe);
+			return false;
 		}
+		
+		return true;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 
-<openmrs:require privilege="Manage Printers" otherwise="/login.htm" redirect="/module/printing/summary.list" />
+<openmrs:require privilege="Manage Printers" otherwise="/login.htm" redirect="/module/printing/printerSetup.htm" />
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
 
