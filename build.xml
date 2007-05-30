@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <!-- ********************************************************* -->
-<!-- ** Printing Module                                        ** -->
+<!-- ** Basic Module                                        ** -->
 <!-- **	                                                    ** -->
 <!-- ** @author Ben Wolfe                                   ** -->
 <!-- ** @version 1.0                                        ** -->
 <!-- ********************************************************* -->
-<project name="PrintingModule" default="package-module">
+<project name="BasicModule" default="package-module">
 		
 	<!-- *********************************************************** -->
 	<!-- **                     TARGETS                           ** -->
@@ -59,7 +59,7 @@
 		
 	</target>
 	
-	<target name="package-module" depends="compile-module" description="Packages module into omod file">
+	<target name="package-module" depends="compile-module" description="Packages module into jar file">
 		<mkdir dir="dist" />
 		
 		<!-- Copy module metadata -->
@@ -86,12 +86,6 @@
 			<fileset dir="build" includes="**/*" />
 		</jar>
 	</target>
-	
-	<target name="package-jar" depends="package-module" description="Packages module into jar file">
-		<!-- Create distributable jar file -->
-		<jar destfile="dist/${module.id}-${module.version}.jar">
-			<fileset dir="build" includes="**/*" />
-		</jar>
-	</target>
-	
+
 </project>
+

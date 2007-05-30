@@ -1,6 +1,6 @@
-package org.openmrs.module.printing.extension.html;
+package org.openmrs.module.basicmodule.extension.html;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openmrs.module.Extension;
@@ -13,14 +13,12 @@ public class AdminList extends AdministrationSectionExt {
 	}
 	
 	public String getTitle() {
-		return "printing.title";
+		return "basicmodule.title";
 	}
 	
 	public Map<String, String> getLinks() {
 		
-		Map<String, String> map = new LinkedHashMap<String, String>();
-		
-		map.put("module/printing/printerSetup.form", "printing.printerSetup");
+		Map<String, String> map = new HashMap<String, String>();
 		
 		return map;
 	}
