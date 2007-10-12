@@ -86,6 +86,24 @@
 			<fileset dir="build" includes="**/*" />
 		</jar>
 	</target>
+	
+	<target name="deploy-web" depends="package-module">
+		<property environment="env"/>
+		<copy todir="${env.CATALINA_HOME}/webapps/openmrs/WEB-INF/view/module/${module.id}">
+			<fileset dir="web/module" includes="**/*" />
+		</copy>
+	</target>
+	
+	<target name="package-jar" depends="package-module" description="Packages class files into jar file to be included in other projects">
+		<!-- Create distributable jar file -->
+		<jar destfile="dist/${module.id}-${module.version}.jar">
+			<fileset dir="build" >
+				<exclude name="web/**/*" />
+				<exclude name="test/**/*" />
+				<exclude name="*" />
+			</fileset>
+		</jar>
+	</target>
 
 </project>
 
