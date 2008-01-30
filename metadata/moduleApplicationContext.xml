@@ -8,7 +8,7 @@
     <bean id="basicmoduleUrlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
     	<property name="mappings">
             <props>
-	           <prop key="module/@MODULE_ID@/basicmodule.form">basicmoduleFormController</prop>
+	           <prop key="module/@MODULE_ID@/basicmoduleLink.form">basicmoduleFormController</prop>
 	    	</props>
 		</property>
     </bean>
@@ -16,9 +16,9 @@
     <!-- Controllers -->
 	
     <bean id="basicmoduleFormController" class="@MODULE_PACKAGE@.web.controller.BasicModuleFormController">
-		<property name="commandName"><value>basicmoduleForm</value></property>
+		<property name="commandName"><value>basicmoduleFormObject</value></property>
 		<property name="formView"><value>/module/@MODULE_ID@/basicmoduleForm</value></property>
-		<property name="successView"><value>basicmodule.form</value></property>
+		<property name="successView"><value>basicmoduleLink.form</value></property>
     </bean>
 	
     <!-- /Controllers -->

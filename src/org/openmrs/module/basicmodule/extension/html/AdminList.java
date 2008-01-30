@@ -49,7 +49,7 @@ public class AdminList extends AdministrationSectionExt {
 		
 		Map<String, String> map = new HashMap<String, String>();
 		
-		map.put("module/basicmodule/basicmodule.form", "basicmodule.replace.this.link.name");
+		map.put("module/basicmodule/basicmoduleLink.form", "basicmodule.replace.this.link.name");
 		
 		return map;
 	}
