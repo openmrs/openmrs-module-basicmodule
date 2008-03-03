@@ -16,7 +16,7 @@
     <!-- Controllers -->
 	
     <bean id="basicmoduleFormController" class="@MODULE_PACKAGE@.web.controller.BasicModuleFormController">
-		<property name="commandName"><value>basicmoduleFormObject</value></property>
+		<property name="commandName"><value>thePatientList</value></property>
 		<property name="formView"><value>/module/@MODULE_ID@/basicmoduleForm</value></property>
 		<property name="successView"><value>basicmoduleLink.form</value></property>
     </bean>
