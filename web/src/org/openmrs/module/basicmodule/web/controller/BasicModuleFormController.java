@@ -13,8 +13,8 @@
  */
 package org.openmrs.module.basicmodule.web.controller;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -74,12 +74,12 @@ public class BasicModuleFormController extends SimpleFormController {
      * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
      */
     @Override
-	protected List<Patient> formBackingObject(HttpServletRequest request) throws Exception { 
+	protected Collection<Patient> formBackingObject(HttpServletRequest request) throws Exception { 
     	
     	// get all patients that have an identifier "1234"
     	// see http://resources.openmrs.org/doc/index.html?org/openmrs/api/PatientService.html for
     	// a list of all PatientService methods
-    	List<Patient> patients = Context.getPatientService().findPatients("1234", false);
+    	Collection<Patient> patients = Context.getPatientService().findPatients("1234", false);
     	
     	// this object will be made available to the jsp page under the variable name
     	// that is defined in the /metadata/moduleApplicationContext.xml file 
