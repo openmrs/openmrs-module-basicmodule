@@ -80,8 +80,13 @@
 		
 		<!-- Copy module web data -->
 		<copy todir="build/web/module/">
-			<fileset dir="web/module/" includes="**/*" />
+			<fileset dir="web/module/" includes="**/*" excludes="resources/**/*" />
 			<filterset refid="variables.to.replace" />
+		</copy>
+		
+		<!-- Copy the /web/resources folder separately so that image files are not corrupted --> 
+		<copy todir="build/web/module/">
+			<fileset dir="web/module/" includes="resources/**/*" />
 		</copy>
 		
 		<!-- Copy lib folder -->
