@@ -25,7 +25,7 @@ Top level configuration element.
     (messages*),
     (mappingFiles*)
 )>
-<!ATTLIST module configVersion CDATA #FIXED "1.0">
+<!ATTLIST module configVersion CDATA #FIXED "1.1">
 
 <!ELEMENT library EMPTY>
 <!ATTLIST library 
@@ -49,3 +49,4 @@ Top level configuration element.
 <!ELEMENT messages (lang, file)>
 
 <!ELEMENT require_modules (require_module*)>
+<!ATTLIST require_module version CDATA #IMPLIED >
