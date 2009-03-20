@@ -18,13 +18,12 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.Activator;
 
 /**
- * This class contains the logic that is run every time this module
- * is either started or shutdown
+ * This class contains the logic that is run every time this module is either started or shutdown
  */
 public class BasicModuleActivator implements Activator {
-
+	
 	private Log log = LogFactory.getLog(this.getClass());
-
+	
 	/**
 	 * @see org.openmrs.module.Activator#startup()
 	 */
@@ -33,7 +32,7 @@ public class BasicModuleActivator implements Activator {
 	}
 	
 	/**
-	 *  @see org.openmrs.module.Activator#shutdown()
+	 * @see org.openmrs.module.Activator#shutdown()
 	 */
 	public void shutdown() {
 		log.info("Shutting down Basic Module");

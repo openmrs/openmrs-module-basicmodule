@@ -31,62 +31,59 @@ import org.springframework.web.servlet.mvc.SimpleFormController;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
- * This controller backs the /web/module/basicmoduleForm.jsp page.
- * This controller is tied to that jsp page in the /metadata/moduleApplicationContext.xml file
- * 
+ * This controller backs the /web/module/basicmoduleForm.jsp page. This controller is tied to that
+ * jsp page in the /metadata/moduleApplicationContext.xml file
  */
 public class BasicModuleFormController extends SimpleFormController {
 	
-    /** Logger for this class and subclasses */
-    protected final Log log = LogFactory.getLog(getClass());
-        	    
-    /**
-     * Returns any extra data in a key-->value pair kind of way
-     * 
-     * @see org.springframework.web.servlet.mvc.SimpleFormController#referenceData(javax.servlet.http.HttpServletRequest, java.lang.Object, org.springframework.validation.Errors)
-     */
-    @Override
-	protected Map<String, Object> referenceData(HttpServletRequest request, Object obj, Errors err) throws Exception {
-
-    	// this method doesn't return any extra data right now, just an empty map
-		return new HashMap<String,Object>();
-	}
-
-
+	/** Logger for this class and subclasses */
+	protected final Log log = LogFactory.getLog(getClass());
+	
 	/**
-	 * @see org.springframework.web.servlet.mvc.SimpleFormController#onSubmit(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Object, org.springframework.validation.BindException)
+	 * Returns any extra data in a key-->value pair kind of way
+	 * 
+	 * @see org.springframework.web.servlet.mvc.SimpleFormController#referenceData(javax.servlet.http.HttpServletRequest,
+	 *      java.lang.Object, org.springframework.validation.Errors)
 	 */
 	@Override
-	protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response, Object object, BindException exceptions) throws Exception {		
-    	//HttpSession httpSession = request.getSession();
-
-    	return new ModelAndView(new RedirectView(getSuccessView()));
-    }
-
-
-    /**
-     * This class returns the form backing object.  This can be a string, a boolean, or a normal
-     * java pojo.
-     * 
-     * The type can be set in the /config/moduleApplicationContext.xml file or it can be just
-     * defined by the return type of this method
-     * 
-     * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
-     */
-    @Override
-	protected Collection<Patient> formBackingObject(HttpServletRequest request) throws Exception { 
-    	
-    	// get all patients that have an identifier "1234"
-    	// see http://resources.openmrs.org/doc/index.html?org/openmrs/api/PatientService.html for
-    	// a list of all PatientService methods
-    	Collection<Patient> patients = Context.getPatientService().findPatients("1234", false);
-    	
-    	// this object will be made available to the jsp page under the variable name
-    	// that is defined in the /metadata/moduleApplicationContext.xml file 
-    	// under the "commandName" tag
-    	return patients;
-    }
-
-
-	    
+	protected Map<String, Object> referenceData(HttpServletRequest request, Object obj, Errors err) throws Exception {
+		
+		// this method doesn't return any extra data right now, just an empty map
+		return new HashMap<String, Object>();
+	}
+	
+	/**
+	 * @see org.springframework.web.servlet.mvc.SimpleFormController#onSubmit(javax.servlet.http.HttpServletRequest,
+	 *      javax.servlet.http.HttpServletResponse, java.lang.Object,
+	 *      org.springframework.validation.BindException)
+	 */
+	@Override
+	protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response, Object object,
+	                                BindException exceptions) throws Exception {
+		//HttpSession httpSession = request.getSession();
+		
+		return new ModelAndView(new RedirectView(getSuccessView()));
+	}
+	
+	/**
+	 * This class returns the form backing object. This can be a string, a boolean, or a normal java
+	 * pojo. The type can be set in the /config/moduleApplicationContext.xml file or it can be just
+	 * defined by the return type of this method
+	 * 
+	 * @see org.springframework.web.servlet.mvc.AbstractFormController#formBackingObject(javax.servlet.http.HttpServletRequest)
+	 */
+	@Override
+	protected Collection<Patient> formBackingObject(HttpServletRequest request) throws Exception {
+		
+		// get all patients that have an identifier "1234"
+		// see http://resources.openmrs.org/doc/index.html?org/openmrs/api/PatientService.html for
+		// a list of all PatientService methods
+		Collection<Patient> patients = Context.getPatientService().findPatients("1234", false);
+		
+		// this object will be made available to the jsp page under the variable name
+		// that is defined in the /metadata/moduleApplicationContext.xml file 
+		// under the "commandName" tag
+		return patients;
+	}
+	
 }
