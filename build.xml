@@ -98,7 +98,10 @@
 		
 		<!-- Create distributable jar file -->
 		<jar destfile="dist/${module.id}-${module.version}.omod">
-			<fileset dir="build" includes="**/*" />
+			<fileset dir="build">
+				<include name="**/*" />
+				<exclude name="**/*Test*" />
+			</fileset>
 		</jar>
 	</target>
 	
