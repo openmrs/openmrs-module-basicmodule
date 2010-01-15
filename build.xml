@@ -44,6 +44,7 @@
 	<target name="clean" description="Delete build and dist directories">
 		<delete dir="dist" />
 		<delete dir="build" />
+		<delete dir="doc" />
 	</target>
 
 	<target name="compile-module" depends="init" description="Compiles the module">
@@ -104,7 +105,7 @@
 			</fileset>
 		</jar>
 	</target>
-	
+
 	<target name="deploy-web" depends="package-module">
 		<property environment="env"/>
 		<copy todir="${env.CATALINA_HOME}/webapps/openmrs/WEB-INF/view/module/${module.id}">
@@ -122,5 +123,16 @@
 		</jar>
 	</target>
 
+	<target name="package-javadoc" depends="init" description="packages javadoc documentation into doc/javadoc.zip">
+		<mkdir dir="doc" />
+		<javadoc destdir="doc/javadoc" classpathref="classpath" author="true" version="true">
+			<packageset dir="src" defaultexcludes="yes">
+				<exclude name="**/.svn" />
+			</packageset>
+		</javadoc>
+		
+		<delete file="doc/javadoc.zip" />
+		<zip destfile="doc/javadoc.zip" basedir="doc/javadoc" />
+	</target>
 </project>
 
