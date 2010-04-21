@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!-- Beans to add to the current Application context definition -->
+  
+<beans>
+	
+    <bean id="growthchartUrlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    	<property name="order"><value>2</value></property>
+    	<property name="mappings">
+            <props>
+	           <prop key="module/growthchart/growthChart.form">growthChartFormController</prop>
+	           <prop key="module/growthchart/growthChart.htm">growthChartTableGraphController</prop>
+	    	</props>
+		</property>
+    </bean>
+    
+	<!-- ========================= Controllers ========================= -->
+	
+    <!-- Controllers -->
+    <bean id="growthChartFormController" class="org.openmrs.module.growthchart.web.controller.GrowthChartFormController">
+		<property name="commandName"><value>growthEncounter</value></property>
+		<property name="formView"><value>/module/growthchart/growthChartForm</value></property>
+		<property name="successView"><value>growthChart.htm</value></property>
+		<property name="validator"><ref bean="growthChartValidator" /></property>
+    </bean>
+    
+   <bean id="growthChartValidator" class="org.openmrs.module.growthchart.validator.GrowthChartValidator" />
+     
+    <bean id="growthChartTableGraphController" class="org.openmrs.module.growthchart.web.controller.GrowthChartTableGraphController">
+		<property name="viewName"><value>/module/growthchart/growthChartTableGraph</value></property>
+		<property name="formViewName"><value>/module/growthchart/growthChart.form</value></property>
+    </bean>
+    <!-- /Controllers -->
+ </beans>
