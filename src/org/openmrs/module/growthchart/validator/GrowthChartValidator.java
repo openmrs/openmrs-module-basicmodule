@@ -40,15 +40,15 @@ public class GrowthChartValidator implements Validator {
     // so the Obs are not being saved in the command object until after validation
  
     if (growthEncounter.getEncounterDatetime().equals("")) {
-      e.rejectValue("encounterDatetime", "growthchart.encounterDatetime.empty");
+      e.rejectValue("encounterDatetime", "growthchart.empty");
     } 
     
     // this is a hack because the native method doesn't work properly (with openmrs tags??)
     if (growthEncounter.getProvider() == null) {
-        e.rejectValue("provider", "growthchart.provider.empty");
+        e.rejectValue("provider", "growthchart.empty");
       } 
     if (growthEncounter.getLocation() == null) {
-        e.rejectValue("location", "growthchart.location.empty");
+        e.rejectValue("location", "growthchart.empty");
       } 
   }
 }

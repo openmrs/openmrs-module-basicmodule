@@ -120,8 +120,6 @@ public class GrowthChartFormController extends SimpleFormController {
 			obsId = Integer.valueOf(sObsId);
 		}
 		
-		log.debug("********************* OBSID=" + obsId);
-		
 		if (obsId != null) { // Editing Encounter
 			EncounterService encounterService = Context.getEncounterService();
 			ObsService obsService = Context.getObsService();
@@ -166,12 +164,13 @@ public class GrowthChartFormController extends SimpleFormController {
 	@Override
 	protected Map<String, Object> referenceData(HttpServletRequest request, Object obj, Errors err) throws Exception {
 		
+		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
 		// Get Encounter Command Object from Form Backing
 		Encounter growthEncounter = (Encounter) obj;
 		Patient patient = growthEncounter.getPatient();
-		String sObsId = request.getParameter("obsId");
+		String sObsId = request.getParameter("obsId");		
 		
 		Concept weightConcept = Context.getConceptService().getConceptByIdOrName(
 		    Context.getAdministrationService().getGlobalProperty("concept.weight"));
@@ -187,6 +186,19 @@ public class GrowthChartFormController extends SimpleFormController {
 					model.put("weightValue", o.getValueNumeric());
 				}
 			}
+		}
+		
+		String heightValue = request.getParameter("heightValue");
+		String weightValue = request.getParameter("weightValue");
+				
+		// if validation fails and the form is shown again, bind the values of the height and weight fields
+		if(heightValue != null && !heightValue.equals("")) {
+			model.put("heightValue", heightValue);
+			log.info("height inserted");
+		}
+		if(weightValue != null && !weightValue.equals("")) {
+			model.put("weightValue", weightValue);
+			log.info("weight inserted");
 		}
 		
 		model.put("obsId", sObsId);
@@ -221,9 +233,6 @@ public class GrowthChartFormController extends SimpleFormController {
 		
 		String heightValue = request.getParameter("heightValue");
 		String weightValue = request.getParameter("weightValue");
-		
-		log.debug("heightValue=" + heightValue);
-		log.debug("weightValue=" + weightValue);
 		
 		// Validate and Bind Obs to Command
 		for (Obs o : growthEncounter.getAllObs()) {

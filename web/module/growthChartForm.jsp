@@ -8,7 +8,7 @@
 <html>
 <head>
 <style>
-.th {
+th {
 	text-align:left;
 }
 </style>
@@ -92,6 +92,10 @@
 			<td><spring:bind path="provider">
 				<openmrs_tag:userField formFieldName="${status.expression}"
 					initialValue="${status.value}" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
 					<c:if test="${status.errorMessage != ''}"><span class="error">${status.errorMessage}</span></c:if>
 				</spring:bind>
 			</td>
@@ -101,6 +105,10 @@
 			<td><spring:bind path="growthEncounter.location">
 				<openmrs_tag:locationField formFieldName="${status.expression}"
 					initialValue="${status.value}" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
 				<c:if test="${status.errorMessage != ''}"><span class="error">${status.errorMessage}</span></c:if>
 				</spring:bind>
 			</td>
@@ -112,10 +120,13 @@
 					<input type="text" id="${status.expression}" name="${status.expression}" size="10" 
 						   value="${status.value}" onClick="showCalendar(this)" />
 				   (<spring:message code="general.format"/>: <openmrs:datePattern />)
+			</td>
+		</tr>
+		<tr>
+			<td  colspan="2">
 				   <c:if test="${status.errorMessage != ''}"><span class="error">${status.errorMessage}</span></c:if>
 				</spring:bind>
 			</td>
-			<td></td>
 		</tr>
 		<!-- 
 	       <c:forEach items="${growthEncounter.obs}" varStatus="status" var="obs">
@@ -148,15 +159,18 @@
 		 <tr>
 		 	<th><spring:message code="growthchart.height.label"/></th>
 		 	<td><input type="text" id="heightValue" name="heightValue" value="${heightValue}">
-		 		<span id="heightValueError"></span>
 		 	</td>
-		 	<td id="heightValueError"></td>
 	       </tr>
+	     <tr>
+	     	<td colspan="2"><span id="heightValueError"></span></td>
+	     </tr>
 		 <tr>
 		 	<th><spring:message code="growthchart.weight.label"/></th>
 		 	<td><input type="text" id="weightValue" name="weightValue" value="${weightValue}">
-		 		<span id="weightValueError"></span>
 		 	</td>
+	       </tr>
+	       <tr>
+	     	<td colspan="2"><span id="weightValueError"></span></td>
 	       </tr>
 	       </table>
 	       <br>
