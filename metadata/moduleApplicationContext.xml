@@ -8,16 +8,16 @@
     <bean id="basicmoduleUrlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
     	<property name="mappings">
             <props>
-	           <prop key="module/@MODULE_ID@/basicmoduleLink.form">basicmoduleFormController</prop>
+	           <prop key="module/basicmodule/basicmoduleLink.form">basicmoduleFormController</prop>
 	    	</props>
 		</property>
     </bean>
 	
     <!-- Controllers -->
 	
-    <bean id="basicmoduleFormController" class="@MODULE_PACKAGE@.web.controller.BasicModuleFormController">
+    <bean id="basicmoduleFormController" class="org.openmrs.module.basicmodule.web.controller.BasicModuleFormController">
 		<property name="commandName"><value>thePatientList</value></property>
-		<property name="formView"><value>/module/@MODULE_ID@/basicmoduleForm</value></property>
+		<property name="formView"><value>/module/basicmodule/basicmoduleForm</value></property>
 		<property name="successView"><value>basicmoduleLink.form</value></property>
     </bean>
 	
