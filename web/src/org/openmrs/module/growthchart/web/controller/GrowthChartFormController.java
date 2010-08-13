@@ -129,7 +129,7 @@ public class GrowthChartFormController extends SimpleFormController {
 			
 		} else { // New Encounter
 			EncounterType clinicianEntered = new EncounterType(Integer.parseInt(Context.getAdministrationService()
-			        .getGlobalProperty("encountertype.clinician")));
+			        .getGlobalProperty("growthchart.encountertype.clinician")));
 			List<EncounterType> encounterTypes = new ArrayList<EncounterType>();
 			encounterTypes.add(clinicianEntered);
 			

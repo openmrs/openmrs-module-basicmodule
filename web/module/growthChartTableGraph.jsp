@@ -275,7 +275,7 @@ var $j = jQuery.noConflict();
 </script>
 </head>
 <body>
-<openmrs:globalProperty key="growthChartGraph.maximumAge" var="maxAgeForGraph"/>
+<openmrs:globalProperty key="growthchart.growthChartGraph.maximumAge" var="maxAgeForGraph"/>
 <div id="growthChart" style="float:left; width:100%; height:100%">
 	<openmrs:hasPrivilege privilege="View Encounters">
 	<h4 style="float:left;"><spring:message code="growthchart.growthChartGraph.label"/></h4>
@@ -296,7 +296,7 @@ var $j = jQuery.noConflict();
 		<div style="clear:both;"></div>
 		<b id="growthChartGraphHeader" class="boxHeader"><span class="growthChartHeader"></span><span style="float:right;"><a class="headerLink" style="color:white;" onclick="drawTable(graphType);"><spring:message code="growthchart.nav.table.link"/></a></span></b>
 		<div style="clear:both;"></div>
-		<div id="growthChartGraph" style="display:none; width:<openmrs:globalProperty key="growthChartGraph.width"/>px; height:<openmrs:globalProperty key="growthChartGraph.height"/>px">
+		<div id="growthChartGraph" style="display:none; width:<openmrs:globalProperty key="growthchart.growthChartGraph.width"/>px; height:<openmrs:globalProperty key="growthchart.growthChartGraph.height"/>px">
 			&nbsp;
 		</div>
 		<div style="clear:both;"></div>

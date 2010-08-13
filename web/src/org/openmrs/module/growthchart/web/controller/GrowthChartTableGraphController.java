@@ -110,7 +110,7 @@ public class GrowthChartTableGraphController extends ParameterizableViewControll
 		// Check today's existing Encounters to see if height and weight have already been entered
 		EncounterService encounterService = Context.getEncounterService();
 		EncounterType clinicianEntered = new EncounterType(Integer.parseInt(Context.getAdministrationService()
-	        .getGlobalProperty("encountertype.clinician")));
+	        .getGlobalProperty("growthchart.encountertype.clinician")));
 		List<EncounterType> encounterTypes = new ArrayList<EncounterType>();
 		encounterTypes.add(clinicianEntered);
 		List<Encounter> encountersWithinADay = encounterService.getEncounters(patient, null, midnightObsDate, today, null,
@@ -258,13 +258,13 @@ public class GrowthChartTableGraphController extends ParameterizableViewControll
             String prop = null;
             
             if (patient.getGender().toLowerCase().equals("m") && patient.getAge() <= 3) {
-                prop = Context.getAdministrationService().getGlobalProperty(graphType+".background.child.male");
+                prop = Context.getAdministrationService().getGlobalProperty("growthchart."+graphType+".background.child.male");
             } else if (patient.getGender().toLowerCase().equals("f") && patient.getAge() <= 3) {
-                prop = Context.getAdministrationService().getGlobalProperty(graphType+".background.child.female");
+                prop = Context.getAdministrationService().getGlobalProperty("growthchart."+graphType+".background.child.female");
             } else if (patient.getGender().toLowerCase().equals("m") && patient.getAge() < 20) {
-                prop = Context.getAdministrationService().getGlobalProperty(graphType+".background.adolescent.male");
+                prop = Context.getAdministrationService().getGlobalProperty("growthchart."+graphType+".background.adolescent.male");
             } else if (patient.getGender().toLowerCase().equals("f") && patient.getAge() < 20) {
-                prop = Context.getAdministrationService().getGlobalProperty(graphType+".background.adolescent.female");
+                prop = Context.getAdministrationService().getGlobalProperty("growthchart."+graphType+".background.adolescent.female");
             }
             if (StringUtils.hasText(prop)) {
                 // treat as TSV
