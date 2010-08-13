@@ -58,7 +58,7 @@
 
 	<!-- Required Global Properties -->
 	<globalProperty>
-		<property>weightForAgeGraph.background.child.male</property>
+		<property>growthchart.weightForAgeGraph.background.child.male</property>
 		<defaultValue>Age	5th Percentile Weight	25th Percentile Weight	50th Percentile Weight	75th Percentile Weight	95th Percentile Weight
 0	2.53	3.15	3.53	3.88	4.34
 0.5	2.96	3.6	4	4.39	4.91
@@ -101,7 +101,7 @@
 		<description>TSV giving the standard curves to be plotted for males. The first row consists of labels for the series. The first column should be the month in question, and the subsequent columns should be weights in kilograms.</description>
 	</globalProperty>
 	<globalProperty>
-		<property>weightForAgeGraph.background.child.female</property>
+		<property>growthchart.weightForAgeGraph.background.child.female</property>
 		<defaultValue>Age	5th Percentile Weight	25th Percentile Weight	50th Percentile Weight	75th Percentile Weight	95th Percentile Weight
 0	2.55	3.06	3.4	3.72	4.15
 0.5	2.89	3.44	3.8	4.15	4.63
@@ -144,7 +144,7 @@
 		<description>TSV giving the standard curves to be plotted for females. The first row consists of labels for the series. The first column should be the month in question, and the subsequent columns should be weights in kilograms.</description>
 	</globalProperty>
 <globalProperty>
-		<property>weightForAgeGraph.background.adolescent.male</property>
+		<property>growthchart.weightForAgeGraph.background.adolescent.male</property>
 		<defaultValue>Age	5th Percentile Weight	25th Percentile Weight	50th Percentile Weight	75th Percentile Weight	95th Percentile Weight
 0	2.53	3.15	3.53	3.88	4.34
 0.5	2.96	3.6	4	4.39	4.91
@@ -392,7 +392,7 @@
 		<description>TSV giving the standard curves to be plotted for males. The first row consists of labels for the series. The first column should be the month in question, and the subsequent columns should be weights in kilograms.</description>
 	</globalProperty>
 <globalProperty>
-		<property>weightForAgeGraph.background.adolescent.female</property>
+		<property>growthchart.weightForAgeGraph.background.adolescent.female</property>
 		<defaultValue>Age	5th Percentile Weight	25th Percentile Weight	50th Percentile Weight	75th Percentile Weight	95th Percentile Weight
 0	2.55	3.06	3.4	3.72	4.15
 0.5	2.89	3.44	3.8	4.15	4.63
@@ -642,7 +642,7 @@
 	
 	
 	<globalProperty>
-		<property>heightForAgeGraph.background.child.male</property>
+		<property>growthchart.heightForAgeGraph.background.child.male</property>
 		<defaultValue>Age	5th Percentile	25th Percentile	50th Percentile	75th Percentile	95th Percentile
 0	46.8	48.6	49.9	51.2	53
 1	51.5	53.4	54.7	56	57.9
@@ -684,7 +684,7 @@
 		<description>TSV giving the standard curves to be plotted for males. The first row consists of labels for the series. The first column should be the month in question, and the subsequent columns should be height in centimeters.</description>
 	</globalProperty>
 	<globalProperty>
-		<property>heightForAgeGraph.background.child.female</property>
+		<property>growthchart.heightForAgeGraph.background.child.female</property>
 		<defaultValue>Age	5th Percentile	25th Percentile	50th Percentile	75th Percentile	95th Percentile
 0	46.1	47.9	49.1	50.4	52.2
 1	50.5	52.4	53.7	55	56.9
@@ -726,7 +726,7 @@
 		<description>TSV giving the standard curves to be plotted for females. The first row consists of labels for the series. The first column should be the month in question, and the subsequent columns should be height in centimeters.</description>
 	</globalProperty>
 	<globalProperty>
-		<property>heightForAgeGraph.background.adolescent.male</property>
+		<property>growthchart.heightForAgeGraph.background.adolescent.male</property>
 		<defaultValue>Age	5th Percentile	25th Percentile	50th Percentile	75th Percentile	95th Percentile
 0	46.8	48.6	49.9	51.2	53
 1	51.5	53.4	54.7	56	57.9
@@ -960,7 +960,7 @@
 		<description>TSV giving the standard curves to be plotted for males. The first row consists of labels for the series. The first column should be the month in question, and the subsequent columns should be height in centimeters.</description>
 	</globalProperty>
 	<globalProperty>
-		<property>heightForAgeGraph.background.adolescent.female</property>
+		<property>growthchart.heightForAgeGraph.background.adolescent.female</property>
 		<defaultValue>Age	5th Percentile	25th Percentile	50th Percentile	75th Percentile	95th Percentile
 0	46.1	47.9	49.1	50.4	52.2
 1	50.5	52.4	53.7	55	56.9
@@ -1194,22 +1194,22 @@
 		<description>TSV giving the standard curves to be plotted for females. The first row consists of labels for the series. The first column should be the month in question, and the subsequent columns should be height in centimeters.</description>
 	</globalProperty>
 	<globalProperty>
-		<property>growthChartGraph.maximumAge</property>
+		<property>growthchart.growthChartGraph.maximumAge</property>
 		<defaultValue>20</defaultValue>
 		<description>If the patient is older than this number of years, then don't display the chart.</description>
 	</globalProperty>
 	<globalProperty>
-		<property>growthChartGraph.width</property>
+		<property>growthchart.growthChartGraph.width</property>
 		<defaultValue>600</defaultValue>
 		<description>How many pixels wide to make the graph</description>
 	</globalProperty>
 	<globalProperty>
-		<property>growthChartGraph.height</property>
+		<property>growthchart.growthChartGraph.height</property>
 		<defaultValue>400</defaultValue>
 		<description>How many pixels high to make the graph</description>
 	</globalProperty>
 	<globalProperty>
-		<property>encountertype.clinician</property>
+		<property>growthchart.encountertype.clinician</property>
 		<defaultValue>5</defaultValue>
 		<description>EncounterType associated with physician entered information</description>
 	</globalProperty>
