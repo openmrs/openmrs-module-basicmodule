@@ -29,18 +29,15 @@
 	<dependencyManagement>
 		<dependencies>
 			<!--
-			Libraries from lib to add as dependencies with compile or runtime scope:
-			
-				
-			Find matching dependencies in maven central repository.
+			Add other dependencies from lib:			
 			<dependency>
 				<groupId>org.other.library</groupId>
 				<artifactId>library-name</artifactId>
 				<version>library.version</version>
-				<scope>compile</scope>
+				<type>jar</type>
+				<scope>provided</scope>
 			</dependency>
-			-->
-			
+			-->			
 			<dependency>
 				<groupId>org.openmrs.api</groupId>
 				<artifactId>openmrs-api</artifactId>
