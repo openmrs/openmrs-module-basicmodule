@@ -86,6 +86,21 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<plugins>
+			<!-- Comment out/remove the following plug-in if you would like to use
+			SVN based buildnumber revisioning. This is here as basicmodule
+			is intended for creation of new modules which may not yet be
+			checked into SVN -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>none</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 	<repositories>
