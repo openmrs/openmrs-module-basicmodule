@@ -9,7 +9,7 @@
 	<name>Basic Module</name>
 	<description>Parent project for Basic Module</description>
 
-	<url>http://openmrs.org</url>
+	<url>http://wiki.openmrs.org/docs/Basic+Module</url>
 
 	<scm>
 		<connection>scm:svn:http://svn.openmrs.org/openmrs-modules/basicmodule/trunk/</connection>
