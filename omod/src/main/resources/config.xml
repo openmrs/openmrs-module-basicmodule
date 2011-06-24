@@ -14,7 +14,7 @@
 
 	<activator>@MODULE_PACKAGE@.BasicModuleActivator</activator>
 	
-	<!-- <updateURL>https://dev.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
+	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 	
 	<require_version>1.7.0</require_version>
