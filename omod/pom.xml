@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.openmrs.module</groupId>
-		<artifactId>basicmodule-parent</artifactId>
+		<artifactId>basicmodule</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.openmrs.module</groupId>
-	<artifactId>basicmodule</artifactId>
+	<artifactId>basicmodule-omod</artifactId>
 	<packaging>jar</packaging>
 	<name>Basic Module OMOD</name>
 	<description>OpenMRS module project for Basic Module</description>
@@ -47,6 +47,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>${project.parent.artifactId}-${project.parent.version}</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -123,10 +124,10 @@
 	</build>
 
 	<properties>
-		<MODULE_ID>${artifactId}</MODULE_ID>
+		<MODULE_ID>${project.parent.artifactId}</MODULE_ID>
 		<MODULE_NAME>${project.parent.name}</MODULE_NAME>
 		<MODULE_VERSION>${project.parent.version}</MODULE_VERSION>
-		<MODULE_PACKAGE>${project.parent.groupId}.${artifactId}</MODULE_PACKAGE>
+		<MODULE_PACKAGE>${project.parent.groupId}.${project.parent.artifactId}</MODULE_PACKAGE>
 	</properties>
 
 </project>
