@@ -3,21 +3,21 @@
 <module configVersion="1.2">
 	
 	<!-- Base Module Properties -->
-	<id>basicmodule</id>
-	<name>Basic Module</name>
-	<version>0.1</version>
-	<package>org.openmrs.module.@MODULE_ID@</package>
+	<id>${project.parent.artifactId}</id>
+	<name>${project.parent.name}</name>
+	<version>${project.parent.version}</version>
+	<package>${project.parent.groupId}.${project.parent.artifactId}</package>
 	<author>Ben Wolfe</author>
 	<description>
-			Basic Module. Useful for creating other modules.
+			${project.parent.description}
 	</description>
 
-	<activator>@MODULE_PACKAGE@.BasicModuleActivator</activator>
+	<activator>${project.parent.groupId}.${project.parent.artifactId}.BasicModuleActivator</activator>
 	
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 	
-	<require_version>1.7.0</require_version>
+	<require_version>${openMRSVersion}</require_version>
 	
 	<!-- Extensions -->
 	<extension>
