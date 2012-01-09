@@ -6,7 +6,7 @@
 		<artifactId>basicmodule</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
-	<groupId>org.openmrs.module</groupId>
+
 	<artifactId>basicmodule-api</artifactId>
 	<packaging>jar</packaging>
 	<name>Basic Module API</name>
@@ -47,5 +47,21 @@
 			<type>pom</type>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
+	</build>
 
 </project>
