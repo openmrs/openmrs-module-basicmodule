@@ -1,4 +1,9 @@
 openmrs-module-basicmodule
 ==========================
 
-A demonstration module for new OpenMRS module developers
+A demonstration module for new OpenMRS module developers.
+
+NOTE: please build the "install" target first.  Some other targets
+(such as "test") implicitly depend on artifacts that are built by the
+"install" target so they'll fail unless the "install" target has been
+built first.
