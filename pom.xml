@@ -7,14 +7,14 @@
 	<version>0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Basic Module</name>
-	<description>Parent project for Basic Module</description>
+	<description>Example OpenMRS Module that may be used as a basis for creating a new module.</description>
 
-	<url>http://wiki.openmrs.org/docs/Basic+Module</url>
+	<url>https://wiki.openmrs.org/x/FQ4z</url>
 
 	<scm>
-		<connection>scm:svn:http://svn.openmrs.org/openmrs-modules/basicmodule/trunk/</connection>
-		<developerConnection>scm:svn:http://svn.openmrs.org/openmrs-modules/basicmodule/trunk/</developerConnection>
-		<url>http://svn.openmrs.org/openmrs-modules/basicmodule/trunk/</url>
+		<connection>scm:git:git@github.com:openmrs/openmrs-module-basicmodule.git</connection>
+		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-basicmodule.git</developerConnection>
+		<url>https://github.com/openmrs/openmrs-module-basicmodule/</url>
 	</scm>
 
 	<modules>
