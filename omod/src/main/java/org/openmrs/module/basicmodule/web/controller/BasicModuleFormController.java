@@ -29,11 +29,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * This class configured as controller using annotation and mapped with the URL of 'module/basicmodule/basicmoduleLink.form'.
+ * This class configured as controller using annotation and mapped with the URL of
+ * 'module/basicmodule/basicmoduleLink.form'.
  */
 @Controller
 @RequestMapping(value = "module/basicmodule/basicmoduleLink.form")
-public class BasicModuleFormController{
+public class BasicModuleFormController {
 	
 	/** Logger for this class and subclasses */
 	protected final Log log = LogFactory.getLog(getClass());
@@ -42,16 +43,17 @@ public class BasicModuleFormController{
 	private final String SUCCESS_FORM_VIEW = "/module/basicmodule/basicmoduleForm";
 	
 	/**
-	 * Initially called after the formBackingObject method to get the landing form name  
+	 * Initially called after the formBackingObject method to get the landing form name
+	 * 
 	 * @return String form view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String showForm(){
+	public String showForm() {
 		return SUCCESS_FORM_VIEW;
 	}
 	
 	/**
-	 * All the parameters are optional based on the necessity  
+	 * All the parameters are optional based on the necessity
 	 * 
 	 * @param httpSession
 	 * @param anyRequestObject
@@ -59,8 +61,8 @@ public class BasicModuleFormController{
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public String onSubmit(HttpSession httpSession,
-	                               @ModelAttribute("anyRequestObject") Object anyRequestObject, BindingResult errors) {
+	public String onSubmit(HttpSession httpSession, @ModelAttribute("anyRequestObject") Object anyRequestObject,
+	        BindingResult errors) {
 		
 		if (errors.hasErrors()) {
 			// return error view
@@ -71,8 +73,8 @@ public class BasicModuleFormController{
 	
 	/**
 	 * This class returns the form backing object. This can be a string, a boolean, or a normal java
-	 * pojo. The bean name defined in the ModelAttribute annotation and the type can be just
-	 * defined by the return type of this method
+	 * pojo. The bean name defined in the ModelAttribute annotation and the type can be just defined
+	 * by the return type of this method
 	 */
 	@ModelAttribute("thePatientList")
 	protected Collection<Patient> formBackingObject(HttpServletRequest request) throws Exception {
