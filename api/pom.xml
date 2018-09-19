@@ -11,19 +11,4 @@
 	<packaging>jar</packaging>
 	<name>Basic Module API</name>
 	<description>API project for Basic Module</description>
-
-	<dependencies>
-        <dependency>
-            <groupId>org.openmrs.api</groupId>
-            <artifactId>openmrs-api</artifactId>
-            <type>jar</type>
-            <scope>provided</scope>
-            <exclusions>
-                 <exclusion>
-                     <groupId>javassist</groupId>
-                     <artifactId>javassist</artifactId>
-                 </exclusion>
-            </exclusions>
-        </dependency>
-	</dependencies>
 </project>
