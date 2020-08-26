@@ -19,13 +19,6 @@
 	
 	<require_version>${openmrs.platform.version}</require_version>
 	
-	<!-- Extensions -->
-	<extension>
-		<point>org.openmrs.admin.list</point>
-		<class>${MODULE_PACKAGE}.extension.html.AdminList</class>
-	</extension>
-	
-	
 	<!-- AOP
 	<advice>
 		<point>org.openmrs.api.FormService</point>

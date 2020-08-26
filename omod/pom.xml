@@ -2,26 +2,27 @@
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.openmrs.module</groupId>
-		<artifactId>basicmodule</artifactId>
+		<groupId>org.bahmni.module</groupId>
+		<artifactId>hipmodule</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>basicmodule-omod</artifactId>
+	<artifactId>hipmodule-omod</artifactId>
 	<packaging>jar</packaging>
-	<name>Basic Module OMOD</name>
-	<description>OpenMRS module project for Basic Module</description>
+	<name>HIP Module OMOD</name>
+	<description>OpenMRS module project for HIP Module</description>
 
 	<dependencies>
         <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>basicmodule-api</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>org.bahmni.module</groupId>
+            <artifactId>hipmodule-api</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
 		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
             <scope>provided</scope>
+			<version>2.1.1</version>
 		</dependency>
 	</dependencies>
 
@@ -36,6 +37,47 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.openmrs.maven.plugins</groupId>
+				<artifactId>maven-openmrs-plugin</artifactId>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>init</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>initialize-module</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>pack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>package-module</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Expand moduleApplicationContext and messages</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<includeGroupIds>${project.parent.groupId}</includeGroupIds>
+							<includeArtifactIds>${project.parent.artifactId}-api</includeArtifactIds>
+							<excludeTransitive>true</excludeTransitive>
+							<includes>**/*</includes>
+							<outputDirectory>${project.build.directory}/classes</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

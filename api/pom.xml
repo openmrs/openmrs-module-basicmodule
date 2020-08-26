@@ -2,13 +2,21 @@
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.openmrs.module</groupId>
-		<artifactId>basicmodule</artifactId>
+		<groupId>org.bahmni.module</groupId>
+		<artifactId>hipmodule</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>basicmodule-api</artifactId>
+	<artifactId>hipmodule-api</artifactId>
 	<packaging>jar</packaging>
-	<name>Basic Module API</name>
-	<description>API project for Basic Module</description>
+	<name>HIP Module API</name>
+	<description>API project for HIP Module</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+	</dependencies>
 </project>

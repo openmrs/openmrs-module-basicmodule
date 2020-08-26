@@ -2,26 +2,30 @@
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.openmrs.maven.parents</groupId>
-        <artifactId>maven-parent-openmrs-module</artifactId>
-        <version>1.1.1</version>
-    </parent>
-
-	<groupId>org.openmrs.module</groupId>
-	<artifactId>basicmodule</artifactId>
+	<groupId>org.bahmni.module</groupId>
+	<artifactId>hipmodule</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Basic Module</name>
+	<name>Hip Module</name>
 	<description>Example OpenMRS Module that may be used as a basis for creating a new module.</description>
 
 	<url>https://wiki.openmrs.org/x/FQ4z</url>
 
-	<scm>
-		<connection>scm:git:git@github.com:openmrs/openmrs-module-basicmodule.git</connection>
-		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-basicmodule.git</developerConnection>
-		<url>https://github.com/openmrs/openmrs-module-basicmodule/</url>
-	</scm>
+<!--	<scm>-->
+<!--		<connection>scm:git:git@github.com:openmrs/openmrs-module-basicmodule.git</connection>-->
+<!--		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-basicmodule.git</developerConnection>-->
+<!--		<url>https://github.com/openmrs/openmrs-module-basicmodule/</url>-->
+<!--	</scm>-->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod</artifactId>
+				<version>2.12</version>
+				<scope>provided</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<modules>
 		<module>api</module>
@@ -29,6 +33,14 @@
 	</modules>
 
     <properties>
-        <openmrs.platform.version>1.11.2</openmrs.platform.version>
+        <openmrs.platform.version>2.1.1</openmrs.platform.version>
     </properties>
+
+	<repositories>
+		<repository>
+			<id>openmrs-repo</id>
+			<name>OpenMRS Nexus Repository</name>
+			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+		</repository>
+	</repositories>
 </project>
