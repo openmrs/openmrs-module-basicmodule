@@ -32,7 +32,10 @@
 		<module>omod</module>
 	</modules>
 
-    <properties>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <openmrs.platform.version>2.1.1</openmrs.platform.version>
     </properties>
 
