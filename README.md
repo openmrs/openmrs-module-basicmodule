@@ -12,16 +12,7 @@ Building from Source
 You will need to have Java 1.6+ and Maven 2.x+ installed. 
 You need to install the OpenMrs module SDK from https://github.com/openmrs/openmrs-sdk (see Readme for installation instructions)
 
-Use the command 'mvn package' **for the parent level (root folder)**, not the child projects (so not api or omod folder) to compile and package the module.  The .omod file will be in the omod/target folder.
-
-Alternatively you can add the snippet provided in the [Creating Modules](https://wiki.openmrs.org/x/cAEr) page to your 
-omod/pom.xml and use the mvn command:
-
-    mvn package -P deploy-web -D deploy.path="../../openmrs-1.8.x/webapp/src/main/webapp"
-
-It will allow you to deploy any changes to your web 
-resources such as jsp or js files without re-installing the module. The deploy path says 
-where OpenMRS is deployed.
+Use the command `mvn clean install` to build the module, the .omod file will be in the omod/target folder.
 
 Installation
 ------------
