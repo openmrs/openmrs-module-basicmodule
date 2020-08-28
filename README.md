@@ -1,25 +1,18 @@
-openmrs-module-basicmodule
+openmrs-module-hipmodule
 ==========================
 
-A demonstration module for new OpenMRS module developers
+HIP module for exposing HIP specific features from OpenMRS.
 
 Description
 -----------
-This is a very basic module which can be used as a starting point in creating a new module.
+This module is supporting the HIP service with all necessary endpoints exposed that are required by the HIP service.
 
 Building from Source
 --------------------
-You will need to have Java 1.6+ and Maven 2.x+ installed.  Use the command 'mvn package' to 
-compile and package the module.  The .omod file will be in the omod/target folder.
+You will need to have Java 1.6+ and Maven 2.x+ installed. 
+You need to install the OpenMrs module SDK from https://github.com/openmrs/openmrs-sdk (see Readme for installation instructions)
 
-Alternatively you can add the snippet provided in the [Creating Modules](https://wiki.openmrs.org/x/cAEr) page to your 
-omod/pom.xml and use the mvn command:
-
-    mvn package -P deploy-web -D deploy.path="../../openmrs-1.8.x/webapp/src/main/webapp"
-
-It will allow you to deploy any changes to your web 
-resources such as jsp or js files without re-installing the module. The deploy path says 
-where OpenMRS is deployed.
+Use the command `mvn clean install` to build the module, the .omod file will be in the omod/target folder.
 
 Installation
 ------------
