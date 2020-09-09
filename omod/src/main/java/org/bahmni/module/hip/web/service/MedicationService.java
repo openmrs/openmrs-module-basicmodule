@@ -19,7 +19,9 @@ public class MedicationService {
         try {
             Patient patient = Context.getPatientService().getPatientByUuid(patientId);
             List<Order> listOrders = getOrdersByVisitType(patient, visitType);
-            String ordersToJson = new Gson().toJson(listOrders);
+            if (listOrders.size() == 0)
+                return "no medication found!";
+            String ordersToJson = listOrders.stream().map(order -> order.getUuid()).findFirst().get();
             return ordersToJson;
         } catch (Exception e) {
             return e.getMessage();
@@ -32,7 +34,8 @@ public class MedicationService {
     }
 
     private List<Order> filterOrdersByVisitType(List<Order> orders, String visitType) {
-        return orders.stream().filter(order -> order.getEncounter().getVisit().getVisitType().getName() == visitType)
+        return orders.stream()
+                .filter(order -> order.getEncounter().getVisit().getVisitType().getName().equals(visitType))
                 .collect(Collectors.toList());
 
     }
