@@ -1,23 +1,34 @@
 package org.bahmni.module.hip.web.service;
 
-import com.google.gson.Gson;
 import org.openmrs.Order;
 import org.openmrs.Patient;
-import org.openmrs.Person;
-import org.openmrs.api.context.Context;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.PatientService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class MedicationService {
-    public String getMedication(String patientId, String visitType)
-    {
-        if(patientId == null || patientId.isEmpty() || visitType == null || visitType.isEmpty()){
+
+    private PatientService patientService;
+    private OrderService orderService;
+
+    @Autowired
+    public MedicationService(PatientService patientService, OrderService orderService) {
+        this.patientService = patientService;
+        this.orderService = orderService;
+    }
+
+    public String getMedication(String patientId, String visitType) {
+        if (patientId == null || patientId.isEmpty() || visitType == null || visitType.isEmpty()) {
             return "Patient id and visit type are required.";
         }
 
         try {
-            Patient patient = Context.getPatientService().getPatientByUuid(patientId);
+            Patient patient = this.patientService.getPatientByUuid(patientId);
             List<Order> listOrders = getOrdersByVisitType(patient, visitType);
             if (listOrders.size() == 0)
                 return "no medication found!";
@@ -29,7 +40,7 @@ public class MedicationService {
     }
 
     private List<Order> getOrdersByVisitType(Patient patient, String visitType) {
-        List<Order> listOrders = Context.getOrderService().getAllOrdersByPatient(patient);
+        List<Order> listOrders = orderService.getAllOrdersByPatient(patient);
         return filterOrdersByVisitType(listOrders, visitType);
     }
 
