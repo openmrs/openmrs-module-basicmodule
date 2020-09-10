@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.service;
 
+import org.bahmni.module.hip.web.exception.NoMedicationFoundException;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.api.OrderService;
@@ -28,16 +29,13 @@ public class MedicationService {
             return "Patient id and visit type are required.";
 
 
-        try {
-            Patient patient = this.patientService.getPatientByUuid(patientId);
-            List<Order> listOrders = getOrdersByVisitType(patient, visitType);
-            if (listOrders.size() == 0)
-                return "no medication found!";
-            String ordersToJson = listOrders.stream().map(order -> order.getUuid()).findFirst().get();
-            return ordersToJson;
-        } catch (Exception e) {
-            return e.getMessage();
-        }
+        Patient patient = this.patientService.getPatientByUuid(patientId);
+        List<Order> listOrders = getOrdersByVisitType(patient, visitType);
+
+        if (listOrders.isEmpty())
+            throw new NoMedicationFoundException(patient.getId());
+
+        return listOrders.stream().map(order -> order.getUuid()).findFirst().get();
     }
 
     private List<Order> getOrdersByVisitType(Patient patient, String visitType) {
