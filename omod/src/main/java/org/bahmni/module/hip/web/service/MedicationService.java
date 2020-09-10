@@ -23,9 +23,10 @@ public class MedicationService {
     }
 
     public String getMedication(String patientId, String visitType) {
-        if (patientId == null || patientId.isEmpty() || visitType == null || visitType.isEmpty()) {
+
+        if (patientId == null || patientId.isEmpty() || visitType == null || visitType.isEmpty())
             return "Patient id and visit type are required.";
-        }
+
 
         try {
             Patient patient = this.patientService.getPatientByUuid(patientId);
