@@ -1,4 +1,4 @@
-package org.bahmni.module.hip.web;
+package org.bahmni.module.hip.web.service;
 
 
 import org.bahmni.module.hip.web.service.MedicationService;
