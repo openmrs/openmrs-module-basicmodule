@@ -1,6 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.web.exception.NoMedicationFoundException;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestDispenseRequestComponent;
@@ -30,7 +31,7 @@ public class MedicationService {
         this.orderService = orderService;
     }
 
-    public List<MedicationRequest> getMedication(String patientId, String visitType) {
+    public Bundle getMedication(String patientId, String visitType) {
 
         if (patientId == null || patientId.isEmpty() || visitType == null || visitType.isEmpty())
             throw new NoMedicationFoundException(123);
@@ -42,7 +43,9 @@ public class MedicationService {
         if (listOrders.isEmpty())
             throw new NoMedicationFoundException(patient.getId());
 
-        return listOrders
+        Bundle bundle = new Bundle();
+
+        listOrders
                 .stream()
                 .filter(order -> order.getOrderType().getUuid().equals(OrderType.DRUG_ORDER_TYPE_UUID))
                 .map(order -> (DrugOrder) order)
@@ -74,7 +77,11 @@ public class MedicationService {
 //
 //                    return medicationRequestTranslator.toFhirResource(drugOrder);
                 })
-                .collect(Collectors.toList());
+                .forEach(medicationRequest -> {
+                    bundle.addEntry().setResource(medicationRequest);
+                });
+
+        return bundle;
     }
 
     private List<Order> getOrdersByVisitType(Patient patient, String visitType) {
