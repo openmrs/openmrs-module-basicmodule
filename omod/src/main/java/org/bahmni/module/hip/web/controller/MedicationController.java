@@ -34,7 +34,7 @@ public class MedicationController {
             FhirContext ctx = FhirContext.forR4();
             IParser parser = ctx.newJsonParser();
             // Serialize it
-            Bundle bundle = medicationService.getMedication(patientId, visitType);
+            Bundle bundle = medicationService.bundleMedicationRequestsFor(patientId, visitType);
 
             String s = parser.encodeResourceToString(bundle);
             final HttpHeaders httpHeaders = new HttpHeaders();
