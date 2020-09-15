@@ -1,8 +1,7 @@
 package org.bahmni.module.hip.web.controller;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import org.bahmni.module.hip.web.service.MedicationService;
+import org.bahmni.module.hip.web.service.BundleService;
+import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,29 +17,28 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
 @Controller
-public class MedicationController {
+public class BundledMedicationRequestController {
 
-    private MedicationService medicationService;
+    private BundleMedicationRequestService bundleMedicationRequestService;
+    private BundleService bundleService;
 
     @Autowired
-    public MedicationController(MedicationService medicationService) {
-        this.medicationService = medicationService;
+    public BundledMedicationRequestController(BundleMedicationRequestService bundleMedicationRequestService,
+                                              BundleService bundleService) {
+        this.bundleMedicationRequestService = bundleMedicationRequestService;
+        this.bundleService = bundleService;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/medication", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody
-    ResponseEntity<String> getMedication(@RequestParam String patientId, @RequestParam String visitType) {
+    public @ResponseBody ResponseEntity<String> getBundledMedicationRequestFor(@RequestParam String patientId, @RequestParam String visitType) {
         try {
-            FhirContext ctx = FhirContext.forR4();
-            IParser parser = ctx.newJsonParser();
-            // Serialize it
-            Bundle bundle = medicationService.bundleMedicationRequestsFor(patientId, visitType);
 
-            String s = parser.encodeResourceToString(bundle);
-            final HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            Bundle bundle = bundleMedicationRequestService.bundleMedicationRequestsFor(patientId, visitType);
 
-            return new ResponseEntity<>(s, httpHeaders, HttpStatus.OK);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .body(bundleService.serializeBundle(bundle));
+
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

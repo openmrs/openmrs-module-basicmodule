@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class DrugOrderService {
+public class OpenMRSDrugOrderClient {
 
     private PatientService patientService;
     private OrderService orderService;
 
     @Autowired
-    public DrugOrderService(PatientService patientService, OrderService orderService) {
+    public OpenMRSDrugOrderClient(PatientService patientService, OrderService orderService) {
         this.patientService = patientService;
         this.orderService = orderService;
     }
