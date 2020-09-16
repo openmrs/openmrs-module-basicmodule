@@ -14,7 +14,7 @@ public class MedicationRequestService {
     private OpenMRSDrugOrderClient openMRSDrugOrderClient;
 
     @Autowired
-    public MedicationRequestService(OpenMRSDrugOrderClient openMRSDrugOrderClient, BundleService bundleService) {
+    public MedicationRequestService(OpenMRSDrugOrderClient openMRSDrugOrderClient) {
         this.openMRSDrugOrderClient = openMRSDrugOrderClient;
     }
 
