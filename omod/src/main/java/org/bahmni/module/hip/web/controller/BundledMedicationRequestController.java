@@ -1,5 +1,7 @@
 package org.bahmni.module.hip.web.controller;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import org.bahmni.module.hip.web.service.BundleService;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.hl7.fhir.r4.model.Bundle;
@@ -37,10 +39,16 @@ public class BundledMedicationRequestController {
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(bundleService.serializeBundle(bundle));
+                    .body(serializeBundle(bundle));
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String serializeBundle(Bundle bundle){
+        FhirContext ctx = FhirContext.forR4();
+        IParser parser = ctx.newJsonParser();
+        return parser.encodeResourceToString(bundle);
     }
 }
