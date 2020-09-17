@@ -10,8 +10,13 @@ import static org.mockito.Mockito.*;
 public class MedicationRequestServiceTest {
 
     private OpenMRSDrugOrderClient openMRSDrugOrderClient = mock(OpenMRSDrugOrderClient.class);
+    private DrugOrderToMedicationRequestTranslationService drugOrderToMedicationRequestTranslationService =
+            mock(DrugOrderToMedicationRequestTranslationService.class);
 
-    private MedicationRequestService medicationRequestService = new MedicationRequestService(openMRSDrugOrderClient);
+    private MedicationRequestService medicationRequestService = new MedicationRequestService(
+            openMRSDrugOrderClient,
+            drugOrderToMedicationRequestTranslationService
+    );
 
     @Test
     public void shouldFetchAllDrugOrdersForVisitTypeOPDGivenAPatientID() {

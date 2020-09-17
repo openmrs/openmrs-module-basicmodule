@@ -31,49 +31,15 @@
             <artifactId>webservices.rest-omod</artifactId>
             <scope>provided</scope>
         </dependency>
-		<!--<dependency>
+		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>fhir2-omod</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>provided</scope>
-		</dependency>-->
+		</dependency>
 
-		<!-- Compile time Dependencies		-->
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-base</artifactId>
-            <version>5.1.0</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-io</groupId>
-                    <artifactId>commons-io</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-server</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-structures-r4</artifactId>
-            <version>5.1.0</version>
-            <scope>compile</scope>
-        </dependency>
+		<!--Compile time Dependencies-->
 
 		<!-- Testing time Dependencies		-->
 		<dependency>

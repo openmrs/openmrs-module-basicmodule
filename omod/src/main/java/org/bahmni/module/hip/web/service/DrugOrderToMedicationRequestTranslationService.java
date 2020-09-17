@@ -1,41 +1,23 @@
 package org.bahmni.module.hip.web.service;
 
-import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Quantity;
 import org.openmrs.DrugOrder;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
+@Service
 class DrugOrderToMedicationRequestTranslationService {
 
-    static MedicationRequest toMedicationRequest(DrugOrder drugOrder) {
+    private MedicationRequestTranslator medicationRequestTranslator;
 
-        // MedicationRequestTranslator medicationRequestTranslator = new MedicationRequestTranslatorImpl();
-        //return medicationRequestTranslator.toFhirResource(drugOrder);
+    @Autowired
+    public DrugOrderToMedicationRequestTranslationService(MedicationRequestTranslator medicationRequestTranslator) {
+        this.medicationRequestTranslator = medicationRequestTranslator;
+    }
 
-        MedicationRequest.MedicationRequestDispenseRequestComponent medicationRequestDispenseRequestComponent =
-                new MedicationRequest.MedicationRequestDispenseRequestComponent();
+    MedicationRequest toMedicationRequest(DrugOrder drugOrder) {
 
-        medicationRequestDispenseRequestComponent.setQuantity(new Quantity(drugOrder.getQuantity()));
-
-
-        MedicationRequest medicationRequest = new MedicationRequest();
-        medicationRequest.setDispenseRequest(medicationRequestDispenseRequestComponent);
-
-        Dosage dosage = new Dosage();
-        Dosage.DosageDoseAndRateComponent dosageDoseAndRateComponent = new Dosage.DosageDoseAndRateComponent();
-        dosageDoseAndRateComponent.setDose(new Quantity(drugOrder.getDose()));
-        ArrayList<Dosage.DosageDoseAndRateComponent> dosageDoseAndRateComponents = new ArrayList<>();
-        dosageDoseAndRateComponents.add(dosageDoseAndRateComponent);
-        dosage.setDoseAndRate(dosageDoseAndRateComponents);
-
-        ArrayList<Dosage> dosages = new ArrayList<>();
-
-        dosages.add(dosage);
-
-        medicationRequest.setDosageInstruction(dosages);
-
-        return medicationRequest;
+        return medicationRequestTranslator.toFhirResource(drugOrder);
     }
 }

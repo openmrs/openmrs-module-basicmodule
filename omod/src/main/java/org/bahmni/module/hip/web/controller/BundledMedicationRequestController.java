@@ -2,7 +2,6 @@ package org.bahmni.module.hip.web.controller;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import org.bahmni.module.hip.web.service.BundleService;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -22,17 +21,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class BundledMedicationRequestController {
 
     private BundleMedicationRequestService bundleMedicationRequestService;
-    private BundleService bundleService;
 
     @Autowired
-    public BundledMedicationRequestController(BundleMedicationRequestService bundleMedicationRequestService,
-                                              BundleService bundleService) {
+    public BundledMedicationRequestController(BundleMedicationRequestService bundleMedicationRequestService) {
         this.bundleMedicationRequestService = bundleMedicationRequestService;
-        this.bundleService = bundleService;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/medication", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ResponseEntity<String> getBundledMedicationRequestFor(@RequestParam String patientId, @RequestParam String visitType) {
+    public @ResponseBody
+    ResponseEntity<String> getBundledMedicationRequestFor(@RequestParam String patientId, @RequestParam String visitType) {
         try {
 
             Bundle bundle = bundleMedicationRequestService.bundleMedicationRequestsFor(patientId, visitType);
@@ -46,7 +43,7 @@ public class BundledMedicationRequestController {
         }
     }
 
-    private String serializeBundle(Bundle bundle){
+    private String serializeBundle(Bundle bundle) {
         FhirContext ctx = FhirContext.forR4();
         IParser parser = ctx.newJsonParser();
         return parser.encodeResourceToString(bundle);

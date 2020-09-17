@@ -12,10 +12,14 @@ import java.util.stream.Collectors;
 public class MedicationRequestService {
 
     private OpenMRSDrugOrderClient openMRSDrugOrderClient;
+    private DrugOrderToMedicationRequestTranslationService drugOrderToMedicationRequestTranslationService;
 
     @Autowired
-    public MedicationRequestService(OpenMRSDrugOrderClient openMRSDrugOrderClient) {
+    public MedicationRequestService(OpenMRSDrugOrderClient openMRSDrugOrderClient,
+                                    DrugOrderToMedicationRequestTranslationService drugOrderToMedicationRequestTranslationService) {
+
         this.openMRSDrugOrderClient = openMRSDrugOrderClient;
+        this.drugOrderToMedicationRequestTranslationService = drugOrderToMedicationRequestTranslationService;
     }
 
     List<MedicationRequest> medicationRequestFor(String patientId, String byVisitType){
@@ -24,7 +28,7 @@ public class MedicationRequestService {
 
         return drugOrders
                 .stream()
-                .map(DrugOrderToMedicationRequestTranslationService::toMedicationRequest)
+                .map(drugOrder ->  drugOrderToMedicationRequestTranslationService.toMedicationRequest(drugOrder))
                 .collect(Collectors.toList());
     }
 }

@@ -27,4 +27,5 @@
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 
 	<context:component-scan base-package="org.bahmni.module.hip" />
+	<context:component-scan base-package="org.openmrs.module.fhir2" />
 </beans>
