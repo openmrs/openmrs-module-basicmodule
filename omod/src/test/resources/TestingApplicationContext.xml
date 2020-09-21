@@ -25,5 +25,6 @@
 		</property>
 		<!--  default properties must be set in the hibernate.default.properties -->
 	</bean>
-	
+
+	<context:component-scan base-package="org.bahmni.module.hip.web" />
 </beans>
