@@ -25,13 +25,13 @@ public class FHIRUtils {
         put("U", Enumerations.AdministrativeGender.UNKNOWN);
     }};
 
-    public static Bundle createBundle(Date forDate, String bundleId, String webUrl) {
+    public static Bundle createBundle(Date forDate, String bundleId, OrgContext hipContext) {
         Bundle bundle = new Bundle();
         bundle.setId(bundleId);
         bundle.setTimestamp(forDate);
 
         Identifier identifier = new Identifier();
-        identifier.setSystem(Utils.ensureTrailingSlash(webUrl.trim()) + "/bundle");
+        identifier.setSystem(Utils.ensureTrailingSlash(hipContext.getWebUrl().trim()) + "/bundle");
         identifier.setValue(bundleId);
         bundle.setIdentifier(identifier);
 
