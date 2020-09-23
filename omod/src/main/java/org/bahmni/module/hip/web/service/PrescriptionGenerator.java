@@ -2,41 +2,33 @@ package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.web.model.CareContext;
 import org.bahmni.module.hip.web.model.Prescription;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Reference;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.hl7.fhir.r4.model.*;
 import org.openmrs.DrugOrder;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
+import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Service
 public class PrescriptionGenerator {
-    private final OrgContext orgContext;
-    private final org.openmrs.Encounter emrEncounter;
-    private final List<DrugOrder> drugOrders;
 
-    public PrescriptionGenerator(OrgContext orgContext, org.openmrs.Encounter emrEncounter, List<DrugOrder> drugOrders) {
-        this.orgContext = orgContext;
-        this.emrEncounter = emrEncounter;
-        this.drugOrders = drugOrders;
-    }
+    public Prescription generate(@NotEmpty List<DrugOrder> drugOrders) {
+        org.openmrs.Encounter emrEncounter = drugOrders.get(0).getEncounter();
+        OrgContext orgContext = getOrgContext();
+        Bundle prescriptionBundle = createPrescriptionBundle(emrEncounter, orgContext, drugOrders);
 
-    public Prescription generate() throws Exception {
-        Bundle prescriptionBundle = createPrescriptionBundle(emrEncounter.getPatient(), orgContext);
         return Prescription.builder()
                 .bundle(prescriptionBundle)
-                .careContext(getCareContext(emrEncounter))
+                .careContext(getCareContext(emrEncounter, orgContext))
                 .build();
     }
 
-    private CareContext getCareContext(org.openmrs.Encounter emrEncounter) {
+    private CareContext getCareContext(org.openmrs.Encounter emrEncounter, OrgContext orgContext) {
         Class cls = orgContext.getCareContextType();
         if (cls.getName().equals("Visit")) {
             return CareContext.builder()
@@ -49,8 +41,9 @@ public class PrescriptionGenerator {
         }
     }
 
-    private Bundle createPrescriptionBundle(org.openmrs.Patient emrPatient, OrgContext hipContext) throws Exception {
-        String prescriptionId = prescriptionId();
+    private Bundle createPrescriptionBundle(org.openmrs.Encounter emrEncounter, OrgContext orgContext, List<DrugOrder> drugOrders) {
+        String prescriptionId = prescriptionId(emrEncounter);
+        org.openmrs.Patient emrPatient = emrEncounter.getPatient();
         Bundle bundle = FHIRUtils.createBundle(emrEncounter.getEncounterDatetime(), prescriptionId, orgContext);
 
         Patient patientResource = FHIRResourceMapper.mapToPatient(emrPatient);
@@ -60,7 +53,7 @@ public class PrescriptionGenerator {
         Composition composition = new Composition();
         composition.setId(UUID.randomUUID().toString());
         composition.setDate(bundle.getTimestamp());
-        composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), hipContext.getWebUrl(), "document"));
+        composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), orgContext.getWebUrl(), "document"));
         composition.setStatus(Composition.CompositionStatus.FINAL);
         CodeableConcept prescriptionType = FHIRUtils.getPrescriptionType();
         composition.setType(prescriptionType);
@@ -68,11 +61,12 @@ public class PrescriptionGenerator {
         FHIRUtils.addToBundleEntry(bundle, composition, false);
 
         //add practitioner to bundle to composition.author
-        List<Practitioner> practitioners = emrEncounter.getEncounterProviders().stream().map(provider -> {
-            return FHIRResourceMapper.mapToPractitioner(provider);
-        }).collect(Collectors.toList());
+        List<Practitioner> practitioners = emrEncounter.getEncounterProviders()
+                .stream()
+                .map(FHIRResourceMapper::mapToPractitioner)
+                .collect(Collectors.toList());
 
-        practitioners.stream().forEach(practitioner -> {
+        practitioners.forEach(practitioner -> {
             FHIRUtils.addToBundleEntry(bundle, practitioner, false);
             Reference authorRef = composition.addAuthor();
             authorRef.setResource(practitioner);
@@ -105,9 +99,29 @@ public class PrescriptionGenerator {
         return bundle;
     }
 
-    private String prescriptionId() {
+    private String prescriptionId(org.openmrs.Encounter emrEncounter) {
         return "PR-" + emrEncounter.getEncounterId().toString();
     }
 
+    private OrgContext getOrgContext() {
+        Organization organization = getOrganization();
+        return OrgContext.builder()
+                .organization(organization)
+                .webUrl(getWebUrl())
+                .build();
+    }
+
+    private String getWebUrl() {
+        AdministrationService administrationService = Context.getAdministrationService();
+        return administrationService.getGlobalProperty(Constants.PROP_HFR_URL);
+    }
+
+    private Organization getOrganization() {
+        AdministrationService administrationService = Context.getAdministrationService();
+        String hfrId = administrationService.getGlobalProperty(Constants.PROP_HFR_ID);
+        String hfrName = administrationService.getGlobalProperty(Constants.PROP_HFR_NAME);
+        String hfrSystem = administrationService.getGlobalProperty(Constants.PROP_HFR_SYSTEM);
+        return FHIRUtils.createOrgInstance(hfrId, hfrName, hfrSystem);
+    }
 
 }
