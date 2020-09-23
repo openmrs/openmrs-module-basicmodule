@@ -3,7 +3,6 @@ package org.bahmni.module.hip.web.service;
 
 import org.apache.log4j.Logger;
 import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
-import org.bahmni.module.hip.web.controller.HipContext;
 import org.bahmni.module.hip.web.model.Prescription;
 import org.hl7.fhir.r4.model.Organization;
 import org.openmrs.DrugOrder;
@@ -11,7 +10,10 @@ import org.openmrs.Encounter;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,11 +27,24 @@ import java.util.stream.Collectors;
 public class PrescriptionService {
     private static final Logger log = Logger.getLogger(PrescriptionService.class);
 
+    private final OrderService orderService;
+    private final PrescriptionOrderDao prescriptionOrderDao;
+    private final PatientService patientService;
+
+    @Autowired
+    public PrescriptionService(OrderService orderService,
+                               PrescriptionOrderDao prescriptionOrderDao,
+                               PatientService patientService) {
+        this.orderService = orderService;
+        this.prescriptionOrderDao = prescriptionOrderDao;
+        this.patientService = patientService;
+    }
+
+
     public List<Prescription> getPrescriptions(String patientIdUuid, Date fromDate, Date toDate) {
-        PrescriptionOrderDao prescriptionDao = getPrescriptionDao();
-        Patient patient = Context.getPatientService().getPatientByUuid(patientIdUuid);
-        OrderType drugOrderType = Context.getOrderService().getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
-        List<DrugOrder> drugOrders = prescriptionDao.getDrugOrders(patient, fromDate, toDate, drugOrderType);
+        Patient patient = patientService.getPatientByUuid(patientIdUuid);
+        OrderType drugOrderType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
+        List<DrugOrder> drugOrders = prescriptionOrderDao.getDrugOrders(patient, fromDate, toDate, drugOrderType);
         return mapToPrescriptions(drugOrders);
     }
 
@@ -42,26 +57,13 @@ public class PrescriptionService {
             return new ArrayList<>();
         }
 
-//        Map<String, List<DrugOrder>> prescriptionsMap = new HashMap<>();
-//        for (DrugOrder drugOrder : drugOrders) {
-//            String encounterUuid = drugOrder.getEncounter().getUuid();
-//            List<DrugOrder> drugOrdersInPrescription = prescriptionsMap.get(encounterUuid);
-//            if (drugOrdersInPrescription != null) {
-//                drugOrdersInPrescription.add(drugOrder);
-//            } else {
-//                ArrayList<DrugOrder> prescriptionOrders = new ArrayList<>();
-//                prescriptionOrders.add(drugOrder);
-//                prescriptionsMap.put(encounterUuid, prescriptionOrders);
-//            }
-//        }
-
-        Map<String, List<DrugOrder>> prescriptionsMap = Optional.ofNullable(drugOrders)
+        Map<String, List<DrugOrder>> drugOrderMap = Optional.ofNullable(drugOrders)
                 .orElseGet(ArrayList::new)
                 .stream()
                 .collect(Collectors.groupingBy(this::getEncounterUuidForOrder));
 
         List<Prescription> prescriptions = new ArrayList<>();
-        prescriptionsMap.forEach((key,value) -> {
+        drugOrderMap.forEach((key,value) -> {
             try {
                 prescriptions.add(createPrescription(value));
             } catch (Exception e) {
@@ -89,15 +91,6 @@ public class PrescriptionService {
         AdministrationService administrationService = Context.getAdministrationService();
         return administrationService.getGlobalProperty(Constants.PROP_HFR_URL);
     }
-
-    private PrescriptionOrderDao getPrescriptionDao() {
-        List<PrescriptionOrderDao> registeredComponents = Context.getRegisteredComponents(PrescriptionOrderDao.class);
-        if (registeredComponents != null & !registeredComponents.isEmpty()) {
-            return registeredComponents.get(0);
-        }
-        return null;
-    }
-
 
     private Organization getOrganization(Encounter encounter) {
         AdministrationService administrationService = Context.getAdministrationService();
