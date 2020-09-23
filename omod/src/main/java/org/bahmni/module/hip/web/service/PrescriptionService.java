@@ -2,49 +2,32 @@ package org.bahmni.module.hip.web.service;
 
 
 import org.apache.log4j.Logger;
-import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
 import org.bahmni.module.hip.web.model.Prescription;
 import org.hl7.fhir.r4.model.Organization;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
-import org.openmrs.OrderType;
-import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.api.OrderService;
-import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class PrescriptionService {
     private static final Logger log = Logger.getLogger(PrescriptionService.class);
 
-    private final OrderService orderService;
-    private final PrescriptionOrderDao prescriptionOrderDao;
-    private final PatientService patientService;
+    private final OpenMRSDrugOrderClient openMRSDrugOrderClient;
 
     @Autowired
-    public PrescriptionService(OrderService orderService,
-                               PrescriptionOrderDao prescriptionOrderDao,
-                               PatientService patientService) {
-        this.orderService = orderService;
-        this.prescriptionOrderDao = prescriptionOrderDao;
-        this.patientService = patientService;
+    public PrescriptionService(OpenMRSDrugOrderClient openMRSDrugOrderClient) {
+        this.openMRSDrugOrderClient = openMRSDrugOrderClient;
     }
 
 
     public List<Prescription> getPrescriptions(String patientIdUuid, Date fromDate, Date toDate) {
-        Patient patient = patientService.getPatientByUuid(patientIdUuid);
-        OrderType drugOrderType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
-        List<DrugOrder> drugOrders = prescriptionOrderDao.getDrugOrders(patient, fromDate, toDate, drugOrderType);
+        List<DrugOrder> drugOrders = openMRSDrugOrderClient.getDrugOrdersByDateFor(patientIdUuid, fromDate, toDate);
         return mapToPrescriptions(drugOrders);
     }
 

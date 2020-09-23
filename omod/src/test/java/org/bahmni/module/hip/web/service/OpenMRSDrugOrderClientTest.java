@@ -1,7 +1,9 @@
 package org.bahmni.module.hip.web.service;
 
+import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
 import org.junit.Test;
 import org.openmrs.Patient;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 
 import static org.mockito.Mockito.*;
@@ -10,8 +12,10 @@ public class OpenMRSDrugOrderClientTest {
 
     private PatientService patientService = mock(PatientService.class);
     private DrugOrderService drugOrderService = mock(DrugOrderService.class);
+    private OrderService orderService = mock(OrderService.class);
+    private PrescriptionOrderDao prescriptionOrderDao = mock(PrescriptionOrderDao.class);
 
-    private OpenMRSDrugOrderClient openMRSDrugOrderClient = new OpenMRSDrugOrderClient(patientService, drugOrderService);
+    private OpenMRSDrugOrderClient openMRSDrugOrderClient = new OpenMRSDrugOrderClient(patientService, drugOrderService, orderService, prescriptionOrderDao);
 
     @Test
     public void shouldFetchThePatientFromTheOpenMRSGivenItsUUID() {
