@@ -4,8 +4,7 @@ import org.bahmni.module.hip.web.model.Prescription;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.r4.model.*;
 import org.openmrs.DrugOrder;
-import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.Context;
+import org.openmrs.VisitType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,34 +16,36 @@ import java.util.stream.Collectors;
 @Service
 public class PrescriptionGenerator {
     private final CareContextService careContextService;
+    private final BahmniAdministrationService bahmniAdministrationService;
 
     @Autowired
-    public PrescriptionGenerator(CareContextService careContextService) {
+    public PrescriptionGenerator(CareContextService careContextService, BahmniAdministrationService bahmniAdministrationService) {
         this.careContextService = careContextService;
+        this.bahmniAdministrationService = bahmniAdministrationService;
     }
 
     public Prescription generate(@NotEmpty List<DrugOrder> drugOrders) {
         org.openmrs.Encounter emrEncounter = drugOrders.get(0).getEncounter();
-        OrgContext orgContext = getOrgContext();
-        Bundle prescriptionBundle = createPrescriptionBundle(emrEncounter, orgContext, drugOrders);
+        Bundle prescriptionBundle = createPrescriptionBundle(emrEncounter, drugOrders);
 
+        // todo: refactor hardcoding VisitType
         return Prescription.builder()
                 .bundle(prescriptionBundle)
-                .careContext(careContextService.careContextFor(emrEncounter, orgContext.getCareContextType()))
+                .careContext(careContextService.careContextFor(emrEncounter, VisitType.class))
                 .build();
     }
 
-    private Bundle createPrescriptionBundle(org.openmrs.Encounter emrEncounter, OrgContext orgContext, List<DrugOrder> drugOrders) {
+    private Bundle createPrescriptionBundle(org.openmrs.Encounter emrEncounter, List<DrugOrder> drugOrders) {
         String prescriptionId = prescriptionId(emrEncounter);
         org.openmrs.Patient emrPatient = emrEncounter.getPatient();
         Date encounterTimestamp = emrEncounter.getEncounterDatetime();
-        Bundle bundle = FHIRUtils.createBundle(encounterTimestamp, prescriptionId, orgContext);
+        Bundle bundle = FHIRUtils.createBundle(encounterTimestamp, prescriptionId, getWebUrl());
 
         Patient patientResource = FHIRResourceMapper.mapToPatient(emrPatient);
         Reference patientRef = FHIRUtils.getReferenceToResource(patientResource);
 
         //add composition first
-        Composition composition = getComposition(orgContext.getWebUrl(), encounterTimestamp);
+        Composition composition = getComposition(getWebUrl(), encounterTimestamp);
         FHIRUtils.addToBundleEntry(bundle, composition, false);
 
         //add practitioner to bundle to composition.author
@@ -101,25 +102,8 @@ public class PrescriptionGenerator {
         return "PR-" + emrEncounter.getEncounterId().toString();
     }
 
-    private OrgContext getOrgContext() {
-        Organization organization = getOrganization();
-        return OrgContext.builder()
-                .organization(organization)
-                .webUrl(getWebUrl())
-                .build();
-    }
-
     private String getWebUrl() {
-        AdministrationService administrationService = Context.getAdministrationService();
-        return administrationService.getGlobalProperty(Constants.PROP_HFR_URL);
-    }
-
-    private Organization getOrganization() {
-        AdministrationService administrationService = Context.getAdministrationService();
-        String hfrId = administrationService.getGlobalProperty(Constants.PROP_HFR_ID);
-        String hfrName = administrationService.getGlobalProperty(Constants.PROP_HFR_NAME);
-        String hfrSystem = administrationService.getGlobalProperty(Constants.PROP_HFR_SYSTEM);
-        return FHIRUtils.createOrgInstance(hfrId, hfrName, hfrSystem);
+        return bahmniAdministrationService.getWebUrl();
     }
 
 }

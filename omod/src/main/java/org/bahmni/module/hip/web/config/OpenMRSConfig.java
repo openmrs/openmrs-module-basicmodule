@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.config;
 
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
@@ -17,5 +18,10 @@ public class OpenMRSConfig {
     @Bean
     public OrderService orderService() {
         return Context.getOrderService();
+    }
+
+    @Bean
+    public AdministrationService administrationService() {
+        return Context.getAdministrationService();
     }
 }
