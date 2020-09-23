@@ -72,6 +72,10 @@ public class FHIRUtils {
                 .setResource(resource);
     }
 
+    public static void addToBundleEntry(Bundle bundle, List<? extends Resource> resources, boolean useIdPart) {
+        resources.forEach(resource ->  FHIRUtils.addToBundleEntry(bundle, resource, useIdPart));
+    }
+
     private static String getHospitalSystemForType(String hospitalDomain, String type) {
         return String.format(Constants.HOSPITAL_SYSTEM, hospitalDomain, type);
     }
