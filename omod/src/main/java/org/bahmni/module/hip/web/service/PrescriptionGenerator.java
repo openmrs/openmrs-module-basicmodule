@@ -1,6 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.web.model.Prescription;
+import org.bahmni.module.hip.web.model.PrescriptionGenerationRequest;
 import org.hl7.fhir.r4.model.*;
 import org.openmrs.DrugOrder;
 import org.openmrs.api.AdministrationService;

@@ -3,6 +3,7 @@ package org.bahmni.module.hip.web.service;
 
 import org.apache.log4j.Logger;
 import org.bahmni.module.hip.web.model.Prescription;
+import org.bahmni.module.hip.web.model.PrescriptionGenerationRequest;
 import org.openmrs.DrugOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package org.bahmni.module.hip.web.service;
+package org.bahmni.module.hip.web.model;
 
 import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Set;
 
 @Getter
-class PrescriptionGenerationRequest {
+public class PrescriptionGenerationRequest {
     private Encounter encounter;
     private Set<EncounterProvider> encounterProviders;
     private List<DrugOrder> drugOrders;
     private Patient patient;
 
-    PrescriptionGenerationRequest(@NotEmpty List<DrugOrder> drugOrders) {
+    public PrescriptionGenerationRequest(@NotEmpty List<DrugOrder> drugOrders) {
         this.encounter = drugOrders.get(0).getEncounter();
         this.encounterProviders = this.encounter.getEncounterProviders();
         this.patient = this.encounter.getPatient();
