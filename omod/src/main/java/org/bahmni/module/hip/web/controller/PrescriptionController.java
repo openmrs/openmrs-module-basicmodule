@@ -1,7 +1,7 @@
 package org.bahmni.module.hip.web.controller;
 
 import org.apache.log4j.Logger;
-import org.bahmni.module.hip.web.model.Prescription;
+import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
 import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +36,10 @@ public class PrescriptionController {
     public @ResponseBody
     ResponseEntity<Object> get(@RequestParam String patientId) {
         try {
-            List<Prescription> prescriptions =  prescriptionService.getPrescriptions(patientId, getFromDate(), new Date());
+            List<BundledPrescriptionResponse> bundledPrescriptionRespons =  prescriptionService.getPrescriptions(patientId, getFromDate(), new Date());
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(prescriptions);
+                    .body(bundledPrescriptionRespons);
         } catch (Exception e) {
             log.error("Error occurred while trying to call prescriptionService.getPrescriptions", e);
             return ResponseEntity.badRequest()

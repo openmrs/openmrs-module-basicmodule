@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Bundle;
 @Builder
 @Getter
 @Setter
-public class Prescription {
+public class BundledPrescriptionResponse {
     private CareContext careContext;
     private Bundle bundle;
 

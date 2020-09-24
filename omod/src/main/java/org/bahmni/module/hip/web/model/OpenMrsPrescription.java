@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Set;
 
 @Getter
-public class PrescriptionGenerationRequest {
+public class OpenMrsPrescription {
     private Encounter encounter;
     private Set<EncounterProvider> encounterProviders;
     private List<DrugOrder> drugOrders;
     private Patient patient;
 
-    public PrescriptionGenerationRequest(@NotEmpty List<DrugOrder> drugOrders) {
+    public OpenMrsPrescription(@NotEmpty List<DrugOrder> drugOrders) {
         this.encounter = drugOrders.get(0).getEncounter();
         this.encounterProviders = this.encounter.getEncounterProviders();
         this.patient = this.encounter.getPatient();

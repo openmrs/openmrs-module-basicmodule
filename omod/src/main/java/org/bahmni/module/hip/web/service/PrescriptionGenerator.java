@@ -1,7 +1,8 @@
 package org.bahmni.module.hip.web.service;
 
-import org.bahmni.module.hip.web.model.Prescription;
-import org.bahmni.module.hip.web.model.PrescriptionGenerationRequest;
+import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
+import org.bahmni.module.hip.web.model.FhirPrescription;
+import org.bahmni.module.hip.web.model.OpenMrsPrescription;
 import org.hl7.fhir.r4.model.*;
 import org.openmrs.DrugOrder;
 import org.openmrs.api.AdministrationService;
@@ -23,68 +24,53 @@ public class PrescriptionGenerator {
         this.careContextService = careContextService;
     }
 
-    Prescription generate(PrescriptionGenerationRequest prescriptionGenerationRequest) {
+    BundledPrescriptionResponse generate(OpenMrsPrescription openMrsPrescription) {
 
-        Bundle prescriptionBundle = createPrescriptionBundle(prescriptionGenerationRequest);
+        Bundle prescriptionBundle = createPrescriptionBundle(openMrsPrescription);
 
-        return Prescription.builder()
+        return BundledPrescriptionResponse.builder()
                 .bundle(prescriptionBundle)
-                .careContext(careContextService.careContextFor(prescriptionGenerationRequest.getEncounter(), getOrgContext().getCareContextType()))
+                .careContext(careContextService.careContextFor(openMrsPrescription.getEncounter(), getOrgContext().getCareContextType()))
                 .build();
     }
 
-    private Bundle createPrescriptionBundle(PrescriptionGenerationRequest prescriptionGenerationRequest) {
+    private Bundle createPrescriptionBundle(OpenMrsPrescription openMrsPrescription) {
 
-        Bundle bundle = initializeBundle(prescriptionGenerationRequest.getEncounter());
+        FhirPrescription fhirPrescription = FhirPrescription.from(openMrsPrescription);
 
         //Plain composition initialized
-        Composition composition = initializeComposition(prescriptionGenerationRequest.getEncounter());
+        Composition composition = initializeComposition(openMrsPrescription.getEncounter());
         Composition.SectionComponent compositionSection = composition.addSection();
 
-        //Construct practitioners
-        // TODO: Create a PractitionerService --> drugOrders
-        List<Practitioner> practitioners = getPractitionersFrom(prescriptionGenerationRequest.getEncounter());
-
-
-        // TODO: DrugOrders -> Get the first encounter -> getPatient -> Patient & PatientReference
-        //add patient to bundle and the ref to composition.subject
-        Patient patientResource = FHIRResourceMapper.mapToPatient(prescriptionGenerationRequest.getPatient());
-        Reference patientRef = FHIRUtils.getReferenceToResource(patientResource);
-
-        // TODO: DrugOrders -> Get the first encounter -> ** Dependency on patientRef
-        //add encounter to bundle and ref to composition
-        Encounter fhirEncounter = FHIRResourceMapper
-                .mapToEncounter(prescriptionGenerationRequest.getEncounter(), prescriptionGenerationRequest.getEncounter().getEncounterDatetime())
-                .setSubject(patientRef);
-
-        // TODO: PAUSE
-        practitioners
+        fhirPrescription.getPractitioners()
                 .forEach(practitioner -> composition
                         .addAuthor().setResource(practitioner).setDisplay(FHIRUtils.getDisplay(practitioner)));
 
-        List<Medication> fhirMedications = fhirMedicationFor(prescriptionGenerationRequest.getDrugOrders());
-        List<MedicationRequest> fhirMedicationRequests = medicationRequestsFor(prescriptionGenerationRequest.getDrugOrders(), practitioners.get(0), patientRef);
-
-        //Populate Composition
-        composition.setEncounter(FHIRUtils.getReferenceToResource(fhirEncounter));
-        composition.setSubject(patientRef);
+        composition
+                .setEncounter(FHIRUtils.getReferenceToResource(fhirPrescription.getEncounter()))
+                .setSubject(fhirPrescription.getPatientReference());
 
         compositionSection
                 .setTitle("OPD Prescription")
                 .setCode(FHIRUtils.getPrescriptionType());
 
-        fhirMedicationRequests
+        fhirPrescription.getMedicationRequests()
                 .stream()
                 .map(FHIRUtils::getReferenceToResource)
                 .forEach(compositionSection::addEntry);
 
-        FHIRUtils.addToBundleEntry(bundle, composition, false);
-        FHIRUtils.addToBundleEntry(bundle, fhirEncounter, false);
-        FHIRUtils.addToBundleEntry(bundle, practitioners, false);
-        FHIRUtils.addToBundleEntry(bundle, patientResource, false);
-        FHIRUtils.addToBundleEntry(bundle, fhirMedications, false);
-        FHIRUtils.addToBundleEntry(bundle, fhirMedicationRequests, false);
+        return wrapInBundle(openMrsPrescription, fhirPrescription, composition);
+    }
 
+    private Bundle wrapInBundle(OpenMrsPrescription openMrsPrescription, FhirPrescription fhirPrescription, Composition composition) {
+        Bundle bundle = initializeBundle(openMrsPrescription.getEncounter());
+
+        FHIRUtils.addToBundleEntry(bundle, composition, false);
+        FHIRUtils.addToBundleEntry(bundle, fhirPrescription.getEncounter(), false);
+        FHIRUtils.addToBundleEntry(bundle, fhirPrescription.getPractitioners(), false);
+        FHIRUtils.addToBundleEntry(bundle, fhirPrescription.getPatient(), false);
+        FHIRUtils.addToBundleEntry(bundle, fhirPrescription.getMedications(), false);
+        FHIRUtils.addToBundleEntry(bundle, fhirPrescription.getMedicationRequests(), false);
         return bundle;
     }
 

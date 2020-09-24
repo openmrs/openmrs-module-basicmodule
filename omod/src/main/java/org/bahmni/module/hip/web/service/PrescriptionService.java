@@ -2,8 +2,8 @@ package org.bahmni.module.hip.web.service;
 
 
 import org.apache.log4j.Logger;
-import org.bahmni.module.hip.web.model.Prescription;
-import org.bahmni.module.hip.web.model.PrescriptionGenerationRequest;
+import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
+import org.bahmni.module.hip.web.model.OpenMrsPrescription;
 import org.openmrs.DrugOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class PrescriptionService {
     }
 
 
-    public List<Prescription> getPrescriptions(String patientIdUuid, Date fromDate, Date toDate) {
+    public List<BundledPrescriptionResponse> getPrescriptions(String patientIdUuid, Date fromDate, Date toDate) {
         List<DrugOrder> drugOrders = openMRSDrugOrderClient.getDrugOrdersByDateFor(patientIdUuid, fromDate, toDate);
         return prescriptionsFor(drugOrders);
     }
@@ -38,7 +38,7 @@ public class PrescriptionService {
         return order.getEncounter().getUuid();
     }
 
-    private List<Prescription> prescriptionsFor(List<DrugOrder> drugOrders) {
+    private List<BundledPrescriptionResponse> prescriptionsFor(List<DrugOrder> drugOrders) {
         if (CollectionUtils.isEmpty(drugOrders)) {
             return new ArrayList<>();
         }
@@ -47,18 +47,18 @@ public class PrescriptionService {
                 .stream()
                 .collect(Collectors.groupingBy(this::getEncounterUuidForOrder));
 
-        List<PrescriptionGenerationRequest> prescriptionGenerationRequests = encounterDrugOrderMap.values()
+        List<OpenMrsPrescription> openMrsPrescriptions = encounterDrugOrderMap.values()
                 .stream()
-                .map(PrescriptionGenerationRequest::new)
+                .map(OpenMrsPrescription::new)
                 .collect(Collectors.toList());
 
-        return prescriptionGenerationRequests
+        return openMrsPrescriptions
                 .stream()
                 .map(this::generatePrescriptionFor)
                 .collect(Collectors.toList());
     }
 
-    private Prescription generatePrescriptionFor(PrescriptionGenerationRequest prescriptionGenerationRequest) {
-        return prescriptionGenerator.generate(prescriptionGenerationRequest);
+    private BundledPrescriptionResponse generatePrescriptionFor(OpenMrsPrescription openMrsPrescription) {
+        return prescriptionGenerator.generate(openMrsPrescription);
     }
 }
