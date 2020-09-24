@@ -3,7 +3,6 @@ package org.bahmni.module.hip.web.service;
 
 import org.apache.log4j.Logger;
 import org.bahmni.module.hip.web.model.Prescription;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.openmrs.DrugOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,14 +46,18 @@ public class PrescriptionService {
                 .stream()
                 .collect(Collectors.groupingBy(this::getEncounterUuidForOrder));
 
-        return encounterDrugOrderMap.values()
+        List<PrescriptionGenerationRequest> prescriptionGenerationRequests = encounterDrugOrderMap.values()
                 .stream()
-                .map(this::createPrescription)
+                .map(PrescriptionGenerationRequest::new)
+                .collect(Collectors.toList());
+
+        return prescriptionGenerationRequests
+                .stream()
+                .map(this::generatePrescriptionFor)
                 .collect(Collectors.toList());
     }
 
-    private Prescription createPrescription(@NotEmpty List<DrugOrder> drugOrders) {
-        return prescriptionGenerator.generate(drugOrders);
+    private Prescription generatePrescriptionFor(PrescriptionGenerationRequest prescriptionGenerationRequest) {
+        return prescriptionGenerator.generate(prescriptionGenerationRequest);
     }
-
 }

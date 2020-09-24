@@ -1,7 +1,6 @@
 package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.web.model.Prescription;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hl7.fhir.r4.model.*;
 import org.openmrs.DrugOrder;
 import org.openmrs.api.AdministrationService;
@@ -9,7 +8,6 @@ import org.openmrs.api.context.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -24,42 +22,38 @@ public class PrescriptionGenerator {
         this.careContextService = careContextService;
     }
 
-    Prescription generate(@NotEmpty List<DrugOrder> drugOrders) {
-        org.openmrs.Encounter emrEncounter = drugOrders.get(0).getEncounter();
+    Prescription generate(PrescriptionGenerationRequest prescriptionGenerationRequest) {
 
-        Bundle prescriptionBundle = createPrescriptionBundle(drugOrders);
+        Bundle prescriptionBundle = createPrescriptionBundle(prescriptionGenerationRequest);
 
         return Prescription.builder()
                 .bundle(prescriptionBundle)
-                .careContext(careContextService.careContextFor(emrEncounter, getOrgContext().getCareContextType()))
+                .careContext(careContextService.careContextFor(prescriptionGenerationRequest.getEncounter(), getOrgContext().getCareContextType()))
                 .build();
     }
 
-    private Bundle createPrescriptionBundle(List<DrugOrder> drugOrders) {
-        org.openmrs.Encounter emrEncounter = drugOrders.get(0).getEncounter();
-        org.openmrs.Patient emrPatient = emrEncounter.getPatient();
+    private Bundle createPrescriptionBundle(PrescriptionGenerationRequest prescriptionGenerationRequest) {
 
-
-        Bundle bundle = initializeBundle(emrEncounter);
+        Bundle bundle = initializeBundle(prescriptionGenerationRequest.getEncounter());
 
         //Plain composition initialized
-        Composition composition = initializeComposition(emrEncounter);
+        Composition composition = initializeComposition(prescriptionGenerationRequest.getEncounter());
         Composition.SectionComponent compositionSection = composition.addSection();
 
         //Construct practitioners
         // TODO: Create a PractitionerService --> drugOrders
-        List<Practitioner> practitioners = getPractitionersFrom(emrEncounter);
+        List<Practitioner> practitioners = getPractitionersFrom(prescriptionGenerationRequest.getEncounter());
 
 
         // TODO: DrugOrders -> Get the first encounter -> getPatient -> Patient & PatientReference
         //add patient to bundle and the ref to composition.subject
-        Patient patientResource = FHIRResourceMapper.mapToPatient(emrPatient);
+        Patient patientResource = FHIRResourceMapper.mapToPatient(prescriptionGenerationRequest.getPatient());
         Reference patientRef = FHIRUtils.getReferenceToResource(patientResource);
 
         // TODO: DrugOrders -> Get the first encounter -> ** Dependency on patientRef
         //add encounter to bundle and ref to composition
         Encounter fhirEncounter = FHIRResourceMapper
-                .mapToEncounter(emrEncounter, emrEncounter.getEncounterDatetime())
+                .mapToEncounter(prescriptionGenerationRequest.getEncounter(), prescriptionGenerationRequest.getEncounter().getEncounterDatetime())
                 .setSubject(patientRef);
 
         // TODO: PAUSE
@@ -67,8 +61,8 @@ public class PrescriptionGenerator {
                 .forEach(practitioner -> composition
                         .addAuthor().setResource(practitioner).setDisplay(FHIRUtils.getDisplay(practitioner)));
 
-        List<Medication> fhirMedications = fhirMedicationFor(drugOrders);
-        List<MedicationRequest> fhirMedicationRequests = medicationRequestsFor(drugOrders, practitioners.get(0), patientRef);
+        List<Medication> fhirMedications = fhirMedicationFor(prescriptionGenerationRequest.getDrugOrders());
+        List<MedicationRequest> fhirMedicationRequests = medicationRequestsFor(prescriptionGenerationRequest.getDrugOrders(), practitioners.get(0), patientRef);
 
         //Populate Composition
         composition.setEncounter(FHIRUtils.getReferenceToResource(fhirEncounter));
