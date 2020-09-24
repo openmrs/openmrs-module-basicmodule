@@ -1,60 +1,37 @@
 package org.bahmni.module.hip.web.service;
 
-import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
-import org.bahmni.module.hip.web.model.FhirPrescription;
-import org.bahmni.module.hip.web.model.OpenMrsPrescription;
+import org.bahmni.module.hip.web.model.*;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Organization;
-import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PrescriptionGenerator {
     private final CareContextService careContextService;
+    private final OrganizationContextService organizationContextService;
 
     @Autowired
-    public PrescriptionGenerator(CareContextService careContextService) {
+    public PrescriptionGenerator(CareContextService careContextService, OrganizationContextService organizationContextService) {
         this.careContextService = careContextService;
+        this.organizationContextService = organizationContextService;
     }
 
     BundledPrescriptionResponse generate(OpenMrsPrescription openMrsPrescription) {
 
-        Bundle prescriptionBundle = createPrescriptionBundle(openMrsPrescription);
+        OrganizationContext organizationContext = organizationContextService.buildContext();
+
+        Bundle prescriptionBundle = FhirPrescription
+                .from(openMrsPrescription)
+                .bundle(organizationContext.webUrl());
+
+        CareContext careContext = careContextService.careContextFor(
+                openMrsPrescription.getEncounter(),
+                organizationContext.careContextType());
 
         return BundledPrescriptionResponse.builder()
                 .bundle(prescriptionBundle)
-                .careContext(careContextService.careContextFor(openMrsPrescription.getEncounter(), getOrgContext().getCareContextType()))
+                .careContext(careContext)
                 .build();
-    }
-
-    private Bundle createPrescriptionBundle(OpenMrsPrescription openMrsPrescription) {
-
-        return FhirPrescription
-                .from(openMrsPrescription)
-                .bundle(webURL());
-    }
-
-    private OrgContext getOrgContext() {
-        Organization organization = getOrganization();
-        return OrgContext.builder()
-                .organization(organization)
-                .webUrl(webURL())
-                .build();
-    }
-
-    private String webURL() {
-        AdministrationService administrationService = Context.getAdministrationService();
-        return administrationService.getGlobalProperty(Constants.PROP_HFR_URL);
-    }
-
-    private Organization getOrganization() {
-        AdministrationService administrationService = Context.getAdministrationService();
-        String hfrId = administrationService.getGlobalProperty(Constants.PROP_HFR_ID);
-        String hfrName = administrationService.getGlobalProperty(Constants.PROP_HFR_NAME);
-        String hfrSystem = administrationService.getGlobalProperty(Constants.PROP_HFR_SYSTEM);
-        return FHIRUtils.createOrgInstance(hfrId, hfrName, hfrSystem);
     }
 
 }
