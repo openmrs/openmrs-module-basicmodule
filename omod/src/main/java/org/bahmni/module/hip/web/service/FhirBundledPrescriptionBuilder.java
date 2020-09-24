@@ -6,17 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PrescriptionGenerator {
+public class FhirBundledPrescriptionBuilder {
     private final CareContextService careContextService;
     private final OrganizationContextService organizationContextService;
 
     @Autowired
-    public PrescriptionGenerator(CareContextService careContextService, OrganizationContextService organizationContextService) {
+    public FhirBundledPrescriptionBuilder(CareContextService careContextService, OrganizationContextService organizationContextService) {
         this.careContextService = careContextService;
         this.organizationContextService = organizationContextService;
     }
 
-    BundledPrescriptionResponse generate(OpenMrsPrescription openMrsPrescription) {
+    BundledPrescriptionResponse buildFor(OpenMrsPrescription openMrsPrescription) {
 
         OrganizationContext organizationContext = organizationContextService.buildContext();
 

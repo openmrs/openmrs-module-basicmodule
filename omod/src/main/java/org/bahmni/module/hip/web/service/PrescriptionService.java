@@ -12,7 +12,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,45 +19,45 @@ public class PrescriptionService {
     private static final Logger log = Logger.getLogger(PrescriptionService.class);
 
     private final OpenMRSDrugOrderClient openMRSDrugOrderClient;
-    private final PrescriptionGenerator prescriptionGenerator;
+    private final FhirBundledPrescriptionBuilder fhirBundledPrescriptionBuilder;
 
     @Autowired
-    public PrescriptionService(OpenMRSDrugOrderClient openMRSDrugOrderClient, PrescriptionGenerator prescriptionGenerator) {
+    public PrescriptionService(OpenMRSDrugOrderClient openMRSDrugOrderClient, FhirBundledPrescriptionBuilder fhirBundledPrescriptionBuilder) {
         this.openMRSDrugOrderClient = openMRSDrugOrderClient;
-        this.prescriptionGenerator = prescriptionGenerator;
+        this.fhirBundledPrescriptionBuilder = fhirBundledPrescriptionBuilder;
     }
 
 
     public List<BundledPrescriptionResponse> getPrescriptions(String patientIdUuid, Date fromDate, Date toDate) {
-        List<DrugOrder> drugOrders = openMRSDrugOrderClient.getDrugOrdersByDateFor(patientIdUuid, fromDate, toDate);
-        return prescriptionsFor(drugOrders);
-    }
+        List<DrugOrder> drugOrders = openMRSDrugOrderClient.getDrugOrdersByDateFor(
+                patientIdUuid,
+                fromDate,
+                toDate);
 
-    public String getEncounterUuidForOrder(DrugOrder order) {
-        return order.getEncounter().getUuid();
-    }
-
-    private List<BundledPrescriptionResponse> prescriptionsFor(List<DrugOrder> drugOrders) {
-        if (CollectionUtils.isEmpty(drugOrders)) {
+        if (CollectionUtils.isEmpty(drugOrders))
             return new ArrayList<>();
-        }
 
-        Map<String, List<DrugOrder>> encounterDrugOrderMap = drugOrders
-                .stream()
-                .collect(Collectors.groupingBy(this::getEncounterUuidForOrder));
+        return bundlePrescriptionsFor(drugOrders);
+    }
 
-        List<OpenMrsPrescription> openMrsPrescriptions = encounterDrugOrderMap.values()
-                .stream()
-                .map(OpenMrsPrescription::new)
-                .collect(Collectors.toList());
+    private List<BundledPrescriptionResponse> bundlePrescriptionsFor(List<DrugOrder> drugOrders) {
+
+        List<OpenMrsPrescription> openMrsPrescriptions = buildOpenMRSPrescriptionsFor(drugOrders);
 
         return openMrsPrescriptions
                 .stream()
-                .map(this::generatePrescriptionFor)
+                .map(fhirBundledPrescriptionBuilder::buildFor)
                 .collect(Collectors.toList());
     }
 
-    private BundledPrescriptionResponse generatePrescriptionFor(OpenMrsPrescription openMrsPrescription) {
-        return prescriptionGenerator.generate(openMrsPrescription);
+    private List<OpenMrsPrescription> buildOpenMRSPrescriptionsFor(List<DrugOrder> drugOrders) {
+        return drugOrders
+                .stream()
+                .collect(Collectors.groupingBy(order -> order.getEncounter().getUuid()))
+                .values()
+                .stream()
+                .map(OpenMrsPrescription::new)
+                .collect(Collectors.toList());
     }
+
 }

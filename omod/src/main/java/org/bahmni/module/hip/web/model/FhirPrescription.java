@@ -60,7 +60,7 @@ public class FhirPrescription {
         return bundle;
     }
 
-    public Composition compositionFrom(String webURL){
+    private Composition compositionFrom(String webURL){
         Composition composition = initializeComposition(encounterTimestamp, webURL);
         Composition.SectionComponent compositionSection = composition.addSection();
 
