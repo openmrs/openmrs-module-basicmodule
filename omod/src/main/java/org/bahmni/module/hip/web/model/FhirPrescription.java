@@ -1,6 +1,5 @@
 package org.bahmni.module.hip.web.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
@@ -8,14 +7,14 @@ import org.hl7.fhir.r4.model.*;
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
 public class FhirPrescription {
 
+    private Date encounterTimestamp;
+    private Integer encounterID;
     private Encounter encounter;
     private List<Practitioner> practitioners;
     private Patient patient;
@@ -23,7 +22,9 @@ public class FhirPrescription {
     private List<Medication> medications;
     private List<MedicationRequest> medicationRequests;
 
-    private FhirPrescription(Encounter encounter, List<Practitioner> practitioners, Patient patient, Reference patientReference, List<Medication> medications, List<MedicationRequest> medicationRequests) {
+    private FhirPrescription(Date encounterTimestamp, Integer encounterID, Encounter encounter, List<Practitioner> practitioners, Patient patient, Reference patientReference, List<Medication> medications, List<MedicationRequest> medicationRequests) {
+        this.encounterTimestamp = encounterTimestamp;
+        this.encounterID = encounterID;
         this.encounter = encounter;
         this.practitioners = practitioners;
         this.patient = patient;
@@ -33,6 +34,9 @@ public class FhirPrescription {
     }
 
     public static FhirPrescription from(OpenMrsPrescription openMrsPrescription) {
+
+        Date encounterDatetime = openMrsPrescription.getEncounter().getEncounterDatetime();
+        Integer encounterId = openMrsPrescription.getEncounter().getId();
         Patient patient = FHIRResourceMapper.mapToPatient(openMrsPrescription.getPatient());
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
         Encounter encounter = encounterFrom(openMrsPrescription.getEncounter(), patientReference);
@@ -40,12 +44,61 @@ public class FhirPrescription {
         List<MedicationRequest> medicationRequests = medicationRequestsFor(openMrsPrescription.getDrugOrders(), patientReference, practitioners.get(0));
         List<Medication> medications = medicationsFor(openMrsPrescription.getDrugOrders());
 
-        return new FhirPrescription(encounter, practitioners, patient, patientReference, medications, medicationRequests);
+        return new FhirPrescription(encounterDatetime, encounterId, encounter, practitioners, patient, patientReference, medications, medicationRequests);
     }
 
-    private static Encounter encounterFrom(org.openmrs.Encounter openMRSEncounter, Reference patientReference){
+    public Bundle bundle(String webUrl){
+        String bundleID = String.format("PR-%d", encounterID);
+        Bundle bundle = FHIRUtils.createBundle(encounterTimestamp, bundleID, webUrl);
+
+        FHIRUtils.addToBundleEntry(bundle, compositionFrom(webUrl), false);
+        FHIRUtils.addToBundleEntry(bundle, encounter, false);
+        FHIRUtils.addToBundleEntry(bundle, practitioners, false);
+        FHIRUtils.addToBundleEntry(bundle, patient, false);
+        FHIRUtils.addToBundleEntry(bundle, medications, false);
+        FHIRUtils.addToBundleEntry(bundle, medicationRequests, false);
+        return bundle;
+    }
+
+    public Composition compositionFrom(String webURL){
+        Composition composition = initializeComposition(encounterTimestamp, webURL);
+        Composition.SectionComponent compositionSection = composition.addSection();
+
+        practitioners
+                .forEach(practitioner -> composition
+                        .addAuthor().setResource(practitioner).setDisplay(FHIRUtils.getDisplay(practitioner)));
+
+        composition
+                .setEncounter(FHIRUtils.getReferenceToResource(encounter))
+                .setSubject(patientReference);
+
+        compositionSection
+                .setTitle("OPD Prescription")
+                .setCode(FHIRUtils.getPrescriptionType());
+
+        medicationRequests
+                .stream()
+                .map(FHIRUtils::getReferenceToResource)
+                .forEach(compositionSection::addEntry);
+
+        return composition;
+    }
+
+    private Composition initializeComposition(Date encounterTimestamp, String webURL) {
+        Composition composition = new Composition();
+
+        composition.setId(UUID.randomUUID().toString());
+        composition.setDate(encounterTimestamp);
+        composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), webURL, "document"));
+        composition.setStatus(Composition.CompositionStatus.FINAL);
+        composition.setType(FHIRUtils.getPrescriptionType());
+        composition.setTitle("Prescription");
+        return composition;
+    }
+
+    private static Encounter encounterFrom(org.openmrs.Encounter openMRSEncounter, Reference patientReference) {
         return FHIRResourceMapper
-                .mapToEncounter(openMRSEncounter, openMRSEncounter.getEncounterDatetime())
+                .mapToEncounter(openMRSEncounter)
                 .setSubject(patientReference);
     }
 

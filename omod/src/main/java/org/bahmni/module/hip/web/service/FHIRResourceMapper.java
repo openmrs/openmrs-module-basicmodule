@@ -58,7 +58,7 @@ public class FHIRResourceMapper {
         put("EXAMPLE", "http://example.org/codes");
     }};
 
-    public static Encounter mapToEncounter(org.openmrs.Encounter emrEncounter, Date date) {
+    public static Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
         Encounter encounter = new Encounter();
         Period period = new Period();
         Visit visit = emrEncounter.getVisit();
