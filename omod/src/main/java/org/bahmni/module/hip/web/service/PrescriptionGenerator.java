@@ -26,43 +26,49 @@ public class PrescriptionGenerator {
 
     Prescription generate(@NotEmpty List<DrugOrder> drugOrders) {
         org.openmrs.Encounter emrEncounter = drugOrders.get(0).getEncounter();
-        OrgContext orgContext = getOrgContext();
-        Bundle prescriptionBundle = createPrescriptionBundle(emrEncounter, orgContext, drugOrders);
+
+        Bundle prescriptionBundle = createPrescriptionBundle(drugOrders);
 
         return Prescription.builder()
                 .bundle(prescriptionBundle)
-                .careContext(careContextService.careContextFor(emrEncounter, orgContext.getCareContextType()))
+                .careContext(careContextService.careContextFor(emrEncounter, getOrgContext().getCareContextType()))
                 .build();
     }
 
-    private Bundle createPrescriptionBundle(org.openmrs.Encounter emrEncounter, OrgContext orgContext, List<DrugOrder> drugOrders) {
+    private Bundle createPrescriptionBundle(List<DrugOrder> drugOrders) {
+        org.openmrs.Encounter emrEncounter = drugOrders.get(0).getEncounter();
         org.openmrs.Patient emrPatient = emrEncounter.getPatient();
 
 
-        Bundle bundle = FHIRUtils.createBundle(emrEncounter.getEncounterDatetime(), prescriptionId(emrEncounter), orgContext);
+        Bundle bundle = initializeBundle(emrEncounter);
 
         //Plain composition initialized
-        Composition composition = initializeComposition(orgContext.getWebUrl(), emrEncounter.getEncounterDatetime());
+        Composition composition = initializeComposition(emrEncounter);
         Composition.SectionComponent compositionSection = composition.addSection();
 
         //Construct practitioners
+        // TODO: Create a PractitionerService --> drugOrders
         List<Practitioner> practitioners = getPractitionersFrom(emrEncounter);
 
+
+        // TODO: DrugOrders -> Get the first encounter -> getPatient -> Patient & PatientReference
         //add patient to bundle and the ref to composition.subject
         Patient patientResource = FHIRResourceMapper.mapToPatient(emrPatient);
         Reference patientRef = FHIRUtils.getReferenceToResource(patientResource);
 
+        // TODO: DrugOrders -> Get the first encounter -> ** Dependency on patientRef
         //add encounter to bundle and ref to composition
         Encounter fhirEncounter = FHIRResourceMapper
-                .mapToEncounter(emrEncounter, composition.getDate())
+                .mapToEncounter(emrEncounter, emrEncounter.getEncounterDatetime())
                 .setSubject(patientRef);
 
+        // TODO: PAUSE
         practitioners
                 .forEach(practitioner -> composition
                         .addAuthor().setResource(practitioner).setDisplay(FHIRUtils.getDisplay(practitioner)));
 
         List<Medication> fhirMedications = fhirMedicationFor(drugOrders);
-        List<MedicationRequest> fhirMedicationRequests = medicationRequestsFor(drugOrders, composition, patientRef);
+        List<MedicationRequest> fhirMedicationRequests = medicationRequestsFor(drugOrders, practitioners.get(0), patientRef);
 
         //Populate Composition
         composition.setEncounter(FHIRUtils.getReferenceToResource(fhirEncounter));
@@ -87,11 +93,16 @@ public class PrescriptionGenerator {
         return bundle;
     }
 
-    private List<MedicationRequest> medicationRequestsFor(List<DrugOrder> drugOrders, Composition composition, Reference patientRef) {
+    private Bundle initializeBundle(org.openmrs.Encounter emrEncounter) {
+        OrgContext orgContext = getOrgContext();
+        return FHIRUtils.createBundle(emrEncounter.getEncounterDatetime(), prescriptionId(emrEncounter), orgContext);
+    }
+
+    private List<MedicationRequest> medicationRequestsFor(List<DrugOrder> drugOrders, Practitioner practitioner, Reference patientRef) {
         return drugOrders
                 .stream()
                 .map(drugOrder -> FHIRResourceMapper
-                        .mapToMedicationRequest(drugOrder, patientRef, composition.getAuthorFirstRep().getResource(), FHIRResourceMapper.mapToMedication(drugOrder)))
+                        .mapToMedicationRequest(drugOrder, patientRef, practitioner, FHIRResourceMapper.mapToMedication(drugOrder)))
                 .collect(Collectors.toList());
     }
 
@@ -110,11 +121,13 @@ public class PrescriptionGenerator {
                 .collect(Collectors.toList());
     }
 
-    private Composition initializeComposition(String webUrl, Date encounterTimestamp) {
+    private Composition initializeComposition(org.openmrs.Encounter encounterTimestamp) {
+        OrgContext orgContext = getOrgContext();
+
         Composition composition = new Composition();
         composition.setId(UUID.randomUUID().toString());
-        composition.setDate(encounterTimestamp);
-        composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), webUrl, "document"));
+        composition.setDate(encounterTimestamp.getEncounterDatetime());
+        composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), orgContext.getWebUrl(), "document"));
         composition.setStatus(Composition.CompositionStatus.FINAL);
         composition.setType(FHIRUtils.getPrescriptionType());
         composition.setTitle("Prescription");
