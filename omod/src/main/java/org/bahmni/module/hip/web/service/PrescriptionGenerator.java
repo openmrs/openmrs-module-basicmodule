@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ public class PrescriptionGenerator {
         this.careContextService = careContextService;
     }
 
-    public Prescription generate(@NotEmpty List<DrugOrder> drugOrders) {
+    Prescription generate(@NotEmpty List<DrugOrder> drugOrders) {
         org.openmrs.Encounter emrEncounter = drugOrders.get(0).getEncounter();
         OrgContext orgContext = getOrgContext();
         Bundle prescriptionBundle = createPrescriptionBundle(emrEncounter, orgContext, drugOrders);
@@ -56,36 +57,50 @@ public class PrescriptionGenerator {
                 .mapToEncounter(emrEncounter, composition.getDate())
                 .setSubject(patientRef);
 
-        FHIRUtils.addToBundleEntry(bundle, composition, false);
-        FHIRUtils.addToBundleEntry(bundle, practitioners, false);
-        FHIRUtils.addToBundleEntry(bundle, fhirEncounter, false);
-        FHIRUtils.addToBundleEntry(bundle, patientResource, false);
+        practitioners
+                .forEach(practitioner -> composition
+                        .addAuthor().setResource(practitioner).setDisplay(FHIRUtils.getDisplay(practitioner)));
+
+        List<Medication> fhirMedications = fhirMedicationFor(drugOrders);
+        List<MedicationRequest> fhirMedicationRequests = medicationRequestsFor(drugOrders, composition, patientRef);
 
         //Populate Composition
         composition.setEncounter(FHIRUtils.getReferenceToResource(fhirEncounter));
         composition.setSubject(patientRef);
 
         compositionSection
-        .setTitle("OPD Prescription")
-        .setCode(FHIRUtils.getPrescriptionType());
+                .setTitle("OPD Prescription")
+                .setCode(FHIRUtils.getPrescriptionType());
 
-        practitioners
-                .forEach(practitioner -> composition
-                        .addAuthor()
-                        .setResource(practitioner)
-                        .setDisplay(FHIRUtils.getDisplay(practitioner))
-                );
+        fhirMedicationRequests
+                .stream()
+                .map(FHIRUtils::getReferenceToResource)
+                .forEach(compositionSection::addEntry);
 
-        for (DrugOrder order: drugOrders) {
-            Medication medication = FHIRResourceMapper.mapToMedication(order);
-            if (medication != null) {
-                FHIRUtils.addToBundleEntry(bundle, medication, false);
-            }
-            MedicationRequest medicationRequest = FHIRResourceMapper.mapToMedicationRequest(order, patientRef, composition.getAuthorFirstRep().getResource(), medication);
-            FHIRUtils.addToBundleEntry(bundle, medicationRequest, false);
-            compositionSection.getEntry().add(FHIRUtils.getReferenceToResource(medicationRequest));
-        }
+        FHIRUtils.addToBundleEntry(bundle, composition, false);
+        FHIRUtils.addToBundleEntry(bundle, fhirEncounter, false);
+        FHIRUtils.addToBundleEntry(bundle, practitioners, false);
+        FHIRUtils.addToBundleEntry(bundle, patientResource, false);
+        FHIRUtils.addToBundleEntry(bundle, fhirMedications, false);
+        FHIRUtils.addToBundleEntry(bundle, fhirMedicationRequests, false);
+
         return bundle;
+    }
+
+    private List<MedicationRequest> medicationRequestsFor(List<DrugOrder> drugOrders, Composition composition, Reference patientRef) {
+        return drugOrders
+                .stream()
+                .map(drugOrder -> FHIRResourceMapper
+                        .mapToMedicationRequest(drugOrder, patientRef, composition.getAuthorFirstRep().getResource(), FHIRResourceMapper.mapToMedication(drugOrder)))
+                .collect(Collectors.toList());
+    }
+
+    private List<Medication> fhirMedicationFor(List<DrugOrder> drugOrders) {
+        return drugOrders
+                .stream()
+                .map(FHIRResourceMapper::mapToMedication)
+                .filter(medication -> !Objects.isNull(medication))
+                .collect(Collectors.toList());
     }
 
     private List<Practitioner> getPractitionersFrom(org.openmrs.Encounter emrEncounter) {
