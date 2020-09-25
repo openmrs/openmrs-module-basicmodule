@@ -1,7 +1,6 @@
 package org.bahmni.module.hip.web.controller;
 
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
-import org.bahmni.module.hip.web.service.BundleMedicationRequestServiceTest;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Before;
 import org.junit.Test;

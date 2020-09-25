@@ -1,7 +1,5 @@
 package org.bahmni.module.hip.web.controller;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import org.bahmni.module.hip.web.exception.RequestParameterMissingException;
 import org.bahmni.module.hip.web.model.ErrorResponse;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
@@ -15,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import static org.bahmni.module.hip.web.model.serializers.BundleSerializer.serializeBundle;
 
 @Validated
 @RestController
@@ -66,9 +65,4 @@ public class BundledMedicationRequestController {
         return "Something went wrong!!";
     }
 
-    private String serializeBundle(Bundle bundle) {
-        FhirContext ctx = FhirContext.forR4();
-        IParser parser = ctx.newJsonParser();
-        return parser.encodeResourceToString(bundle);
-    }
 }
