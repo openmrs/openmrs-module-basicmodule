@@ -4,6 +4,7 @@ import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.springframework.util.CollectionUtils;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,7 +14,7 @@ public class DrugOrders {
 
     private List<DrugOrder> openMRSDrugOrders;
 
-    public DrugOrders(List<DrugOrder> openMRSDrugOrders) {
+    public DrugOrders(@NotNull List<DrugOrder> openMRSDrugOrders) {
         this.openMRSDrugOrders = openMRSDrugOrders;
     }
 
@@ -27,6 +28,10 @@ public class DrugOrders {
                 .stream()
                 .map(DrugOrders::new)
                 .collect(Collectors.toMap(DrugOrders::firstEncounter, drugOrders -> drugOrders));
+    }
+
+    public int size() {
+        return openMRSDrugOrders.size();
     }
 
     private Map<String, List<DrugOrder>> groupByEncounterUUID(){

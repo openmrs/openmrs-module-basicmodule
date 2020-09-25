@@ -23,13 +23,11 @@ import java.util.List;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
 @Controller
 public class PrescriptionController {
-    private HipContext hipContext;
     private PrescriptionService prescriptionService;
     private static final Logger log = Logger.getLogger(PrescriptionController.class);
 
     @Autowired
-    public PrescriptionController(HipContext hipContext, PrescriptionService prescriptionService) {
-        this.hipContext = hipContext;
+    public PrescriptionController(PrescriptionService prescriptionService) {
         this.prescriptionService = prescriptionService;
     }
 
