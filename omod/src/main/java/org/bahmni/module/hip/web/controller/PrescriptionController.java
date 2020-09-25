@@ -2,6 +2,7 @@ package org.bahmni.module.hip.web.controller;
 
 import org.apache.log4j.Logger;
 import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
+import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class PrescriptionController {
     ResponseEntity<Object> get(@RequestParam String patientId) {
         try {
             List<BundledPrescriptionResponse> bundledPrescriptionResponse =
-                    prescriptionService.getPrescriptions(patientId, getFromDate(), new Date());
+                    prescriptionService.getPrescriptions(patientId, new DateRange(getFromDate(), new Date()));
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

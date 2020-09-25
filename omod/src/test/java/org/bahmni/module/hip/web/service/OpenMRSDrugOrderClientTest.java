@@ -2,12 +2,14 @@ package org.bahmni.module.hip.web.service;
 
 
 import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
+import org.bahmni.module.hip.web.model.DateRange;
 import org.junit.Test;
 import org.openmrs.*;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -102,5 +104,23 @@ public class OpenMRSDrugOrderClientTest {
                 .drugOrdersFor("0f90531a-285c-438b-b265-bb3abb4745bd", "OPD");
 
         assertEquals(1, drugOrders.size());
+    }
+
+    @Test
+    public void shouldFetchDrugOrdersForADateRangeAndAPatient() {
+        DateRange dateRange = new DateRange(new Date(), new Date());
+        String patientUUID = "0f90531a-285c-438b-b265-bb3abb4745bd";
+
+        Patient patient = mock(Patient.class);
+        OrderType orderType = mock(OrderType.class);
+
+        when(patientService.getPatientByUuid(anyString()))
+                .thenReturn(patient);
+        when(orderService.getOrderTypeByUuid(any())).thenReturn(orderType);
+
+        openMRSDrugOrderClient.getDrugOrdersByDateFor(patientUUID, dateRange);
+
+        verify(prescriptionOrderDao, times(1))
+                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), orderType);
     }
 }
