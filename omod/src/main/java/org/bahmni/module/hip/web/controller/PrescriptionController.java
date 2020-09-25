@@ -36,10 +36,12 @@ public class PrescriptionController {
     public @ResponseBody
     ResponseEntity<Object> get(@RequestParam String patientId) {
         try {
-            List<BundledPrescriptionResponse> bundledPrescriptionRespons =  prescriptionService.getPrescriptions(patientId, getFromDate(), new Date());
+            List<BundledPrescriptionResponse> bundledPrescriptionResponse =
+                    prescriptionService.getPrescriptions(patientId, getFromDate(), new Date());
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(bundledPrescriptionRespons);
+                    .body(bundledPrescriptionResponse);
         } catch (Exception e) {
             log.error("Error occurred while trying to call prescriptionService.getPrescriptions", e);
             return ResponseEntity.badRequest()

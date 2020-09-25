@@ -16,7 +16,7 @@ public class FhirBundledPrescriptionBuilder {
         this.organizationContextService = organizationContextService;
     }
 
-    BundledPrescriptionResponse buildFor(OpenMrsPrescription openMrsPrescription) {
+    BundledPrescriptionResponse fhirBundleResponseFor(OpenMrsPrescription openMrsPrescription) {
 
         OrganizationContext organizationContext = organizationContextService.buildContext();
 
@@ -33,5 +33,4 @@ public class FhirBundledPrescriptionBuilder {
                 .careContext(careContext)
                 .build();
     }
-
 }

@@ -3,11 +3,10 @@ package org.bahmni.module.hip.web.service;
 
 import org.apache.log4j.Logger;
 import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
+import org.bahmni.module.hip.web.model.DrugOrders;
 import org.bahmni.module.hip.web.model.OpenMrsPrescription;
-import org.openmrs.DrugOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,35 +28,20 @@ public class PrescriptionService {
 
 
     public List<BundledPrescriptionResponse> getPrescriptions(String patientIdUuid, Date fromDate, Date toDate) {
-        List<DrugOrder> drugOrders = openMRSDrugOrderClient.getDrugOrdersByDateFor(
+        DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateFor(
                 patientIdUuid,
                 fromDate,
-                toDate);
+                toDate));
 
-        if (CollectionUtils.isEmpty(drugOrders))
+        if (drugOrders.isEmpty())
             return new ArrayList<>();
 
-        return bundlePrescriptionsFor(drugOrders);
-    }
-
-    private List<BundledPrescriptionResponse> bundlePrescriptionsFor(List<DrugOrder> drugOrders) {
-
-        List<OpenMrsPrescription> openMrsPrescriptions = buildOpenMRSPrescriptionsFor(drugOrders);
+        List<OpenMrsPrescription> openMrsPrescriptions = OpenMrsPrescription
+                .from(drugOrders.groupByEncounter());
 
         return openMrsPrescriptions
                 .stream()
-                .map(fhirBundledPrescriptionBuilder::buildFor)
+                .map(fhirBundledPrescriptionBuilder::fhirBundleResponseFor)
                 .collect(Collectors.toList());
     }
-
-    private List<OpenMrsPrescription> buildOpenMRSPrescriptionsFor(List<DrugOrder> drugOrders) {
-        return drugOrders
-                .stream()
-                .collect(Collectors.groupingBy(order -> order.getEncounter().getUuid()))
-                .values()
-                .stream()
-                .map(OpenMrsPrescription::new)
-                .collect(Collectors.toList());
-    }
-
 }

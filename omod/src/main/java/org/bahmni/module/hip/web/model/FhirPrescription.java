@@ -52,9 +52,9 @@ public class FhirPrescription {
         Bundle bundle = FHIRUtils.createBundle(encounterTimestamp, bundleID, webUrl);
 
         FHIRUtils.addToBundleEntry(bundle, compositionFrom(webUrl), false);
-        FHIRUtils.addToBundleEntry(bundle, encounter, false);
         FHIRUtils.addToBundleEntry(bundle, practitioners, false);
         FHIRUtils.addToBundleEntry(bundle, patient, false);
+        FHIRUtils.addToBundleEntry(bundle, encounter, false);
         FHIRUtils.addToBundleEntry(bundle, medications, false);
         FHIRUtils.addToBundleEntry(bundle, medicationRequests, false);
         return bundle;
@@ -103,7 +103,7 @@ public class FhirPrescription {
     }
 
     private static List<MedicationRequest> medicationRequestsFor(
-            List<DrugOrder> drugOrders,
+            DrugOrders drugOrders,
             Reference patientReference,
             Practitioner practitioner) {
         return drugOrders
@@ -120,7 +120,7 @@ public class FhirPrescription {
                 .collect(Collectors.toList());
     }
 
-    private static List<Medication> medicationsFor(List<DrugOrder> drugOrders) {
+    private static List<Medication> medicationsFor(DrugOrders drugOrders) {
         return drugOrders
                 .stream()
                 .map(FHIRResourceMapper::mapToMedication)
