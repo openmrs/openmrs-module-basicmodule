@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
 import org.hl7.fhir.r4.model.*;
-import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
 
 import java.util.*;

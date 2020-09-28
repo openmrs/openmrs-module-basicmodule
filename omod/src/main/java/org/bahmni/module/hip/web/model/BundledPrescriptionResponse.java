@@ -12,13 +12,8 @@ import org.hl7.fhir.r4.model.Bundle;
 @Setter
 public class BundledPrescriptionResponse {
     private CareContext careContext;
+
+    @JsonSerialize(using = FhirBundleSerializer.class)
     private Bundle bundle;
 
-    public CareContext getCareContext() {
-        return careContext;
-    }
-    @JsonSerialize(using = FhirBundleSerializer.class)
-    public Bundle getBundle() {
-        return bundle;
-    }
 }
