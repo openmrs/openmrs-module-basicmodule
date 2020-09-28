@@ -43,7 +43,7 @@ public class FhirPrescription {
         Encounter encounter = mapToEncounter(openMrsPrescription.getEncounter()).setSubject(patientReference);
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsPrescription.getEncounterProviders());
         List<MedicationRequest> medicationRequests = medicationRequestsFor(fhirResourceMapper, openMrsPrescription.getDrugOrders());
-        List<Medication> medications = medicationsFor(openMrsPrescription.getDrugOrders());
+        List<Medication> medications = medicationsFor(fhirResourceMapper, openMrsPrescription.getDrugOrders());
 
         return new FhirPrescription(encounterDatetime, encounterId, encounter, practitioners, patient, patientReference, medications, medicationRequests);
     }
@@ -104,10 +104,10 @@ public class FhirPrescription {
                 .collect(Collectors.toList());
     }
 
-    private static List<Medication> medicationsFor(DrugOrders drugOrders) {
+    private static List<Medication> medicationsFor(FHIRResourceMapper fhirResourceMapper, DrugOrders drugOrders) {
         return drugOrders
                 .stream()
-                .map(FHIRResourceMapper::mapToMedication)
+                .map(fhirResourceMapper::mapToMedication)
                 .filter(medication -> !Objects.isNull(medication))
                 .collect(Collectors.toList());
     }

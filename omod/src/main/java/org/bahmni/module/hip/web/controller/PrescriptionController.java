@@ -1,6 +1,5 @@
 package org.bahmni.module.hip.web.controller;
 
-import org.apache.log4j.Logger;
 import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
 import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.service.PrescriptionService;
@@ -24,7 +23,6 @@ import java.util.List;
 @Controller
 public class PrescriptionController {
     private PrescriptionService prescriptionService;
-    private static final Logger log = Logger.getLogger(PrescriptionController.class);
 
     @Autowired
     public PrescriptionController(PrescriptionService prescriptionService) {
@@ -34,19 +32,12 @@ public class PrescriptionController {
     @RequestMapping(method = RequestMethod.GET, value = "/prescriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     ResponseEntity<Object> get(@RequestParam String patientId) {
-        try {
-            List<BundledPrescriptionResponse> bundledPrescriptionResponse =
-                    prescriptionService.getPrescriptions(patientId, new DateRange(getFromDate(), new Date()));
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(bundledPrescriptionResponse);
-        } catch (Exception e) {
-            log.error("Error occurred while trying to call prescriptionService.getPrescriptions", e);
-            return ResponseEntity.badRequest()
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(e.getMessage());
-        }
+        // todo: define from and to date and visit type as query params
+        List<BundledPrescriptionResponse> bundledPrescriptionResponse =
+                prescriptionService.getPrescriptions(patientId, new DateRange(getFromDate(), new Date()));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(bundledPrescriptionResponse);
     }
 
     private Date getFromDate() {

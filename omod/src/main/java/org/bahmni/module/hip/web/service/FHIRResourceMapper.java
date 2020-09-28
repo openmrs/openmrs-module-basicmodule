@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.*;
 import org.openmrs.*;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class FHIRResourceMapper {
     private final PatientTranslator patientTranslator;
     private final PractitionerTranslatorProviderImpl practitionerTranslatorProvider;
     private final MedicationRequestTranslator medicationRequestTranslator;
+    private final MedicationTranslator medicationTranslator;
 
     private static Map<String, String> encounterTypeMap = new HashMap<String, String>() {{
         put("ADMISSION", "IMP,inpatient encounter");
@@ -46,10 +48,11 @@ public class FHIRResourceMapper {
     }};
 
     @Autowired
-    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator) {
+    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator) {
         this.patientTranslator = patientTranslator;
         this.practitionerTranslatorProvider = practitionerTranslatorProvider;
         this.medicationRequestTranslator = medicationRequestTranslator;
+        this.medicationTranslator = medicationTranslator;
     }
 
     public static Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
@@ -111,33 +114,11 @@ public class FHIRResourceMapper {
         return medicationRequestTranslator.toFhirResource(order);
     }
 
-    public static Medication mapToMedication(DrugOrder order) {
-        if (!Utils.isBlank(order.getDrugNonCoded())) {
+    public Medication mapToMedication(DrugOrder order) {
+        if (order.getDrug() == null) {
             return null;
         }
-        Medication medication = new Medication();
-        Drug drug = order.getDrug();
-        String drugId, drugName;
-        List<Coding> codings;
-        if (drug == null) {
-            drugId = order.getConcept().getUuid();
-            drugName = order.getConcept().getName().getName();
-            codings = order.getConcept().getConceptMappings().stream().map(cm -> {
-                return mapToCodeableConcept(cm.getConceptReferenceTerm());
-            }).collect(Collectors.toList());
-        } else {
-            drugId = drug.getUuid();
-            drugName = drug.getDisplayName();
-            codings = mapToCodeableConcept(drug.getDrugReferenceMaps());
-        }
-        medication.setId(drugId);
-        CodeableConcept concept = new CodeableConcept();
-        concept.setText(drugName);
-        if (codings != null && !codings.isEmpty()) {
-            concept.setCoding(codings);
-        }
-        medication.setCode(concept);
-        return medication;
+        return medicationTranslator.toFhirResource(order.getDrug());
     }
 
     private static Coding mapToCodeableConcept(ConceptReferenceTerm crt) {
