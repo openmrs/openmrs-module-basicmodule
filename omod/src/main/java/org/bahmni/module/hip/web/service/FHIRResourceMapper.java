@@ -1,18 +1,15 @@
 package org.bahmni.module.hip.web.service;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.*;
 import org.openmrs.*;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +21,7 @@ public class FHIRResourceMapper {
 
     private final PatientTranslator patientTranslator;
     private final PractitionerTranslatorProviderImpl practitionerTranslatorProvider;
+    private final MedicationRequestTranslator medicationRequestTranslator;
 
     private static Map<String, String> encounterTypeMap = new HashMap<String, String>() {{
         put("ADMISSION", "IMP,inpatient encounter");
@@ -48,9 +46,10 @@ public class FHIRResourceMapper {
     }};
 
     @Autowired
-    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider) {
+    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator) {
         this.patientTranslator = patientTranslator;
         this.practitionerTranslatorProvider = practitionerTranslatorProvider;
+        this.medicationRequestTranslator = medicationRequestTranslator;
     }
 
     public static Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
@@ -104,54 +103,12 @@ public class FHIRResourceMapper {
         return patientTranslator.toFhirResource(emrPatient);
     }
 
-    private static HumanName mapToHumanName(PersonName personName) {
-        HumanName humanName = new HumanName();
-        humanName.setFamily(personName.getFamilyName());
-        humanName.addGiven(personName.getGivenName());
-        humanName.setText(personName.getFullName());
-        return humanName;
-    }
-
     public Practitioner mapToPractitioner(EncounterProvider encounterProvider) {
         return practitionerTranslatorProvider.toFhirResource(encounterProvider.getProvider());
     }
 
-    public static MedicationRequest mapToMedicationRequest(DrugOrder order,
-                                                           Reference patientRef,
-                                                           IBaseResource author,
-                                                           Medication medication) {
-        MedicationRequest medReq = new MedicationRequest();
-        medReq.setId(order.getOrderId().toString());
-
-        medReq.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
-        medReq.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
-
-        Reference authorRef = new Reference();
-        authorRef.setResource(author);
-        medReq.setRequester(authorRef);
-        medReq.setAuthoredOn(order.getDateCreated());
-        medReq.setSubject(patientRef);
-
-        if (medication == null) {
-            CodeableConcept medCodeableConcept = new CodeableConcept();
-            medCodeableConcept.setText(order.getDrugNonCoded());
-            medReq.setMedication(medCodeableConcept);
-        } else {
-            Reference medicationRef = FHIRUtils.getReferenceToResource(medication);
-            medicationRef.setResource(medication);
-            medReq.setMedication(medicationRef);
-        }
-
-        medReq.addDosageInstruction().setText(getDosingInstruction(order));
-        if (!Utils.isBlank(order.getCommentToFulfiller())) {
-            //TODO - should be in dispense instruction
-            medReq.addNote().setText(order.getCommentToFulfiller());
-        }
-
-        //NOTE: Openmrs does not have means to adding specific reason but we can potentially get something from
-        //dosage instruction as text
-        //medReq.setReasonReference(some condition);
-        return medReq;
+    public MedicationRequest mapToMedicationRequest(DrugOrder order) {
+        return medicationRequestTranslator.toFhirResource(order);
     }
 
     public static Medication mapToMedication(DrugOrder order) {
@@ -204,21 +161,5 @@ public class FHIRResourceMapper {
     private static String getCodingSystem(ConceptSource conceptSource) {
         //TODO
         return conceptSource.getHl7Code();
-    }
-
-
-    private static String getDosingInstruction(DrugOrder order) {
-        boolean bahmniSystem = order.getDosingType().getName().equals("org.openmrs.module.bahmniemrapi.drugorder.dosinginstructions.FlexibleDosingInstructions");
-        if (bahmniSystem) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                JsonNode jsonNode = objectMapper.readTree(order.getDosingInstructions());
-                return jsonNode.get("instructions").asText();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "";
-            }
-        }
-        return order.getDosingInstructions();
     }
 }
