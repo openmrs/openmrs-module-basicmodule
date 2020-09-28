@@ -9,8 +9,6 @@ import org.openmrs.EncounterProvider;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.web.service.FHIRResourceMapper.mapToEncounter;
-
 @Getter
 public class FhirPrescription {
 
@@ -40,7 +38,7 @@ public class FhirPrescription {
         Integer encounterId = openMrsPrescription.getEncounter().getId();
         Patient patient = fhirResourceMapper.mapToPatient(openMrsPrescription.getPatient());
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
-        Encounter encounter = mapToEncounter(openMrsPrescription.getEncounter()).setSubject(patientReference);
+        Encounter encounter = fhirResourceMapper.mapToEncounter(openMrsPrescription.getEncounter());
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsPrescription.getEncounterProviders());
         List<MedicationRequest> medicationRequests = medicationRequestsFor(fhirResourceMapper, openMrsPrescription.getDrugOrders());
         List<Medication> medications = medicationsFor(fhirResourceMapper, openMrsPrescription.getDrugOrders());
