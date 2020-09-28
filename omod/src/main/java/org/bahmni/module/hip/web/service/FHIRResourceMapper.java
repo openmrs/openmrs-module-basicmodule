@@ -8,17 +8,22 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.*;
 import org.openmrs.*;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class FHIRResourceMapper {
 
     private final PatientTranslator patientTranslator;
+    private final PractitionerTranslatorProviderImpl practitionerTranslatorProvider;
 
     private static Map<String, String> encounterTypeMap = new HashMap<String, String>() {{
         put("ADMISSION", "IMP,inpatient encounter");
@@ -43,8 +48,9 @@ public class FHIRResourceMapper {
     }};
 
     @Autowired
-    public FHIRResourceMapper(PatientTranslator patientTranslator) {
+    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider) {
         this.patientTranslator = patientTranslator;
+        this.practitionerTranslatorProvider = practitionerTranslatorProvider;
     }
 
     public static Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
@@ -106,19 +112,8 @@ public class FHIRResourceMapper {
         return humanName;
     }
 
-    public static Practitioner mapToPractitioner(EncounterProvider encounterProvider) {
-        Practitioner practitioner = new Practitioner();
-        Provider provider = encounterProvider.getProvider();
-        practitioner.setId(provider.getIdentifier());
-        List<ProviderAttribute> attributes = provider.getAttributes().stream().filter(
-                providerAttribute -> providerAttribute.getAttributeType().getName().equalsIgnoreCase("prefix"))
-                .collect(Collectors.toList());
-        List<StringType> prefixes = attributes.stream().map(p -> new StringType(p.getValue().toString())).collect(Collectors.toList());
-        HumanName humanName = mapToHumanName(provider.getPerson().getPersonName());
-        humanName.setPrefix(prefixes);
-        practitioner.setName(Collections.singletonList(humanName));
-        //TODO map identifier
-        return practitioner;
+    public Practitioner mapToPractitioner(EncounterProvider encounterProvider) {
+        return practitionerTranslatorProvider.toFhirResource(encounterProvider.getProvider());
     }
 
     public static MedicationRequest mapToMedicationRequest(DrugOrder order,
