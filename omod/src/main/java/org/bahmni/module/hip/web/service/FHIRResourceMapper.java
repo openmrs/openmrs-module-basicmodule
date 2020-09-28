@@ -3,39 +3,23 @@ package org.bahmni.module.hip.web.service;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
-import org.openmrs.ConceptReferenceTerm;
-import org.openmrs.ConceptSource;
-import org.openmrs.Drug;
-import org.openmrs.DrugOrder;
-import org.openmrs.DrugReferenceMap;
-import org.openmrs.EncounterProvider;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PersonName;
-import org.openmrs.Provider;
-import org.openmrs.ProviderAttribute;
-import org.openmrs.Visit;
+import org.hl7.fhir.r4.model.*;
+import org.openmrs.*;
+import org.openmrs.module.fhir2.api.translators.PatientTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Service
 public class FHIRResourceMapper {
+
+    private final PatientTranslator patientTranslator;
+
     private static Map<String, String> encounterTypeMap = new HashMap<String, String>() {{
         put("ADMISSION", "IMP,inpatient encounter");
         put("CONSULTATION", "AMB,ambulatory");
@@ -57,6 +41,11 @@ public class FHIRResourceMapper {
         put("ATC", "http://www.whocc.no/atc");
         put("EXAMPLE", "http://example.org/codes");
     }};
+
+    @Autowired
+    public FHIRResourceMapper(PatientTranslator patientTranslator) {
+        this.patientTranslator = patientTranslator;
+    }
 
     public static Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
         Encounter encounter = new Encounter();
@@ -105,15 +94,8 @@ public class FHIRResourceMapper {
         return encClassDetails;
     }
 
-    public static Patient mapToPatient(org.openmrs.Patient emrPatient) {
-        Patient patient = new Patient();
-        patient.setId(emrPatient.getUuid());
-        patient.setGender(FHIRUtils.getGender(emrPatient.getGender()));
-        HumanName humanName = mapToHumanName(emrPatient.getPersonName());
-        patient.addName(humanName);
-        patient.setIdentifier(FHIRUtils.getEmrPatientIdentifiers(emrPatient));
-        List<PatientIdentifier> patientIdentifiers = emrPatient.getActiveIdentifiers();
-        return patient;
+    public Patient mapToPatient(org.openmrs.Patient emrPatient) {
+        return patientTranslator.toFhirResource(emrPatient);
     }
 
     private static HumanName mapToHumanName(PersonName personName) {
