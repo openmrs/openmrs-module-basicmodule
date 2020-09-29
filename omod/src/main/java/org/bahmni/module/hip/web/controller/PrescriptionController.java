@@ -31,11 +31,12 @@ public class PrescriptionController {
     ResponseEntity<BundledPrescriptionResponse> get(
             @RequestParam String patientId,
             @RequestParam String fromDate,
-            @RequestParam String toDate
+            @RequestParam String toDate,
+            @RequestParam String visitType
     ) throws ParseException {
         // todo: define from and to date and visit type as query params
         List<PrescriptionBundle> prescriptionBundle =
-                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)));
+                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledPrescriptionResponse(prescriptionBundle));

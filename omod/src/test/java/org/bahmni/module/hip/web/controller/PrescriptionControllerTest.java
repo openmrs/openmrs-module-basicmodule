@@ -43,10 +43,13 @@ public class PrescriptionControllerTest {
 
     @Test
     public void shouldReturn200OkWhenfromDateToDateAndPatientIdAreGiven() throws Exception {
-        when(prescriptionService.getPrescriptions(anyString(), any()))
+        when(prescriptionService.getPrescriptions(anyString(), any(), anyString()))
                 .thenReturn(EMPTY_LIST);
-        mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/prescriptions?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'" +
-                "&fromDate=2020-01-01&toDate=2020-02-01")
+        mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
+                .param("visitType", "IPD")
+                .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .param("fromDate", "2020-01-01")
+                .param("toDate", "2020-01-31")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

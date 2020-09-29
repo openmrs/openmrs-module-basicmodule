@@ -2,10 +2,7 @@ package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
 import org.bahmni.module.hip.web.model.DateRange;
-import org.openmrs.DrugOrder;
-import org.openmrs.Order;
-import org.openmrs.OrderType;
-import org.openmrs.Patient;
+import org.openmrs.*;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +44,10 @@ class OpenMRSDrugOrderClient {
         return order.getEncounter().getVisit().getVisitType().getName().equals(visitType);
     }
 
-    List<DrugOrder> getDrugOrdersByDateFor(String forPatientUUID, DateRange dateRange) {
+    List<DrugOrder> getDrugOrdersByDateAndVisitTypeFor(String forPatientUUID, DateRange dateRange, String visitType) {
         Patient patient = patientService.getPatientByUuid(forPatientUUID);
         OrderType drugOrderType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
-        return prescriptionOrderDao.getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType);
+        return prescriptionOrderDao
+                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType, visitType);
     }
 }

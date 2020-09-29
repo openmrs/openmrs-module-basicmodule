@@ -110,6 +110,7 @@ public class OpenMRSDrugOrderClientTest {
     public void shouldFetchDrugOrdersForADateRangeAndAPatient() {
         DateRange dateRange = new DateRange(new Date(), new Date());
         String patientUUID = "0f90531a-285c-438b-b265-bb3abb4745bd";
+        String visitType = "IPD";
 
         Patient patient = mock(Patient.class);
         OrderType orderType = mock(OrderType.class);
@@ -118,9 +119,9 @@ public class OpenMRSDrugOrderClientTest {
                 .thenReturn(patient);
         when(orderService.getOrderTypeByUuid(any())).thenReturn(orderType);
 
-        openMRSDrugOrderClient.getDrugOrdersByDateFor(patientUUID, dateRange);
+        openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientUUID, dateRange, visitType);
 
         verify(prescriptionOrderDao, times(1))
-                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), orderType);
+                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), orderType, visitType);
     }
 }
