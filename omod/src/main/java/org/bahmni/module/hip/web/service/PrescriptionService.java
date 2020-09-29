@@ -2,7 +2,7 @@ package org.bahmni.module.hip.web.service;
 
 
 import org.apache.log4j.Logger;
-import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
+import org.bahmni.module.hip.web.model.PrescriptionBundle;
 import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.model.DrugOrders;
 import org.bahmni.module.hip.web.model.OpenMrsPrescription;
@@ -27,7 +27,7 @@ public class PrescriptionService {
     }
 
 
-    public List<BundledPrescriptionResponse> getPrescriptions(String patientIdUuid, DateRange dateRange) {
+    public List<PrescriptionBundle> getPrescriptions(String patientIdUuid, DateRange dateRange) {
         DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateFor(patientIdUuid, dateRange));
 
         if (drugOrders.isEmpty())
