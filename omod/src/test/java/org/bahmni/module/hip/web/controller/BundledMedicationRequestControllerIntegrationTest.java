@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.controller;
 
+import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Before;
@@ -7,8 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -22,7 +21,6 @@ import org.springframework.web.util.NestedServletException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -133,13 +131,5 @@ public class BundledMedicationRequestControllerIntegrationTest {
         String content = mvcResult.getResponse().getContentAsString();
 
         assertEquals("{\"errMessage\":\"visitType is mandatory request parameter\"}", content);
-    }
-}
-
-@Configuration
-class TestConfiguration {
-    @Bean
-    public BundleMedicationRequestService bundleMedicationRequestService() {
-        return mock(BundleMedicationRequestService.class);
     }
 }
