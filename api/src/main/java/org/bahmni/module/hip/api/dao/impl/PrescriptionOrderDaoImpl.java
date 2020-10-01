@@ -1,7 +1,8 @@
-package org.bahmni.module.hip.api.dao;
+package org.bahmni.module.hip.api.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
