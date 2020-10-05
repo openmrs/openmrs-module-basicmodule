@@ -1,6 +1,7 @@
 package org.bahmni.module.hip.web;
 
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
+import org.bahmni.module.hip.web.service.CareContextService;
 import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,5 +19,10 @@ public class TestConfiguration {
     @Bean
     public PrescriptionService prescriptionService() {
         return mock(PrescriptionService.class);
+    }
+
+    @Bean
+    public CareContextService careContextService() {
+        return mock(CareContextService.class);
     }
 }
