@@ -1,21 +1,11 @@
 package org.bahmni.module.hip.web.service;
 
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.*;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class FHIRUtils {
     private static Map<String, Enumerations.AdministrativeGender> genderMap = new HashMap<String, Enumerations.AdministrativeGender>() {{
@@ -25,13 +15,13 @@ public class FHIRUtils {
         put("U", Enumerations.AdministrativeGender.UNKNOWN);
     }};
 
-    public static Bundle createBundle(Date forDate, String bundleId, OrgContext hipContext) {
+    public static Bundle createBundle(Date forDate, String bundleId, String webURL) {
         Bundle bundle = new Bundle();
         bundle.setId(bundleId);
         bundle.setTimestamp(forDate);
 
         Identifier identifier = new Identifier();
-        identifier.setSystem(Utils.ensureTrailingSlash(hipContext.getWebUrl().trim()) + "/bundle");
+        identifier.setSystem(Utils.ensureTrailingSlash(webURL.trim()) + "/bundle");
         identifier.setValue(bundleId);
         bundle.setIdentifier(identifier);
 
@@ -72,8 +62,8 @@ public class FHIRUtils {
                 .setResource(resource);
     }
 
-    private static String getHospitalSystemForType(String hospitalDomain, String type) {
-        return String.format(Constants.HOSPITAL_SYSTEM, hospitalDomain, type);
+    public static void addToBundleEntry(Bundle bundle, List<? extends Resource> resources, boolean useIdPart) {
+        resources.forEach(resource ->  FHIRUtils.addToBundleEntry(bundle, resource, useIdPart));
     }
 
     public static Organization createOrgInstance(String hfrId, String hfrName, String hfrSystem) {
@@ -92,20 +82,6 @@ public class FHIRUtils {
         ref.setResource(res);
         return ref;
     }
-
-    public static List<Identifier> getEmrPatientIdentifiers(org.openmrs.Patient emrPatient) {
-        return emrPatient.getIdentifiers().stream().map(id -> {
-            Identifier identifier = new Identifier();
-            identifier.setValue(id.getIdentifier());
-            return identifier;
-        }).collect(Collectors.toList());
-    }
-
-    public static Enumerations.AdministrativeGender getGender(String gender) {
-        Enumerations.AdministrativeGender patientGender = genderMap.get(gender.toUpperCase());
-        return patientGender != null ? patientGender : Enumerations.AdministrativeGender.UNKNOWN;
-    }
-
 
     public static String getDisplay(Practitioner author) {
         String prefixAsSingleString = author.getNameFirstRep().getPrefixAsSingleString();

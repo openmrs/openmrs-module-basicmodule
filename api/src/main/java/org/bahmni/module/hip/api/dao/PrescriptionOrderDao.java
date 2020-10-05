@@ -8,5 +8,5 @@ import java.util.Date;
 import java.util.List;
 
 public interface PrescriptionOrderDao {
-    public List<DrugOrder> getDrugOrders(Patient patient, Date fromDate, Date toDate, OrderType orderType);
+    List<DrugOrder> getDrugOrders(Patient patient, Date fromDate, Date toDate, OrderType orderType, String visitType);
 }
