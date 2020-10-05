@@ -1,7 +1,7 @@
 package org.bahmni.module.hip.web.controller;
 
 import org.bahmni.module.hip.web.TestConfiguration;
-import org.bahmni.module.hip.web.service.CareContextService;
+import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,22 +17,23 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static java.util.Collections.EMPTY_LIST;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {CareContextController.class, TestConfiguration.class})
+@ContextConfiguration(classes = {PrescriptionController.class, TestConfiguration.class})
 @WebAppConfiguration
-public class CareContextControllerTest {
+public class PrescriptionControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext wac;
 
     @Autowired
-    private CareContextService careContextService;
+    private PrescriptionService prescriptionService;
 
     @Before
     public void setup() {
@@ -41,13 +42,16 @@ public class CareContextControllerTest {
     }
 
     @Test
-    public void shouldReturn200OkWhenPatientIdIsGiven() throws Exception {
-        when(careContextService.careContextForPatient(anyInt()))
+    public void shouldReturn200OkWhenfromDateToDateAndPatientIdAreGiven() throws Exception {
+        when(prescriptionService.getPrescriptions(anyString(), any(), anyString()))
                 .thenReturn(EMPTY_LIST);
-
-        mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
-                .param("patientId", "72")
+        mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
+                .param("visitType", "IPD")
+                .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .param("fromDate", "2020-01-01")
+                .param("toDate", "2020-01-31")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+
 }
