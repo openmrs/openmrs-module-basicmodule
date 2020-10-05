@@ -30,7 +30,7 @@ public class CareContextService {
         }
     }
 
-    public List<PatientCareContext>  careContextForPatient(String patientId){
+    public List<PatientCareContext>  careContextForPatient(Integer patientId){
       return careContextRepository.getPatientCareContext(patientId);
     }
 

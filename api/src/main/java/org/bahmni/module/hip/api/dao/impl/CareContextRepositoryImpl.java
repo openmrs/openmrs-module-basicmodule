@@ -22,7 +22,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
     }
 
     @Override
-    public List<PatientCareContext> getPatientCareContext(String patientId) {
+    public List<PatientCareContext> getPatientCareContext(Integer patientId) {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("SELECT" +
                 "    case\n" +
                 "        when care_context = 'PROGRAM' then patient_program_id\n" +
