@@ -25,7 +25,7 @@ public class CareContextController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/careContext", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    ResponseEntity<List<PatientCareContext>> getCareContextForPatient(@RequestParam String patientId){
+    ResponseEntity<List<PatientCareContext>> getCareContextForPatient(@RequestParam Integer patientId){
         return ResponseEntity.ok(careContextService.careContextForPatient(patientId));
     }
 }

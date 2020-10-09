@@ -2,7 +2,6 @@ package org.bahmni.module.hip.web.controller;
 
 import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.service.CareContextService;
-import org.bahmni.module.hip.web.service.CareContextServiceTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,8 +17,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static java.util.Collections.EMPTY_LIST;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,7 +42,7 @@ public class CareContextControllerTest {
 
     @Test
     public void shouldReturn200OkWhenPatientIdIsGiven() throws Exception {
-        when(careContextService.careContextForPatient(anyString()))
+        when(careContextService.careContextForPatient(anyInt()))
                 .thenReturn(EMPTY_LIST);
 
         mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
