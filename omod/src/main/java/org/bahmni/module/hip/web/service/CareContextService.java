@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 public class CareContextService {
@@ -30,8 +31,17 @@ public class CareContextService {
         }
     }
 
-    public List<PatientCareContext>  careContextForPatient(String patientId){
-      return careContextRepository.getPatientCareContext(patientId);
+    public <Type> Type careContextForPatient(Integer patientId){
+        if(!careContextRepository.isPatientIdExist(patientId)){
+            return (Type) Boolean.FALSE;
+        }
+      return (Type) careContextRepository.getPatientCareContext(patientId);
     }
 
+    public boolean isValid(String patientId){
+        if (Pattern.matches("[0-9]{1,}", patientId)){
+            return true;
+        }
+        return false;
+    }
 }

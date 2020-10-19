@@ -1,8 +1,10 @@
 package org.bahmni.module.hip.web.controller;
 
+import org.bahmni.module.hip.model.PatientCareContext;
 import org.bahmni.module.hip.web.TestConfiguration;
+import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.service.CareContextService;
-import org.bahmni.module.hip.web.service.CareContextServiceTest;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,12 +15,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static java.util.Collections.EMPTY_LIST;
-import static org.mockito.Matchers.any;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,12 +50,66 @@ public class CareContextControllerTest {
 
     @Test
     public void shouldReturn200OkWhenPatientIdIsGiven() throws Exception {
-        when(careContextService.careContextForPatient(anyString()))
-                .thenReturn(EMPTY_LIST);
+        List<PatientCareContext> patientCareContextList=new ArrayList<>();
+        patientCareContextList.add(PatientCareContext.builder()
+                .careContextName("TB Program")
+                .careContextType("PROGRAM")
+                .careContextReference(4)
+                .build());
+        when(careContextService.isValid(anyString())).thenReturn(true);
+        when(careContextService.careContextForPatient(anyInt()))
+                .thenReturn(patientCareContextList);
+
 
         mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
                 .param("patientId", "72")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldReturn400BadRequestWhenPatientIdContainsCharacters() throws Exception {
+        List<PatientCareContext> patientCareContextList=new ArrayList<>();
+        patientCareContextList.add(PatientCareContext.builder()
+                .careContextName("TB Program")
+                .careContextType("PROGRAM")
+                .careContextReference(4)
+                .build());
+        when(careContextService.isValid(anyString())).thenReturn(false);
+        when(careContextService.careContextForPatient(anyInt()))
+                .thenReturn(patientCareContextList);
+
+
+        MvcResult mvcResult=mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
+                .param("patientId", "72aa")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        String responseBody = new ObjectMapper().writeValueAsString(ClientError.invalidPatientId());
+        assertEquals(responseBody, content);
+    }
+
+    @Test
+    public void shouldReturn400BadRequestWhenNoPatientIdProvided() throws Exception {
+        List<PatientCareContext> patientCareContextList=new ArrayList<>();
+        patientCareContextList.add(PatientCareContext.builder()
+                .careContextName("TB Program")
+                .careContextType("PROGRAM")
+                .careContextReference(4)
+                .build());
+        when(careContextService.isValid(anyString())).thenReturn(true);
+        when(careContextService.careContextForPatient(anyInt()))
+                .thenReturn(patientCareContextList);
+
+
+        MvcResult mvcResult=mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
+                .param("patientId", "")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        String responseBody = new ObjectMapper().writeValueAsString(ClientError.noPatientIdProvided());
+        assertEquals(responseBody, content);
     }
 }

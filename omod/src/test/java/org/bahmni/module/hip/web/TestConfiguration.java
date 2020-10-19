@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web;
 
+import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.bahmni.module.hip.web.service.CareContextService;
 import org.bahmni.module.hip.web.service.PrescriptionService;
