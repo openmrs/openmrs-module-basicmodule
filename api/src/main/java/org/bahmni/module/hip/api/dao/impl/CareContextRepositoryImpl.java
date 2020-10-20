@@ -58,8 +58,11 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "                    v.visit_type_id = vt.visit_type_id ) as a\n" +
                 "where\n" +
                 "        a.patient_id = :patientId" +
-                " group by\n" +
-                "    a.visit_type_id,a.patient_program_id,care_context")
+                " group by " +
+                "care_context, " +
+                "case when care_context = 'PROGRAM' " +
+                "then patient_program_id else visit_type_id " +
+                "end")
                 .addScalar("careContextReference", IntegerType.INSTANCE)
                 .addScalar("careContextType", StringType.INSTANCE)
                 .addScalar("careContextName",StringType.INSTANCE);

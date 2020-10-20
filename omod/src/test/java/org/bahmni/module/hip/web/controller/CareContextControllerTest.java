@@ -26,6 +26,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static java.util.Collections.EMPTY_LIST;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,7 +61,6 @@ public class CareContextControllerTest {
         when(careContextService.isValid(anyString())).thenReturn(true);
         when(careContextService.careContextForPatient(anyInt()))
                 .thenReturn(patientCareContextList);
-
 
         mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
                 .param("patientId", "72")
