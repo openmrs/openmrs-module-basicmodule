@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CareContextRepository {
     List<PatientCareContext> getPatientCareContext(Integer patientId);
+    boolean isPatientIdExist(Integer patientId);
 }

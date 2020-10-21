@@ -24,6 +24,8 @@ public class CareContextServiceTest {
 
         when(careContextRepository.getPatientCareContext(patientId))
                 .thenReturn(careContexts);
+        when(careContextRepository.isPatientIdExist(patientId))
+                .thenReturn(true);
 
         careContextServiceObject.careContextForPatient(patientId);
 

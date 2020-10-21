@@ -34,4 +34,12 @@ public class HipControllerAdvice {
         log.error(ex.getMessage(), ex);
         return new ErrorResponse(ex.getMessage());
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NumberFormatException.class)
+    public ErrorResponse numberFormatException(Exception ex) {
+        log.error(ex.getMessage(), ex);
+        return new ErrorResponse(ex.getMessage());
+    }
 }

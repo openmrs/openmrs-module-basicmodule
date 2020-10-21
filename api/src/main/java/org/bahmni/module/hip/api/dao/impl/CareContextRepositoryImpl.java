@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
+import org.openmrs.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +23,6 @@ public class CareContextRepositoryImpl implements CareContextRepository {
     }
 
     @Override
-
     public List<PatientCareContext> getPatientCareContext(Integer patientId) {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("SELECT" +
                 "    case\n" +
@@ -68,5 +68,17 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 .addScalar("careContextName",StringType.INSTANCE);
         query.setParameter("patientId", patientId);
         return query.setResultTransformer(Transformers.aliasToBean(PatientCareContext.class)).list();
+    }
+
+    @Override
+    public boolean isPatientIdExist(Integer patientId) {
+        Query query = this.sessionFactory.getCurrentSession().createSQLQuery("SELECT patient_id as patientId from patient " +
+                "where patient_id= :patientId")
+                .addScalar("patientId", IntegerType.INSTANCE);
+        query.setParameter("patientId", patientId);
+        if(query.setResultTransformer(Transformers.aliasToBean(Patient.class)).list().size()==0){
+            return false;
+        }
+        return true;
     }
 }
