@@ -13,6 +13,6 @@ public class FhirBundleSerializer extends JsonSerializer<Bundle> {
     @Override
     public void serialize(Bundle bundle, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
             throws IOException {
-        jsonGenerator.writeRaw(serializeBundle(bundle));
+        jsonGenerator.writeRaw(":" + serializeBundle(bundle));
     }
 }
