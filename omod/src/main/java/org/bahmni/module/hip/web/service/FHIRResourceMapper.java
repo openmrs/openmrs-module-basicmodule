@@ -42,6 +42,9 @@ public class FHIRResourceMapper {
     }
 
     public MedicationRequest mapToMedicationRequest(DrugOrder order) {
+        String dosingInstrutions = order.getDose().toString() + " " + order.getDoseUnits() + "," + order.getFrequency().toString()
+                + "," + order.getRoute().getName().toString() + " - " + order.getDuration().toString() + order.getDurationUnits().getName().toString();
+        order.setDosingInstructions(dosingInstrutions);
         return medicationRequestTranslator.toFhirResource(order);
     }
 
