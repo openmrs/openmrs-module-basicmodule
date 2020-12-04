@@ -1,6 +1,10 @@
 package org.bahmni.module.hip.web.service;
 
-import org.bahmni.module.hip.web.model.*;
+import org.bahmni.module.hip.web.model.CareContext;
+import org.bahmni.module.hip.web.model.FhirPrescription;
+import org.bahmni.module.hip.web.model.OpenMrsPrescription;
+import org.bahmni.module.hip.web.model.OrganizationContext;
+import org.bahmni.module.hip.web.model.PrescriptionBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

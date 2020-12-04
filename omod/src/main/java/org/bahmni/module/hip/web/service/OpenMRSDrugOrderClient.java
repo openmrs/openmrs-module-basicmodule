@@ -2,7 +2,10 @@ package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
 import org.bahmni.module.hip.web.model.DateRange;
-import org.openmrs.*;
+import org.openmrs.DrugOrder;
+import org.openmrs.Order;
+import org.openmrs.OrderType;
+import org.openmrs.Patient;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;

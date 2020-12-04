@@ -1,6 +1,11 @@
 package org.bahmni.module.hip.web.service;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Dosage;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
@@ -41,14 +46,20 @@ public class FHIRResourceMapper {
         return practitionerTranslatorProvider.toFhirResource(encounterProvider.getProvider());
     }
 
+    private String displayName(Object object) {
+        if (object == null)
+            return "";
+        return object.toString() + " ";
+
+    }
+
     public MedicationRequest mapToMedicationRequest(DrugOrder order) {
-        String dosingInstrutions = order.getDose().toString() + " " +
-                        order.getDoseUnits().getName().toString() + "," +
-                        order.getFrequency().toString() + "," +
-                        order.getRoute().getName().toString() + " - " +
-                        order.getDuration().toString() + " " +
-                        order.getDurationUnits().getName().toString();
-        //order.setDosingInstructions(dosingInstrutions);
+        String dosingInstrutions = displayName(order.getDose()) +
+                displayName(order.getDoseUnits().getName()) +
+                displayName(order.getFrequency()) +
+                displayName(order.getRoute().getName()) +
+                displayName(order.getDuration()) +
+                displayName(order.getDurationUnits().getName());
         MedicationRequest medicationRequest = medicationRequestTranslator.toFhirResource(order);
         Dosage dosage = medicationRequest.getDosageInstruction().get(0);
         dosage.setText(dosingInstrutions);
@@ -61,5 +72,4 @@ public class FHIRResourceMapper {
         }
         return medicationTranslator.toFhirResource(order.getDrug());
     }
-
 }
