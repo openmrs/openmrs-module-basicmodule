@@ -2,21 +2,26 @@ package org.bahmni.module.hip.web.controller;
 
 import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.service.PrescriptionService;
+import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
 import static java.util.Collections.EMPTY_LIST;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -50,8 +55,56 @@ public class PrescriptionControllerTest {
                 .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
                 .param("fromDate", "2020-01-01")
                 .param("toDate", "2020-01-31")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void shouldThrowUnauthorizedWhenUserIsUnauthorized() throws Exception {
+        when(prescriptionService.getPrescriptions(anyString(), any(), anyString()))
+                .thenReturn(EMPTY_LIST);
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
+                .param("visitType", "IPD")
+                .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .param("fromDate", "2020-01-01")
+                .param("toDate", "2020-01-31")
+                .header("Authorization", "baha")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
+    }
+
+
+    @Test(expected = NestedServletException.class)
+    public void shouldReturnPatientIdRequestParameterIsMandatoryErrorMessage() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
+                .param("visitType", "IPD")
+                .param("fromDate", "2020-01-01")
+                .param("toDate", "2020-01-31")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+
+        assertEquals("{\"errMessage\":\"patientId is mandatory request parameter\"}", content);
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedErrorMessageWhenNoAuth() throws Exception {
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
+                .param("visitType", "IPD")
+                .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .param("fromDate", "2020-01-01")
+                .param("toDate", "2020-01-31")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
+    }
 }

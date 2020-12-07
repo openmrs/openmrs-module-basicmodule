@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.controller;
 
+import org.apache.log4j.Logger;
 import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BundledMedicationRequestControllerIntegrationTest {
 
     private MockMvc mockMvc;
+    private static final Logger log = Logger.getLogger(BundledMedicationRequestControllerIntegrationTest.class);
+
 
     @Autowired
     private WebApplicationContext wac;
@@ -52,6 +55,7 @@ public class BundledMedicationRequestControllerIntegrationTest {
 
         mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'" +
                 "&visitType='OPD'")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -63,6 +67,7 @@ public class BundledMedicationRequestControllerIntegrationTest {
                 .thenReturn(new Bundle());
 
         mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -74,6 +79,7 @@ public class BundledMedicationRequestControllerIntegrationTest {
                 .thenReturn(new Bundle());
 
         mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication?patient=''")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -85,6 +91,7 @@ public class BundledMedicationRequestControllerIntegrationTest {
                 .thenReturn(new Bundle());
 
         mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication?patient=''")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -97,6 +104,7 @@ public class BundledMedicationRequestControllerIntegrationTest {
 
         mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
                 "/hip/medication?patient='0f90531a-285c-438b-b265-bb3abb4745bd'&visitType=''")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -109,6 +117,7 @@ public class BundledMedicationRequestControllerIntegrationTest {
 
         MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
                 "/hip/medication?patient=''")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
@@ -125,11 +134,42 @@ public class BundledMedicationRequestControllerIntegrationTest {
 
         MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
                 "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
 
         assertEquals("{\"errMessage\":\"visitType is mandatory request parameter\"}", content);
+    }
+
+
+    @Test
+    public void shouldReturnUnauthorizedErrorMessageWhenWrongUser() throws Exception {
+        when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
+                .thenReturn(new Bundle());
+
+        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
+                "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .header("Authorization", "baha")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
+    }
+
+    @Test
+    public void shouldReturnUnauthorizedErrorMessageWhenNoAuth() throws Exception {
+        when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
+                .thenReturn(new Bundle());
+
+        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
+                "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
     }
 }
