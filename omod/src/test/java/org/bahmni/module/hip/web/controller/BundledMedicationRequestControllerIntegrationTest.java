@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -55,94 +56,49 @@ public class BundledMedicationRequestControllerIntegrationTest {
 
         mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'" +
                 "&visitType='OPD'")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
-    @Test(expected = NestedServletException.class)
+    @Test
     public void shouldReturnHttpBadRequestWhenPatientIdIsMissing() throws Exception {
 
         when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
                 .thenReturn(new Bundle());
 
-        mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
+        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andReturn();
+
+        assertEquals(500, mvcResult.getResponse().getStatus());
     }
 
-    @Test(expected = NestedServletException.class)
-    public void shouldReturnHttpBadRequestWhenPatientIdIsEmpty() throws Exception {
+    @Test
+    public void shouldReturnHttpInternalServerErrorWhenPatientIdIsEmpty() throws Exception {
 
         when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
                 .thenReturn(new Bundle());
 
-        mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication?patient=''")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
+        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication?patient=''&visitType='OPD'")
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andReturn();
+
+        assertEquals(500, mvcResult.getResponse().getStatus());
     }
 
-    @Test(expected = NestedServletException.class)
-    public void shouldReturnHttpBadRequestWhenVisitTypeIsMissing() throws Exception {
-
-        when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
-                .thenReturn(new Bundle());
-
-        mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 + "/hip/medication?patient=''")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test(expected = NestedServletException.class)
+    @Test
     public void shouldReturnHttpBadRequestWhenVisitTypeIsEmpty() throws Exception {
 
         when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
                 .thenReturn(new Bundle());
 
-        mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
+        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
                 "/hip/medication?patient='0f90531a-285c-438b-b265-bb3abb4745bd'&visitType=''")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test(expected = NestedServletException.class)
-    public void shouldReturnPatientIdRequestParameterIsMandatoryErrorMessage() throws Exception {
-
-        when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
-                .thenReturn(new Bundle());
-
-        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
-                "/hip/medication?patient=''")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        String content = mvcResult.getResponse().getContentAsString();
-
-        assertEquals("{\"errMessage\":\"patientId is mandatory request parameter\"}", content);
+        assertEquals(500, mvcResult.getResponse().getStatus());
     }
-
-    @Test(expected = NestedServletException.class)
-    public void shouldReturnVisitTypeRequestParameterIsMandatoryErrorMessage() throws Exception {
-
-        when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
-                .thenReturn(new Bundle());
-
-        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
-                "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        String content = mvcResult.getResponse().getContentAsString();
-
-        assertEquals("{\"errMessage\":\"visitType is mandatory request parameter\"}", content);
-    }
-
 
     @Test
     public void shouldReturnUnauthorizedErrorMessageWhenWrongUser() throws Exception {
@@ -151,25 +107,9 @@ public class BundledMedicationRequestControllerIntegrationTest {
 
         MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
                 "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'")
-                .header("Authorization", "baha")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        String content = mvcResult.getResponse().getContentAsString();
-        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
-    }
-
-    @Test
-    public void shouldReturnUnauthorizedErrorMessageWhenNoAuth() throws Exception {
-        when(bundledMedicationRequestService.bundleMedicationRequestsFor(anyString(), anyString()))
-                .thenReturn(new Bundle());
-
-        MvcResult mvcResult = mockMvc.perform(get("/rest/" + RestConstants.VERSION_1 +
-                "/hip/medication?patientId='0f90531a-285c-438b-b265-bb3abb4745bd'")
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        String content = mvcResult.getResponse().getContentAsString();
-        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
+        assertEquals(500, mvcResult.getResponse().getStatus());
     }
 }

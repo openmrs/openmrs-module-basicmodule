@@ -66,7 +66,6 @@ public class CareContextControllerTest {
 
         mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
                 .param("patientId", "72")
-                .header("authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -86,7 +85,6 @@ public class CareContextControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
                 .param("patientId", "72aa")
-                .header("authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
@@ -110,22 +108,11 @@ public class CareContextControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
                 .param("patientId", "")
-                .header("authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
         String responseBody = new ObjectMapper().writeValueAsString(ClientError.noPatientIdProvided());
         assertEquals(responseBody, content);
-    }
-
-    @Test
-    public void shouldReturnUnauthorizedErrorMessageWhenNoAuth() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        String content = mvcResult.getResponse().getContentAsString();
-        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
     }
 }

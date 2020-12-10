@@ -3,6 +3,7 @@ package org.bahmni.module.hip.web.controller;
 import org.apache.log4j.Logger;
 import org.bahmni.module.hip.web.exception.RequestParameterMissingException;
 import org.bahmni.module.hip.web.model.ErrorResponse;
+import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class HipControllerAdvice {
+public class HipControllerAdvice extends BaseRestController {
     private static final Logger log = Logger.getLogger(HipControllerAdvice.class);
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

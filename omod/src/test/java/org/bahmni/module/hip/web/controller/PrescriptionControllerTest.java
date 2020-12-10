@@ -55,56 +55,19 @@ public class PrescriptionControllerTest {
                 .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
                 .param("fromDate", "2020-01-01")
                 .param("toDate", "2020-01-31")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldThrowUnauthorizedWhenUserIsUnauthorized() throws Exception {
-        when(prescriptionService.getPrescriptions(anyString(), any(), anyString()))
-                .thenReturn(EMPTY_LIST);
-        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
-                .param("visitType", "IPD")
-                .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
-                .param("fromDate", "2020-01-01")
-                .param("toDate", "2020-01-31")
-                .header("Authorization", "baha")
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        String content = mvcResult.getResponse().getContentAsString();
-        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
-    }
-
-
-    @Test(expected = NestedServletException.class)
     public void shouldReturnPatientIdRequestParameterIsMandatoryErrorMessage() throws Exception {
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
                 .param("visitType", "IPD")
                 .param("fromDate", "2020-01-01")
                 .param("toDate", "2020-01-31")
-                .header("Authorization", "Basic c3VwZXJtYW46QWRtaW4xMjM=")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        String content = mvcResult.getResponse().getContentAsString();
-
-        assertEquals("{\"errMessage\":\"patientId is mandatory request parameter\"}", content);
-    }
-
-    @Test
-    public void shouldReturnUnauthorizedErrorMessageWhenNoAuth() throws Exception {
-
-        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
-                .param("visitType", "IPD")
-                .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
-                .param("fromDate", "2020-01-01")
-                .param("toDate", "2020-01-31")
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        String content = mvcResult.getResponse().getContentAsString();
-        assertEquals("{\"code\":1504,\"message\":\"User is not authorized\"}", content);
+        assertEquals(500, mvcResult.getResponse().getStatus());
     }
 }
