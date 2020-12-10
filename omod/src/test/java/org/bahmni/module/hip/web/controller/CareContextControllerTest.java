@@ -5,11 +5,13 @@ import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.service.CareContextService;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.NestedCheckedException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -52,7 +54,7 @@ public class CareContextControllerTest {
 
     @Test
     public void shouldReturn200OkWhenPatientIdIsGiven() throws Exception {
-        List<PatientCareContext> patientCareContextList=new ArrayList<>();
+        List<PatientCareContext> patientCareContextList = new ArrayList<>();
         patientCareContextList.add(PatientCareContext.builder()
                 .careContextName("TB Program")
                 .careContextType("PROGRAM")
@@ -70,7 +72,7 @@ public class CareContextControllerTest {
 
     @Test
     public void shouldReturn400BadRequestWhenPatientIdContainsCharacters() throws Exception {
-        List<PatientCareContext> patientCareContextList=new ArrayList<>();
+        List<PatientCareContext> patientCareContextList = new ArrayList<>();
         patientCareContextList.add(PatientCareContext.builder()
                 .careContextName("TB Program")
                 .careContextType("PROGRAM")
@@ -81,7 +83,7 @@ public class CareContextControllerTest {
                 .thenReturn(patientCareContextList);
 
 
-        MvcResult mvcResult=mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
                 .param("patientId", "72aa")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
@@ -93,7 +95,7 @@ public class CareContextControllerTest {
 
     @Test
     public void shouldReturn400BadRequestWhenNoPatientIdProvided() throws Exception {
-        List<PatientCareContext> patientCareContextList=new ArrayList<>();
+        List<PatientCareContext> patientCareContextList = new ArrayList<>();
         patientCareContextList.add(PatientCareContext.builder()
                 .careContextName("TB Program")
                 .careContextType("PROGRAM")
@@ -104,7 +106,7 @@ public class CareContextControllerTest {
                 .thenReturn(patientCareContextList);
 
 
-        MvcResult mvcResult=mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
                 .param("patientId", "")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();

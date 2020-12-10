@@ -5,6 +5,7 @@ import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.model.PrescriptionBundle;
 import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,8 +19,8 @@ import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
 @RestController
-public class PrescriptionController {
-    private PrescriptionService prescriptionService;
+public class PrescriptionController extends BaseRestController {
+    private final PrescriptionService prescriptionService;
 
     @Autowired
     public PrescriptionController(PrescriptionService prescriptionService) {

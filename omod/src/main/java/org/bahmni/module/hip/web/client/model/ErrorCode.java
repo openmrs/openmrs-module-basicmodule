@@ -9,7 +9,8 @@ public enum ErrorCode {
     UNKNOWN_ERROR_OCCURRED(1500),
     BAD_REQUEST(1501),
     PATIENT_ID_NOT_FOUND(1502),
-    NO_PATIENT_ID_SUPPLIED (1503);
+    NO_PATIENT_ID_SUPPLIED (1503),
+    UNAUTHORIZED(1504);
 
     private final int value;
 
