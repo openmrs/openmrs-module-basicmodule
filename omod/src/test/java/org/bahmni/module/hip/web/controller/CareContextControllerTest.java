@@ -107,7 +107,7 @@ public class CareContextControllerTest {
 
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
-                .param("patientId", "")
+                .param("patientId", " ")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 

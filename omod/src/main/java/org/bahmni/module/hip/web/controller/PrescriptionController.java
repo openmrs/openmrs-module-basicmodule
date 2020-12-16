@@ -1,9 +1,11 @@
 package org.bahmni.module.hip.web.controller;
 
+import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.model.BundledPrescriptionResponse;
 import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.model.PrescriptionBundle;
 import org.bahmni.module.hip.web.service.PrescriptionService;
+import org.bahmni.module.hip.web.service.ValidationService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +23,30 @@ import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
 @RestController
 public class PrescriptionController extends BaseRestController {
     private final PrescriptionService prescriptionService;
+    private final ValidationService validationService;
 
     @Autowired
-    public PrescriptionController(PrescriptionService prescriptionService) {
+    public PrescriptionController(PrescriptionService prescriptionService, ValidationService validationService) {
         this.prescriptionService = prescriptionService;
+        this.validationService = validationService;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/prescriptions", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    ResponseEntity<BundledPrescriptionResponse> get(
+    ResponseEntity<?> get(
             @RequestParam String patientId,
             @RequestParam String fromDate,
             @RequestParam String toDate,
             @RequestParam String visitType
     ) throws ParseException {
-        // todo: define from and to date and visit type as query params
+        if (patientId == null || patientId.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
+        if (visitType == null || visitType.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noVisitTypeProvided());
+        if (!validationService.isValidVisit(visitType))
+            return ResponseEntity.badRequest().body(ClientError.invalidVisitType());
+        if (!validationService.isValidPatient(patientId))
+            return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
         List<PrescriptionBundle> prescriptionBundle =
                 prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType);
         return ResponseEntity.ok()

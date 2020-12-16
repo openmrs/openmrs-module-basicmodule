@@ -2,6 +2,7 @@ package org.bahmni.module.hip.web.controller;
 
 import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.service.PrescriptionService;
+import org.bahmni.module.hip.web.service.ValidationService;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +25,7 @@ import static java.util.Collections.EMPTY_LIST;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +41,9 @@ public class PrescriptionControllerTest {
     @Autowired
     private PrescriptionService prescriptionService;
 
+    @Autowired
+    private ValidationService validationService;
+
     @Before
     public void setup() {
         DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(this.wac);
@@ -48,15 +52,46 @@ public class PrescriptionControllerTest {
 
     @Test
     public void shouldReturn200OkWhenfromDateToDateAndPatientIdAreGiven() throws Exception {
+        when(validationService.isValidVisit("IPD")).thenReturn(true);
+        when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
         when(prescriptionService.getPrescriptions(anyString(), any(), anyString()))
                 .thenReturn(EMPTY_LIST);
         mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
                 .param("visitType", "IPD")
-                .param("patientId", "'0f90531a-285c-438b-b265-bb3abb4745bd'")
+                .param("patientId", "0f90531a-285c-438b-b265-bb3abb4745bd")
                 .param("fromDate", "2020-01-01")
                 .param("toDate", "2020-01-31")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+    @Test
+    public void shouldReturn400OkOnInvalidVisitType() throws Exception {
+        when(validationService.isValidVisit("OP")).thenReturn(false);
+        when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
+        when(prescriptionService.getPrescriptions(anyString(), any(), anyString()))
+                .thenReturn(EMPTY_LIST);
+        mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
+                .param("visitType", "OP")
+                .param("patientId", "0f90531a-285c-438b-b265-bb3abb4745bd")
+                .param("fromDate", "2020-01-01")
+                .param("toDate", "2020-01-31")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldReturn400OkOnInvalidPatientId() throws Exception {
+        when(validationService.isValidVisit("IPD")).thenReturn(true);
+        when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745")).thenReturn(false);
+        when(prescriptionService.getPrescriptions(anyString(), any(), anyString()))
+                .thenReturn(EMPTY_LIST);
+        mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions", RestConstants.VERSION_1))
+                .param("visitType", "IPD")
+                .param("patientId", "0f90531a-285c-438b-b265-bb3abb4745")
+                .param("fromDate", "2020-01-01")
+                .param("toDate", "2020-01-31")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

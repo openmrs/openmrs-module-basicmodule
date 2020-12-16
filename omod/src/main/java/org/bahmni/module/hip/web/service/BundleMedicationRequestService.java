@@ -10,8 +10,8 @@ import java.util.List;
 @Service
 public class BundleMedicationRequestService {
 
-    private MedicationRequestService medicationRequestService;
-    private BundleService bundleService;
+    private final MedicationRequestService medicationRequestService;
+    private final BundleService bundleService;
 
     @Autowired
     public BundleMedicationRequestService(MedicationRequestService medicationRequestService, BundleService bundleService) {

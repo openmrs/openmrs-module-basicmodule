@@ -10,8 +10,8 @@ public enum ErrorCode {
     BAD_REQUEST(1501),
     PATIENT_ID_NOT_FOUND(1502),
     NO_PATIENT_ID_SUPPLIED (1503),
-    UNAUTHORIZED(1504);
-
+    NO_VISIT_TYPE_SUPPLIED(1504),
+    INVALID_VISIT_TYPE(1505);
     private final int value;
 
     ErrorCode(int val) {

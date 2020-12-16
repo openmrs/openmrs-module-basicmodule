@@ -27,10 +27,12 @@ public class ClientError {
     }
 
     public static ClientError noPatientIdProvided() {
-        return new ClientError(ErrorCode.NO_PATIENT_ID_SUPPLIED.getValue(), "No patient id supplied");
+        return new ClientError(ErrorCode.NO_PATIENT_ID_SUPPLIED.getValue(), "No Patient ID supplied");
     }
-
-    public static ClientError unauthorizedUser() {
-        return new ClientError(ErrorCode.UNAUTHORIZED.getValue(), "User is not authorized");
+    public static ClientError noVisitTypeProvided(){
+        return new ClientError(ErrorCode.NO_VISIT_TYPE_SUPPLIED.getValue(),"No Visit type is supplied");
+    }
+    public static ClientError invalidVisitType(){
+        return new ClientError(ErrorCode.INVALID_VISIT_TYPE.getValue(),"Visit Type is invalid");
     }
 }

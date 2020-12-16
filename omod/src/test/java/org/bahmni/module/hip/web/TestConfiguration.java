@@ -1,14 +1,15 @@
 package org.bahmni.module.hip.web;
 
-import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.bahmni.module.hip.web.service.CareContextService;
 import org.bahmni.module.hip.web.service.PrescriptionService;
+import org.bahmni.module.hip.web.service.ValidationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.mockito.Mockito.mock;
+
 @Configuration
 @EnableWebMvc
 public class TestConfiguration {
@@ -25,5 +26,10 @@ public class TestConfiguration {
     @Bean
     public CareContextService careContextService() {
         return mock(CareContextService.class);
+    }
+
+    @Bean
+    public ValidationService validationService() {
+        return mock(ValidationService.class);
     }
 }

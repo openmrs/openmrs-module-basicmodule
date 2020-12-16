@@ -25,11 +25,11 @@ public class CareContextController extends BaseRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/careContext", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ResponseEntity<?> getCareContextForPatient(@RequestParam String patientId) {
-        if (patientId.equals("null") || patientId.equals("") || patientId.equals(" ")) {
+    public @ResponseBody
+    ResponseEntity<?> getCareContextForPatient(@RequestParam(required = false) String patientId) {
+        if (patientId == null || patientId.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
         }
-
         if (!careContextService.isValid(patientId)) {
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
         }

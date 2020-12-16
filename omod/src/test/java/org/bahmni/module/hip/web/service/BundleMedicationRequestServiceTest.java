@@ -7,16 +7,13 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BundleMedicationRequestServiceTest {
 
-    private MedicationRequestService medicationRequestService = mock(MedicationRequestService.class);
-    private BundleService bundleService = mock(BundleService.class);
-    private BundleMedicationRequestService bundledMedicationRequestService =
+    private final MedicationRequestService medicationRequestService = mock(MedicationRequestService.class);
+    private final BundleService bundleService = mock(BundleService.class);
+    private final BundleMedicationRequestService bundledMedicationRequestService =
             new BundleMedicationRequestService(medicationRequestService, bundleService);
 
     @Test
