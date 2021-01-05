@@ -19,17 +19,15 @@ public class CareContextServiceTest {
 
     @Test
     public void shouldFetchAllCareContextForPatient() {
-        Integer patientId = 70;
+        String patientUuid = "c04fa14e-9997-4bfe-80a2-9c474b94dd8a";
         List<PatientCareContext> careContexts = new ArrayList<>();
 
-        when(careContextRepository.getPatientCareContext(patientId))
+        when(careContextRepository.getPatientCareContext(patientUuid))
                 .thenReturn(careContexts);
-        when(careContextRepository.isPatientIdExist(patientId))
-                .thenReturn(true);
 
-        careContextServiceObject.careContextForPatient(patientId);
+        careContextServiceObject.careContextForPatient(patientUuid);
 
         verify(careContextRepository, times(1))
-                .getPatientCareContext(patientId);
+                .getPatientCareContext(patientUuid);
     }
 }

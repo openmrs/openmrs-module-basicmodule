@@ -5,6 +5,6 @@ import org.bahmni.module.hip.model.PatientCareContext;
 import java.util.List;
 
 public interface CareContextRepository {
-    List<PatientCareContext> getPatientCareContext(Integer patientId);
-    boolean isPatientIdExist(Integer patientId);
+    List<PatientCareContext> getPatientCareContext(String patientUuid);
+
 }

@@ -4,14 +4,13 @@ import org.bahmni.module.hip.model.PatientCareContext;
 import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.service.CareContextService;
+import org.bahmni.module.hip.web.service.ValidationService;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.NestedCheckedException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -26,10 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static java.util.Collections.EMPTY_LIST;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +42,9 @@ public class CareContextControllerTest {
     @Autowired
     private CareContextService careContextService;
 
+    @Autowired
+    private ValidationService validationService;
+
     @Before
     public void setup() {
         DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(this.wac);
@@ -60,12 +59,12 @@ public class CareContextControllerTest {
                 .careContextType("PROGRAM")
                 .careContextReference(4)
                 .build());
-        when(careContextService.isValid(anyString())).thenReturn(true);
-        when(careContextService.careContextForPatient(anyInt()))
+        when(careContextService.careContextForPatient(anyString()))
                 .thenReturn(patientCareContextList);
+        when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
 
         mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
-                .param("patientId", "72")
+                .param("patientUuid", "0f90531a-285c-438b-b265-bb3abb4745bd")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -78,13 +77,12 @@ public class CareContextControllerTest {
                 .careContextType("PROGRAM")
                 .careContextReference(4)
                 .build());
-        when(careContextService.isValid(anyString())).thenReturn(false);
-        when(careContextService.careContextForPatient(anyInt()))
+        when(careContextService.careContextForPatient(anyString()))
                 .thenReturn(patientCareContextList);
 
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
-                .param("patientId", "72aa")
+                .param("patientUuid", "72aa")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
@@ -101,13 +99,12 @@ public class CareContextControllerTest {
                 .careContextType("PROGRAM")
                 .careContextReference(4)
                 .build());
-        when(careContextService.isValid(anyString())).thenReturn(true);
-        when(careContextService.careContextForPatient(anyInt()))
+        when(careContextService.careContextForPatient(anyString()))
                 .thenReturn(patientCareContextList);
 
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext", RestConstants.VERSION_1))
-                .param("patientId", " ")
+                .param("patientUuid", " ")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 

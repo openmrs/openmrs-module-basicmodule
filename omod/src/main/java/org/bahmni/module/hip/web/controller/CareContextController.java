@@ -2,6 +2,7 @@ package org.bahmni.module.hip.web.controller;
 
 import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.service.CareContextService;
+import org.bahmni.module.hip.web.service.ValidationService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,23 +19,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CareContextController extends BaseRestController {
     private final CareContextService careContextService;
+    private final ValidationService validationService;
 
     @Autowired
-    public CareContextController(CareContextService careContextService) {
+    public CareContextController(CareContextService careContextService, ValidationService validationService) {
         this.careContextService = careContextService;
+        this.validationService = validationService;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/careContext", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    ResponseEntity<?> getCareContextForPatient(@RequestParam(required = false) String patientId) {
-        if (patientId == null || patientId.trim().isEmpty()) {
+    ResponseEntity<?> getCareContextForPatient(@RequestParam(required = false) String patientUuid) {
+        if (patientUuid == null || patientUuid.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
         }
-        if (!careContextService.isValid(patientId)) {
+        if (!validationService.isValidPatient(patientUuid))
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
-        }
-
-        Object careContextForPatient = careContextService.careContextForPatient(Integer.parseInt(patientId));
+        Object careContextForPatient = careContextService.careContextForPatient(patientUuid);
         if (careContextForPatient.equals(false)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ClientError.noPatientFound());
         }
