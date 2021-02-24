@@ -4,14 +4,17 @@ import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
+import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.impl.EncounterTranslatorImpl;
+import org.openmrs.module.fhir2.api.translators.impl.ObservationTranslatorImpl;
 import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,18 +27,24 @@ public class FHIRResourceMapper {
     private final MedicationRequestTranslator medicationRequestTranslator;
     private final MedicationTranslator medicationTranslator;
     private final EncounterTranslatorImpl encounterTranslator;
+    private final ObservationTranslatorImpl observationTranslator;
 
     @Autowired
-    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator, EncounterTranslatorImpl encounterTranslator) {
+    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator, EncounterTranslatorImpl encounterTranslator, ObservationTranslatorImpl observationTranslator) {
         this.patientTranslator = patientTranslator;
         this.practitionerTranslatorProvider = practitionerTranslatorProvider;
         this.medicationRequestTranslator = medicationRequestTranslator;
         this.medicationTranslator = medicationTranslator;
         this.encounterTranslator = encounterTranslator;
+        this.observationTranslator = observationTranslator;
     }
 
     public Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
         return encounterTranslator.toFhirResource(emrEncounter);
+    }
+
+    public Observation mapToObs(Obs obs) {
+        return observationTranslator.toFhirResource(obs);
     }
 
     public Patient mapToPatient(org.openmrs.Patient emrPatient) {

@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterProvider;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class OpenMrsPrescription {
         this.patient = encounter.getPatient();
         this.drugOrders = drugOrders;
     }
+
 
     public static List<OpenMrsPrescription> from(Map<Encounter, DrugOrders> encounterDrugOrdersMap) {
         return encounterDrugOrdersMap
