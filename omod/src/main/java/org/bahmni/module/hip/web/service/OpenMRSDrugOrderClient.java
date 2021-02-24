@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.service;
 
+import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
 import org.bahmni.module.hip.web.model.DateRange;
 import org.openmrs.DrugOrder;
@@ -52,5 +53,12 @@ class OpenMRSDrugOrderClient {
         OrderType drugOrderType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
         return prescriptionOrderDao
                 .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType, visitType);
+    }
+
+    List<DrugOrder> getDrugOrdersByDateAndProgramFor(String forPatientUUID, DateRange dateRange, String programName, String programEnrolmentId) {
+        Patient patient = patientService.getPatientByUuid(forPatientUUID);
+        OrderType drugOrderType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
+        return prescriptionOrderDao
+                .getDrugOrdersForProgram(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType, programName, programEnrolmentId);
     }
 }

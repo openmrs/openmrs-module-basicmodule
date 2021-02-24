@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.VisitType;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.VisitService;
 
 import java.util.Collections;
@@ -15,7 +16,8 @@ import static org.mockito.Mockito.when;
 public class ValidationServiceTest {
     private final VisitService visitService = mock(VisitService.class);
     private final PatientService patientService = mock(PatientService.class);
-    private final ValidationService validationService = new ValidationService(visitService,patientService);
+    private final ProgramWorkflowService programWorkflowService = mock(ProgramWorkflowService.class);
+    private final ValidationService validationService = new ValidationService(visitService,patientService, programWorkflowService);
     @Test
     public void shouldReturnTrueForValidVisitType() {
         String visitType = "OPD";

@@ -1,8 +1,10 @@
 package org.bahmni.module.hip.web.service;
 
 import org.openmrs.Patient;
+import org.openmrs.Program;
 import org.openmrs.VisitType;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.VisitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,11 +16,13 @@ import java.util.List;
 public class ValidationService {
     private final VisitService visitService;
     private final PatientService patientService;
+    private final ProgramWorkflowService programWorkflowService;
 
     @Autowired
-    public ValidationService(VisitService visitService, PatientService patientService) {
+    public ValidationService(VisitService visitService, PatientService patientService, ProgramWorkflowService programWorkflowService) {
         this.patientService = patientService;
         this.visitService = visitService;
+        this.programWorkflowService = programWorkflowService;
     }
 
     public boolean isValidVisit(String visitType) {
@@ -34,5 +38,12 @@ public class ValidationService {
     public boolean isValidPatient(String pid) {
         Patient patient = patientService.getPatientByUuid(pid);
         return patient != null;
+    }
+
+    public boolean isValidProgram(String programName) {
+        Program program = programWorkflowService.getProgramByName(programName);
+        if(program != null)
+            return true;
+        return false;
     }
 }

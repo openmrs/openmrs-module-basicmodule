@@ -41,4 +41,19 @@ public class PrescriptionService {
                 .map(fhirBundledPrescriptionBuilder::fhirBundleResponseFor)
                 .collect(Collectors.toList());
     }
+
+    public List<PrescriptionBundle> getPrescriptionsForProgram(String patientIdUuid, DateRange dateRange, String programName, String programEnrolmentId) {
+        DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateAndProgramFor(patientIdUuid, dateRange, programName, programEnrolmentId));
+
+        if (drugOrders.isEmpty())
+            return new ArrayList<>();
+
+        List<OpenMrsPrescription> openMrsPrescriptions = OpenMrsPrescription
+                .from(drugOrders.groupByEncounter());
+
+        return openMrsPrescriptions
+                .stream()
+                .map(fhirBundledPrescriptionBuilder::fhirBundleResponseFor)
+                .collect(Collectors.toList());
+    }
 }

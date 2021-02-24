@@ -39,7 +39,6 @@ public class CareContextController extends BaseRestController {
         if (careContextForPatient.equals(false)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ClientError.noPatientFound());
         }
-
         return ResponseEntity.ok(careContextForPatient);
     }
 }

@@ -19,7 +19,7 @@ import java.util.List;
 
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
 
-@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
+@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip/prescriptions")
 @RestController
 public class PrescriptionController extends BaseRestController {
     private final PrescriptionService prescriptionService;
@@ -31,7 +31,7 @@ public class PrescriptionController extends BaseRestController {
         this.validationService = validationService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/prescriptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET, value = "/visit", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     ResponseEntity<?> get(
             @RequestParam String patientId,
@@ -50,6 +50,30 @@ public class PrescriptionController extends BaseRestController {
         List<PrescriptionBundle> prescriptionBundle =
                 prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType);
         return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(new BundledPrescriptionResponse(prescriptionBundle));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/program", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    ResponseEntity<?> get(
+            @RequestParam String patientId,
+            @RequestParam String fromDate,
+            @RequestParam String toDate,
+            @RequestParam String programName,
+            @RequestParam String programEnrollmentId
+    ) throws ParseException {
+        if (patientId == null || patientId.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
+        if (programName == null || programName.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noProgramNameProvided());
+        if (!validationService.isValidProgram(programName))
+            return ResponseEntity.badRequest().body(ClientError.invalidProgramName());
+        if (!validationService.isValidPatient(patientId))
+            return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
+        List<PrescriptionBundle> prescriptionBundle =
+                prescriptionService.getPrescriptionsForProgram(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), programName, programEnrollmentId);
+         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledPrescriptionResponse(prescriptionBundle));
     }

@@ -35,4 +35,14 @@ public class ClientError {
     public static ClientError invalidVisitType(){
         return new ClientError(ErrorCode.INVALID_VISIT_TYPE.getValue(),"Visit Type is invalid");
     }
+    public static ClientError noProgramNameProvided(){
+        return new ClientError(ErrorCode.NO_PROGRAM_NAME_SUPPLIED.getValue(),"No program name supplied");
+    }
+    public static ClientError noProgramIDProvided(){
+        return new ClientError(ErrorCode.NO_PROGRAM_ID_SUPPLIED.getValue(),"No patient's program enrollment id supplied");
+    }
+    public static ClientError invalidProgramName(){
+        return new ClientError(ErrorCode.INVALID_PROGRAM_NAME.getValue(),"Program specified does not exist");
+    }
+
 }
