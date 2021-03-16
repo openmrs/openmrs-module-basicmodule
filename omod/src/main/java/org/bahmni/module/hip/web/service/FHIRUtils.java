@@ -1,6 +1,15 @@
 package org.bahmni.module.hip.web.service;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -54,6 +63,15 @@ public class FHIRUtils {
         return type;
     }
 
+    public static CodeableConcept getDiagnosticReportType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("721981007");
+        coding.setDisplay("Diagnostic Report");
+        return type;
+    }
+
     public static void addToBundleEntry(Bundle bundle, Resource resource, boolean useIdPart) {
         String resourceType = resource.getResourceType().toString();
         String id = useIdPart ? resource.getIdElement().getIdPart() : resource.getId();
@@ -63,7 +81,7 @@ public class FHIRUtils {
     }
 
     public static void addToBundleEntry(Bundle bundle, List<? extends Resource> resources, boolean useIdPart) {
-        resources.forEach(resource ->  FHIRUtils.addToBundleEntry(bundle, resource, useIdPart));
+        resources.forEach(resource -> FHIRUtils.addToBundleEntry(bundle, resource, useIdPart));
     }
 
     public static Organization createOrgInstance(String hfrId, String hfrName, String hfrSystem) {

@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 
 @Getter
 public class OpenMrsPrescription {
-    private Encounter encounter;
-    private Set<EncounterProvider> encounterProviders;
-    private DrugOrders drugOrders;
-    private Patient patient;
+    private final Encounter encounter;
+    private final Set<EncounterProvider> encounterProviders;
+    private final DrugOrders drugOrders;
+    private final Patient patient;
 
     private OpenMrsPrescription(@NotEmpty Encounter encounter, DrugOrders drugOrders) {
         this.encounter = encounter;

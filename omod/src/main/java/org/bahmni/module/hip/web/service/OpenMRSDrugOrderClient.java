@@ -1,6 +1,5 @@
 package org.bahmni.module.hip.web.service;
 
-import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.api.dao.PrescriptionOrderDao;
 import org.bahmni.module.hip.web.model.DateRange;
 import org.openmrs.DrugOrder;
@@ -18,9 +17,9 @@ import java.util.stream.Collectors;
 @Service
 class OpenMRSDrugOrderClient {
 
-    private PatientService patientService;
-    private OrderService orderService;
-    private PrescriptionOrderDao prescriptionOrderDao;
+    private final PatientService patientService;
+    private final OrderService orderService;
+    private final PrescriptionOrderDao prescriptionOrderDao;
 
     @Autowired
     public OpenMRSDrugOrderClient(PatientService patientService, OrderService orderService, PrescriptionOrderDao prescriptionOrderDao) {

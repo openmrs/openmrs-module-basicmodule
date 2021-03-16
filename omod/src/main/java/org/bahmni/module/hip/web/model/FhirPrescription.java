@@ -23,16 +23,19 @@ import java.util.stream.Collectors;
 
 @Getter
 public class FhirPrescription {
-    private Date encounterTimestamp;
-    private Integer encounterID;
-    private Encounter encounter;
-    private List<Practitioner> practitioners;
-    private Patient patient;
-    private Reference patientReference;
-    private List<Medication> medications;
-    private List<MedicationRequest> medicationRequests;
+    private final Date encounterTimestamp;
+    private final Integer encounterID;
+    private final Encounter encounter;
+    private final List<Practitioner> practitioners;
+    private final Patient patient;
+    private final Reference patientReference;
+    private final List<Medication> medications;
+    private final List<MedicationRequest> medicationRequests;
 
-    private FhirPrescription(Date encounterTimestamp, Integer encounterID, Encounter encounter, List<Practitioner> practitioners, Patient patient, Reference patientReference, List<Medication> medications, List<MedicationRequest> medicationRequests) {
+    private FhirPrescription(Date encounterTimestamp, Integer encounterID, Encounter encounter,
+                             List<Practitioner> practitioners, Patient patient,
+                             Reference patientReference, List<Medication> medications,
+                             List<MedicationRequest> medicationRequests) {
         this.encounterTimestamp = encounterTimestamp;
         this.encounterID = encounterID;
         this.encounter = encounter;
@@ -53,11 +56,11 @@ public class FhirPrescription {
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsPrescription.getEncounterProviders());
         List<MedicationRequest> medicationRequests = medicationRequestsFor(fhirResourceMapper, openMrsPrescription.getDrugOrders());
         List<Medication> medications = medicationsFor(fhirResourceMapper, openMrsPrescription.getDrugOrders());
+
         return new FhirPrescription(encounterDatetime, encounterId, encounter, practitioners, patient, patientReference, medications, medicationRequests);
     }
 
-
-    public Bundle bundle(String webUrl) {
+    public Bundle bundle(String webUrl){
         String bundleID = String.format("PR-%d", encounterID);
         Bundle bundle = FHIRUtils.createBundle(encounterTimestamp, bundleID, webUrl);
 
@@ -70,7 +73,7 @@ public class FhirPrescription {
         return bundle;
     }
 
-    private Composition compositionFrom(String webURL) {
+    private Composition compositionFrom(String webURL){
         Composition composition = initializeComposition(encounterTimestamp, webURL);
         Composition.SectionComponent compositionSection = composition.addSection();
 
