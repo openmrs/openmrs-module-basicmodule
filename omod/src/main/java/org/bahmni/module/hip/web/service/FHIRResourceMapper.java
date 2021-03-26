@@ -1,12 +1,12 @@
 package org.bahmni.module.hip.web.service;
 
 import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.DrugOrder;
@@ -16,9 +16,11 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.impl.EncounterTranslatorImpl;
+import org.openmrs.module.fhir2.api.translators.impl.ObservationTranslatorImpl;
 import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.io.IOException;
@@ -33,39 +35,47 @@ public class FHIRResourceMapper {
     private final MedicationRequestTranslator medicationRequestTranslator;
     private final MedicationTranslator medicationTranslator;
     private final EncounterTranslatorImpl encounterTranslator;
+    private final ObservationTranslatorImpl observationTranslator;
 
     @Autowired
-    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator, EncounterTranslatorImpl encounterTranslator) {
+    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator, EncounterTranslatorImpl encounterTranslator, ObservationTranslatorImpl observationTranslator) {
         this.patientTranslator = patientTranslator;
         this.practitionerTranslatorProvider = practitionerTranslatorProvider;
         this.medicationRequestTranslator = medicationRequestTranslator;
         this.medicationTranslator = medicationTranslator;
         this.encounterTranslator = encounterTranslator;
+        this.observationTranslator = observationTranslator;
     }
 
     public Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
         return encounterTranslator.toFhirResource(emrEncounter);
     }
 
-    public DocumentReference mapToDocumentReference(Obs obs) {
-        DocumentReference documentReference = new DocumentReference();
+    public DiagnosticReport mapToDiagnosticReport(Obs obs) {
+        DiagnosticReport diagnosticReport = new DiagnosticReport();
         try {
-            documentReference.setId(obs.getUuid());
-            documentReference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
-            List<DocumentReference.DocumentReferenceContentComponent> documentReferenceContentComponentList = new ArrayList<>();
-            DocumentReference.DocumentReferenceContentComponent documentReferenceContentComponent =
-                    new DocumentReference.DocumentReferenceContentComponent();
-            Attachment attachment = new Attachment();
-            attachment.setContentType(getTypeOfTheObsDocument(obs.getValueText()));
-            byte[] fileContent = Files.readAllBytes(new File(Constants.PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
-            attachment.setData(fileContent);
-            documentReferenceContentComponent.setAttachment(attachment);
-            documentReferenceContentComponentList.add(documentReferenceContentComponent);
-            documentReference.setContent(documentReferenceContentComponentList);
-            return documentReference;
+            diagnosticReport.setId(obs.getUuid());
+            diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+            diagnosticReport.setPresentedForm(getAttachments(obs));
+
+            return diagnosticReport;
         } catch (IOException exception) {
-            return documentReference;
+            return diagnosticReport;
         }
+    }
+
+    private List<Attachment> getAttachments(Obs obs) throws IOException {
+        List<Attachment> attachments = new ArrayList<>();
+        Attachment attachment = new Attachment();
+        attachment.setContentType(getTypeOfTheObsDocument(obs.getValueText()));
+        byte[] fileContent = Files.readAllBytes(new File(Constants.PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
+        attachment.setData(fileContent);
+        attachments.add(attachment);
+        return attachments;
+    }
+
+    public Observation mapToObs(Obs obs) {
+        return observationTranslator.toFhirResource(obs);
     }
 
     private String getTypeOfTheObsDocument(String valueText) {
