@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.model;
 
+import org.bahmni.module.hip.web.service.Constants;
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
 import org.hl7.fhir.r4.model.Bundle;
@@ -11,12 +12,15 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.EncounterProvider;
+import org.openmrs.Obs;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.bahmni.module.hip.web.service.Constants.DOCUMENT_TYPE;
 
 public class FhirDiagnosticReport {
     private final List<DiagnosticReport> diagnosticReports;
@@ -69,17 +73,22 @@ public class FhirDiagnosticReport {
         Date encounterDatetime = openMrsDiagnosticReport.getEncounter().getEncounterDatetime();
         Integer encounterId = openMrsDiagnosticReport.getEncounter().getId();
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsDiagnosticReport.getEncounterProviders());
-        List<Observation> observations = openMrsDiagnosticReport.getEncounter().getAllObs().stream()
+        List<Obs> observationNotDocumentType = openMrsDiagnosticReport.getEncounter().getAllObs().stream()
+                .filter(obs -> (!obs.getConcept().getId().toString().equals(DOCUMENT_TYPE))).collect(Collectors.toList());
+        List<Observation> observations = observationNotDocumentType.stream()
                 .map(fhirResourceMapper::mapToObs).collect(Collectors.toList());
-        List<DiagnosticReport> diagnosticReports = openMrsDiagnosticReport.getEncounter().getAllObs().stream().filter(obs -> obs.getConcept().getId() == 35)
+        List<DiagnosticReport> diagnosticReports = observationNotDocumentType.stream()
                 .map(fhirResourceMapper::mapToDiagnosticReport).collect(Collectors.toList());
-       List<DiagnosticReport> diagnosticReportList = diagnosticReports.stream()
-               .peek(diagnosticReport -> {
-                   diagnosticReport.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
-                   diagnosticReport.setSubject(FHIRUtils.getReferenceToResource(patient));
-                   diagnosticReport.setResult(observations.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
-               }).collect(Collectors.toList());
-        return new FhirDiagnosticReport(encounterDatetime, diagnosticReportList, encounterId, encounter, practitioners, patient, patientReference, observations);
+        List<DiagnosticReport> diagnosticReportList = diagnosticReports.stream()
+                .peek(diagnosticReport -> {
+                    diagnosticReport.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource)
+                            .collect(Collectors.toList()));
+                    diagnosticReport.setSubject(FHIRUtils.getReferenceToResource(patient));
+                    diagnosticReport.setResult(observations.stream().map(FHIRUtils::getReferenceToResource)
+                            .collect(Collectors.toList()));
+                }).collect(Collectors.toList());
+        return new FhirDiagnosticReport(encounterDatetime, diagnosticReportList, encounterId, encounter, practitioners,
+                patient, patientReference, observations);
     }
 
     private Composition compositionFrom(String webURL) {

@@ -26,6 +26,22 @@ import java.nio.file.Files;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static org.bahmni.module.hip.web.service.Constants.DOCUMENT_TYPE;
+import static org.bahmni.module.hip.web.service.Constants.GIF;
+import static org.bahmni.module.hip.web.service.Constants.IMAGE;
+import static org.bahmni.module.hip.web.service.Constants.JPEG;
+import static org.bahmni.module.hip.web.service.Constants.JPG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_IMAGE_JPEG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_PDF;
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT;
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT_TYPE;
+import static org.bahmni.module.hip.web.service.Constants.PDF;
+import static org.bahmni.module.hip.web.service.Constants.PNG;
+import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_REPORT;
+import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_TYPE;
 
 @Service
 public class FHIRResourceMapper {
@@ -57,7 +73,6 @@ public class FHIRResourceMapper {
             diagnosticReport.setId(obs.getUuid());
             diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
             diagnosticReport.setPresentedForm(getAttachments(obs));
-
             return diagnosticReport;
         } catch (IOException exception) {
             return diagnosticReport;
@@ -67,9 +82,26 @@ public class FHIRResourceMapper {
     private List<Attachment> getAttachments(Obs obs) throws IOException {
         List<Attachment> attachments = new ArrayList<>();
         Attachment attachment = new Attachment();
-        attachment.setContentType(getTypeOfTheObsDocument(obs.getValueText()));
-        byte[] fileContent = Files.readAllBytes(new File(Constants.PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
+        Set<Obs> obsList = obs.getGroupMembers();
+        StringBuilder valueText = new StringBuilder();
+        StringBuilder contentType = new StringBuilder();
+        for(Obs obs1 : obsList){
+            if(obs1.getConcept().getId().toString().equals(DOCUMENT_TYPE)){
+                valueText.append(obs1.getValueText());
+                contentType.append(getTypeOfTheObsDocument(obs1.getValueText()));
+            }
+        }
+        attachment.setContentType(contentType.toString());
+        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + valueText).toPath());
         attachment.setData(fileContent);
+        StringBuilder title = new StringBuilder();
+        String encounterId = obs.getEncounter().getEncounterType().getEncounterTypeId().toString();
+        if(encounterId.equals(PATIENT_DOCUMENT_TYPE))
+            title.append(PATIENT_DOCUMENT);
+        else if(encounterId.equals(RADIOLOGY_TYPE))
+            title.append(RADIOLOGY_REPORT);
+        title.append(": ").append(obs.getConcept().getName().getName());
+        attachment.setTitle(title.toString());
         attachments.add(attachment);
         return attachments;
     }
@@ -81,12 +113,12 @@ public class FHIRResourceMapper {
     private String getTypeOfTheObsDocument(String valueText) {
         if (valueText == null) return "";
         String extension = valueText.substring(valueText.indexOf('.') + 1);
-        if (extension.compareTo(Constants.JPEG) == 0 || extension.compareTo(Constants.JPG) == 0) {
-            return Constants.MIMETYPE_IMAGE_JPEG;
-        } else if (extension.compareTo(Constants.PNG) == 0 || extension.compareTo(Constants.GIF) == 0) {
-            return Constants.IMAGE + extension;
-        } else if (extension.compareTo(Constants.PDF) == 0) {
-            return Constants.MIMETYPE_PDF;
+        if (extension.compareTo(JPEG) == 0 || extension.compareTo(JPG) == 0) {
+            return MIMETYPE_IMAGE_JPEG;
+        } else if (extension.compareTo(PNG) == 0 || extension.compareTo(GIF) == 0) {
+            return IMAGE + extension;
+        } else if (extension.compareTo(PDF) == 0) {
+            return MIMETYPE_PDF;
         } else {
             return "";
         }
