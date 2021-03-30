@@ -30,4 +30,10 @@ public class Constants {
     static final String GIF = "gif";
     static final String PDF = "pdf";
     static final String MIMETYPE_PDF = "application/pdf";
+
+    public static final String RADIOLOGY_TYPE = "6";
+    public static final String PATIENT_DOCUMENT_TYPE = "9";
+    public static final String DOCUMENT_TYPE = "35";
+    public static final String RADIOLOGY_REPORT = "Radiology Report";
+    public static final String PATIENT_DOCUMENT = "Patient Document";
 }

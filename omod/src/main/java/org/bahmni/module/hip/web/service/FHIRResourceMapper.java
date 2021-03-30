@@ -1,12 +1,12 @@
 package org.bahmni.module.hip.web.service;
 
 import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.DrugOrder;
@@ -16,14 +16,32 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.impl.EncounterTranslatorImpl;
+import org.openmrs.module.fhir2.api.translators.impl.ObservationTranslatorImpl;
 import org.openmrs.module.fhir2.api.translators.impl.PractitionerTranslatorProviderImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static org.bahmni.module.hip.web.service.Constants.DOCUMENT_TYPE;
+import static org.bahmni.module.hip.web.service.Constants.GIF;
+import static org.bahmni.module.hip.web.service.Constants.IMAGE;
+import static org.bahmni.module.hip.web.service.Constants.JPEG;
+import static org.bahmni.module.hip.web.service.Constants.JPG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_IMAGE_JPEG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_PDF;
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT;
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT_TYPE;
+import static org.bahmni.module.hip.web.service.Constants.PDF;
+import static org.bahmni.module.hip.web.service.Constants.PNG;
+import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_REPORT;
+import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_TYPE;
 
 @Service
 public class FHIRResourceMapper {
@@ -33,50 +51,74 @@ public class FHIRResourceMapper {
     private final MedicationRequestTranslator medicationRequestTranslator;
     private final MedicationTranslator medicationTranslator;
     private final EncounterTranslatorImpl encounterTranslator;
+    private final ObservationTranslatorImpl observationTranslator;
 
     @Autowired
-    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator, EncounterTranslatorImpl encounterTranslator) {
+    public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator, EncounterTranslatorImpl encounterTranslator, ObservationTranslatorImpl observationTranslator) {
         this.patientTranslator = patientTranslator;
         this.practitionerTranslatorProvider = practitionerTranslatorProvider;
         this.medicationRequestTranslator = medicationRequestTranslator;
         this.medicationTranslator = medicationTranslator;
         this.encounterTranslator = encounterTranslator;
+        this.observationTranslator = observationTranslator;
     }
 
     public Encounter mapToEncounter(org.openmrs.Encounter emrEncounter) {
         return encounterTranslator.toFhirResource(emrEncounter);
     }
 
-    public DocumentReference mapToDocumentReference(Obs obs) {
-        DocumentReference documentReference = new DocumentReference();
+    public DiagnosticReport mapToDiagnosticReport(Obs obs) {
+        DiagnosticReport diagnosticReport = new DiagnosticReport();
         try {
-            documentReference.setId(obs.getUuid());
-            documentReference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
-            List<DocumentReference.DocumentReferenceContentComponent> documentReferenceContentComponentList = new ArrayList<>();
-            DocumentReference.DocumentReferenceContentComponent documentReferenceContentComponent =
-                    new DocumentReference.DocumentReferenceContentComponent();
-            Attachment attachment = new Attachment();
-            attachment.setContentType(getTypeOfTheObsDocument(obs.getValueText()));
-            byte[] fileContent = Files.readAllBytes(new File(Constants.PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
-            attachment.setData(fileContent);
-            documentReferenceContentComponent.setAttachment(attachment);
-            documentReferenceContentComponentList.add(documentReferenceContentComponent);
-            documentReference.setContent(documentReferenceContentComponentList);
-            return documentReference;
+            diagnosticReport.setId(obs.getUuid());
+            diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+            diagnosticReport.setPresentedForm(getAttachments(obs));
+            return diagnosticReport;
         } catch (IOException exception) {
-            return documentReference;
+            return diagnosticReport;
         }
+    }
+
+    private List<Attachment> getAttachments(Obs obs) throws IOException {
+        List<Attachment> attachments = new ArrayList<>();
+        Attachment attachment = new Attachment();
+        Set<Obs> obsList = obs.getGroupMembers();
+        StringBuilder valueText = new StringBuilder();
+        StringBuilder contentType = new StringBuilder();
+        for(Obs obs1 : obsList){
+            if(obs1.getConcept().getId().toString().equals(DOCUMENT_TYPE)){
+                valueText.append(obs1.getValueText());
+                contentType.append(getTypeOfTheObsDocument(obs1.getValueText()));
+            }
+        }
+        attachment.setContentType(contentType.toString());
+        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + valueText).toPath());
+        attachment.setData(fileContent);
+        StringBuilder title = new StringBuilder();
+        String encounterId = obs.getEncounter().getEncounterType().getEncounterTypeId().toString();
+        if(encounterId.equals(PATIENT_DOCUMENT_TYPE))
+            title.append(PATIENT_DOCUMENT);
+        else if(encounterId.equals(RADIOLOGY_TYPE))
+            title.append(RADIOLOGY_REPORT);
+        title.append(": ").append(obs.getConcept().getName().getName());
+        attachment.setTitle(title.toString());
+        attachments.add(attachment);
+        return attachments;
+    }
+
+    public Observation mapToObs(Obs obs) {
+        return observationTranslator.toFhirResource(obs);
     }
 
     private String getTypeOfTheObsDocument(String valueText) {
         if (valueText == null) return "";
         String extension = valueText.substring(valueText.indexOf('.') + 1);
-        if (extension.compareTo(Constants.JPEG) == 0 || extension.compareTo(Constants.JPG) == 0) {
-            return Constants.MIMETYPE_IMAGE_JPEG;
-        } else if (extension.compareTo(Constants.PNG) == 0 || extension.compareTo(Constants.GIF) == 0) {
-            return Constants.IMAGE + extension;
-        } else if (extension.compareTo(Constants.PDF) == 0) {
-            return Constants.MIMETYPE_PDF;
+        if (extension.compareTo(JPEG) == 0 || extension.compareTo(JPG) == 0) {
+            return MIMETYPE_IMAGE_JPEG;
+        } else if (extension.compareTo(PNG) == 0 || extension.compareTo(GIF) == 0) {
+            return IMAGE + extension;
+        } else if (extension.compareTo(PDF) == 0) {
+            return MIMETYPE_PDF;
         } else {
             return "";
         }
