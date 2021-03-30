@@ -19,11 +19,14 @@ public class OpenMrsLabResults {
     private Encounter encounter;
     private List<LabOrderResult> labOrderResults;
     private Patient patient;
+    private final Set<EncounterProvider> encounterProviders;
+
 
     public OpenMrsLabResults(@NotEmpty Encounter encounter, Patient patient, List<LabOrderResult> labOrderResults) {
         this.encounter = encounter;
         this.patient = patient;
         this.labOrderResults = labOrderResults;
+        this.encounterProviders = encounter.getEncounterProviders();
     }
 
 

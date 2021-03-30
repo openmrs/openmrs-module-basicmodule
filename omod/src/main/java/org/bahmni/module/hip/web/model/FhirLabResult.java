@@ -13,12 +13,14 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.bahmniemrapi.laborder.contract.LabOrderResult;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class FhirLabResult {
 
@@ -27,13 +29,15 @@ public class FhirLabResult {
     private final Date encounterTime;
     private final DiagnosticReport report;
     private final List<Observation> results;
+    private final List<Practitioner> practitioners;
 
-    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date encounterTime, DiagnosticReport report, List<Observation> results) {
+    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date encounterTime, DiagnosticReport report, List<Observation> results, List<Practitioner> practitioners) {
         this.patient = patient;
         this.encounter = encounter;
         this.encounterTime = encounterTime;
         this.report = report;
         this.results = results;
+        this.practitioners = practitioners;
     }
 
     public Bundle bundleLabResults (String webUrl, FHIRResourceMapper fhirResourceMapper) {
@@ -43,6 +47,8 @@ public class FhirLabResult {
 
         FHIRUtils.addToBundleEntry(bundle, compositionFrom(webUrl), false);
 
+        FHIRUtils.addToBundleEntry(bundle, encounter, false);
+        FHIRUtils.addToBundleEntry(bundle, practitioners, false);
         FHIRUtils.addToBundleEntry(bundle, patient, false);
         FHIRUtils.addToBundleEntry(bundle, report, false);
         FHIRUtils.addToBundleEntry(bundle, results, false);
@@ -52,6 +58,7 @@ public class FhirLabResult {
 
     public static FhirLabResult fromOpenMrsLabResults(OpenMrsLabResults labresult, FHIRResourceMapper fhirResourceMapper) {
         Patient patient = fhirResourceMapper.mapToPatient(labresult.getPatient());
+        List<Practitioner> practitioners = labresult.getEncounterProviders().stream().map(fhirResourceMapper::mapToPractitioner).collect(Collectors.toList());
 
         DiagnosticReport reports = new DiagnosticReport();
         LabOrderResult firstresult = labresult.getLabOrderResults().get(0);
@@ -60,6 +67,7 @@ public class FhirLabResult {
         reports.setCode(new CodeableConcept().setText(firstresult.getPanelName()).addCoding(new Coding().setDisplay(firstresult.getPanelName())));
         reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
         reports.setSubject(FHIRUtils.getReferenceToResource(patient));
+        reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
 
         List<Observation> results = new ArrayList<>();
 
@@ -67,7 +75,7 @@ public class FhirLabResult {
 
         FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient() ), labresult.getLabOrderResults().get(0).getPanelName(),
                 fhirResourceMapper.mapToEncounter( labresult.getEncounter() ),
-                labresult.getEncounter().getEncounterDatetime(), reports, results);
+                labresult.getEncounter().getEncounterDatetime(), reports, results, practitioners);
 
         return fhirLabResult;
     }
