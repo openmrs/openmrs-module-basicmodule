@@ -11,6 +11,21 @@
     <packaging>jar</packaging>
     <name>HIP Module OMOD</name>
     <description>OpenMRS module project for HIP Module</description>
+    <repositories>
+        <repository>
+            <id>repo.mybahmni.org</id>
+            <name>bahmni-artifactory-snapshots</name>
+            <url>http://repo.mybahmni.org.s3.amazonaws.com/artifactory/snapshot</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>repo.mybahmni.org-release</id>
+            <name>bahmni-artifactory-release</name>
+            <url>http://repo.mybahmni.org.s3.amazonaws.com/artifactory/release</url>
+        </repository>
+    </repositories>
 
     <dependencies>
 
@@ -36,6 +51,19 @@
             <artifactId>fhir2-omod</artifactId>
             <version>1.0.0-20200925.143534-163</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bahmni.module</groupId>
+            <artifactId>bahmnicore-api</artifactId>
+            <version>0.92-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>rome</groupId>
+                    <artifactId>rome</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

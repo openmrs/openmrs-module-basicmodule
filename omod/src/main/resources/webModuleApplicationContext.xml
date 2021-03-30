@@ -28,4 +28,8 @@
 
 	<context:component-scan base-package="org.bahmni.module.hip" />
 	<context:component-scan base-package="org.openmrs.module.fhir2" />
+	<context:component-scan base-package="org.openmrs.module.bahmniemrapi.laborder.service" />
+
+	<bean class="org.openmrs.module.bahmniemrapi.laborder.service.LabOrderResultsServiceImpl" id="labOrderResultsService"/>
+
 </beans>
