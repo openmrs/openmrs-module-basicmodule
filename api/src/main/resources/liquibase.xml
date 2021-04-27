@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
- 
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
-                  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
  
     <!--
     	See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
@@ -36,5 +36,24 @@
     </changeSet>
     
     -->
+    <changeSet id="Adding-Health-Id-IdentifierType-220420210516"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from patient_identifier_type where name='Health ID'</sqlCheck>
+        </preConditions>
+        <comment>Adding Health Id Identifier type</comment>
+        <sql>
+            insert into patient_identifier_type( name, description,creator, uuid, uniqueness_behavior, location_behavior) Select 'Health ID','Health Id identifier type',creator,uuid(),'UNIQUE','NOT_USED' from users where username='admin';
+        </sql>
+    </changeSet>
+
+    <changeSet id="updating-extraPatientIdentifierTypes-global-property"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='Health ID'</sqlCheck>
+        </preConditions>
+        <comment>Adding Health Id Identifier type</comment>
+        <sql>
+            update global_property set property_value=(SELECT CONCAT(property_value,',',uuid) from patient_identifier_type where name = 'Health ID') where property = 'bahmni.extraPatientIdentifierTypes';
+        </sql>
+    </changeSet>
  
 </databaseChangeLog>
