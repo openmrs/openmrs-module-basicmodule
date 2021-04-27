@@ -42,7 +42,7 @@
         </preConditions>
         <comment>Adding Health Id Identifier type</comment>
         <sql>
-            insert into patient_identifier_type( name, description,creator, uuid, uniqueness_behavior, location_behavior) Select 'Health ID','Health Id identifier type',creator,uuid(),'UNIQUE','NOT_USED' from users where username='admin';
+            insert into patient_identifier_type( name, description,creator, uuid, uniqueness_behavior, location_behavior, date_created) Select 'Health ID','Health Id identifier type',creator,uuid(),'UNIQUE','NOT_USED',now() from users where username='admin';
         </sql>
     </changeSet>
 
@@ -55,5 +55,5 @@
             update global_property set property_value=(SELECT CONCAT(property_value,',',uuid) from patient_identifier_type where name = 'Health ID') where property = 'bahmni.extraPatientIdentifierTypes';
         </sql>
     </changeSet>
- 
+
 </databaseChangeLog>
