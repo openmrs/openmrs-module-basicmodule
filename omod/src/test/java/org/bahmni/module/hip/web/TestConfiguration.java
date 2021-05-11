@@ -3,6 +3,7 @@ package org.bahmni.module.hip.web;
 import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
 import org.bahmni.module.hip.web.service.CareContextService;
 import org.bahmni.module.hip.web.service.DiagnosticReportService;
+import org.bahmni.module.hip.web.service.ExistingPatientService;
 import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.bahmni.module.hip.web.service.ValidationService;
 import org.springframework.context.annotation.Bean;
@@ -37,5 +38,10 @@ public class TestConfiguration {
     @Bean
     public DiagnosticReportService diagnosticReportService() {
         return mock(DiagnosticReportService.class);
+    }
+
+    @Bean
+    public ExistingPatientService existingPatientService() {
+        return mock(ExistingPatientService.class);
     }
 }
