@@ -13,9 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -46,6 +47,20 @@ public class PatientController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .body(existingPatients);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/{healthId}")
+    @ResponseBody
+    public ResponseEntity<?> getExistingPatientsWithHealthId(@PathVariable String healthId) {
+        String patientUuid = existingPatientService.getPatientWithHealthId(healthId);
+        if (patientUuid != null) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .body(patientUuid);
+        } else {
+            return ResponseEntity.ok()
+                    .body(new ErrorRepresentation(new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
         }
     }
 }

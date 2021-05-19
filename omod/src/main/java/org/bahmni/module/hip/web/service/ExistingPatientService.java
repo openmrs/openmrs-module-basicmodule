@@ -1,6 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.bahmni.module.hip.api.dao.ExistingPatientDao;
 import org.bahmni.module.hip.web.model.ExistingPatient;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
@@ -14,11 +15,13 @@ import java.util.List;
 @Service
 public class ExistingPatientService {
     private final PatientService patientService;
+    private final ExistingPatientDao existingPatientDao;
     static final int MATCHING_CRITERIA_CONSTANT = 2;
 
     @Autowired
-    public ExistingPatientService(PatientService patientService) {
+    public ExistingPatientService(PatientService patientService, ExistingPatientDao existingPatientDao) {
         this.patientService = patientService;
+        this.existingPatientDao = existingPatientDao;
     }
 
     public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth,
@@ -90,5 +93,9 @@ public class ExistingPatientService {
                 patient.getGender());
 
         return existingPatient;
+    }
+
+    public String getPatientWithHealthId(String healthId) {
+        return existingPatientDao.getPatientUuidWithHealthId(healthId);
     }
 }

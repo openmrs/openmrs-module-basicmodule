@@ -1,7 +1,5 @@
 package org.bahmni.module.hip.api.dao;
 
-import org.openmrs.Patient;
-
-public interface PatientDao {
+public interface ExistingPatientDao {
     String getPatientUuidWithHealthId(String healthId);
 }
