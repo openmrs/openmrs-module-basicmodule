@@ -33,10 +33,11 @@ public class PatientController {
     public @ResponseBody
     ResponseEntity<?> getExistingPatients(@RequestParam(required = false) String patientName,
                                           @RequestParam String patientYearOfBirth,
-                                          @RequestParam String patientGender) {
+                                          @RequestParam String patientGender,
+                                          @RequestParam String phoneNumber) {
 
         List<Patient> matchingPatients = existingPatientService.getMatchingPatients(patientName,
-                Integer.parseInt(patientYearOfBirth), patientGender);
+                Integer.parseInt(patientYearOfBirth), patientGender, phoneNumber);
 
         if (matchingPatients.size() != 1)
             return ResponseEntity.ok().body(new ErrorRepresentation(new Error(

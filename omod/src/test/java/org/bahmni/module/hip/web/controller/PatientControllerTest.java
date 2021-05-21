@@ -59,7 +59,7 @@ public class PatientControllerTest extends TestCase {
         patients.add(patient);
 
         ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M");
-        when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
+        when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString(), anyString()))
                 .thenReturn(patients);
         when(existingPatientService.getMatchingPatientDetails(patients))
                 .thenReturn(existingPatient);
@@ -68,6 +68,7 @@ public class PatientControllerTest extends TestCase {
                 .param("patientName", "sam tom")
                 .param("patientYearOfBirth", "1985")
                 .param("patientGender", "M")
+                .param("phoneNumber", "+91-9876543210")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -77,13 +78,14 @@ public class PatientControllerTest extends TestCase {
         List<Patient> patients = new ArrayList<>();
         ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M");
 
-        when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
+        when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString(), anyString()))
                 .thenReturn(patients);
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients", RestConstants.VERSION_1))
                 .param("patientName", "sam tom")
                 .param("patientYearOfBirth", "1985")
                 .param("patientGender", "M")
+                .param("phoneNumber", "+91-9876543210")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
