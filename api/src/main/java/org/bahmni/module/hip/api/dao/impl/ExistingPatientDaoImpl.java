@@ -11,8 +11,6 @@ import java.util.List;
 @Repository
 public class ExistingPatientDaoImpl implements ExistingPatientDao {
 
-    public static final int HEALTH_ID_IDENTIFIER_TYPE_ID = 5;
-
     private SessionFactory sessionFactory;
 
     @Autowired
@@ -24,7 +22,7 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
     public String getPatientUuidWithHealthId(String healthId) {
         String getPatientWithHealthIdQuery = "SELECT p.uuid FROM person AS p INNER JOIN \n" +
                 "\t\t\t\t   patient_identifier AS pi ON p.person_id = pi.patient_id \n" +
-                "\t\t\t\t   WHERE pi.identifier_type = " + HEALTH_ID_IDENTIFIER_TYPE_ID + " AND identifier = :healthId ;";
+                "\t\t\t\t   WHERE identifier = :healthId ;";
         Query query = this.sessionFactory.openSession().createSQLQuery(getPatientWithHealthIdQuery);
         query.setParameter("healthId", healthId);
         List<String> patientUuids =  query.list();
