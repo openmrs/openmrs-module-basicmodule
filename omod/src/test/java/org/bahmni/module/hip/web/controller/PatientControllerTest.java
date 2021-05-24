@@ -93,4 +93,27 @@ public class PatientControllerTest extends TestCase {
         assertEquals(value,
                 mvcResult.getResponse().getContentAsString());
     }
+
+    @Test
+    public void shouldReturnPatientUuidWhenTheHealthIdIsLinkedToAPatient() throws Exception {
+        when(existingPatientService.getPatientWithHealthId("abc.xyz@sbx")).thenReturn("bd27cbfd-b395-4a8a-af71-b27535b85e31");
+        mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/" + "abc.xyz@sbx", RestConstants.VERSION_1))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldReturnNoPatientFoundAsResponseWhenTheHealthIdIsNotLinkedToAnyPatient() throws Exception {
+        when(existingPatientService.getPatientWithHealthId("def.xyz@sbx")).thenReturn(null);
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/" + "def.xyz@sbx", RestConstants.VERSION_1))
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String value = objectMapper.writeValueAsString(new ErrorRepresentation
+                (new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
+        assertEquals(value,
+                mvcResult.getResponse().getContentAsString());
+    }
 }
