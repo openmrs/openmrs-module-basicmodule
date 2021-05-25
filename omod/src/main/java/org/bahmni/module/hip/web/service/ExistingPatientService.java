@@ -1,7 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.bahmni.module.hip.api.dao.PatientDao;
+import org.bahmni.module.hip.api.dao.ExistingPatientDao;
 import org.bahmni.module.hip.web.model.ExistingPatient;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
@@ -15,41 +15,20 @@ import java.util.List;
 @Service
 public class ExistingPatientService {
     private final PatientService patientService;
-    private final PatientDao patientDao;
+    private final ExistingPatientDao existingPatientDao;
     static final int MATCHING_CRITERIA_CONSTANT = 2;
 
     @Autowired
-    public ExistingPatientService(PatientService patientService, PatientDao patientDao) {
+    public ExistingPatientService(PatientService patientService, ExistingPatientDao existingPatientDao) {
         this.patientService = patientService;
-        this.patientDao = patientDao;
+        this.existingPatientDao = existingPatientDao;
     }
 
-    public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth,
-                                             String patientGender, String phoneNumber) {
-        List<Patient> existingPatients = getPatientsByPhoneNumber(phoneNumber);
-        if (existingPatients.size() == 1) {
-            return existingPatients;
-        }
-        return getPatients(patientName, patientYearOfBirth, patientGender);
+    public List<Patient> getMatchingPatients(String phoneNumber) {
+         return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber);
     }
 
-    private List<Patient> getPatientsByPhoneNumber(String phoneNumber) {
-        List<Patient> existingPatients = new ArrayList<>();
-        List<Patient> patients = patientService.getAllPatients();
-        for (Patient patient : patients) {
-            Integer patientId = patient.getId();
-            String patientPhoneNumber = patientDao.getPhoneNumber(patientId);
-            if (patientPhoneNumber != null) {
-                patientPhoneNumber = patientPhoneNumber.replace("+91-", "");
-                if (phoneNumber.equals(patientPhoneNumber)) {
-                    existingPatients.add(patient);
-                }
-            }
-        }
-        return existingPatients;
-    }
-
-    private List<Patient> getPatients(String patientName, int patientYearOfBirth, String patientGender) {
+    public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {
         List<Patient> patientsMatchedWithName = filterPatientsByName(patientName);
         if (patientsMatchedWithName.size() != 1) {
             List<Patient> patientsMatchedWithNameAndAge = filterPatientsByAge(patientYearOfBirth, patientsMatchedWithName);
@@ -103,15 +82,20 @@ public class ExistingPatientService {
         return patients;
     }
 
-    public ExistingPatient getMatchingPatientDetails(List<Patient> matchingPatients) {
-        Patient patient = matchingPatients.get(0);
-        ExistingPatient existingPatient = new ExistingPatient(patient.getGivenName() + " " + patient.getFamilyName(),
-                getYearOfBirth(patient.getAge()).toString(),
-                patient.getPersonAddress().getAddress1() +
-                        "," + patient.getPersonAddress().getCountyDistrict() +
-                        "," + patient.getPersonAddress().getStateProvince(),
-                patient.getGender());
+    public List<ExistingPatient> getMatchingPatientDetails(List<Patient> matchingPatients) {
+        List<ExistingPatient> existingPatients = new ArrayList<>();
+        for (Patient patient : matchingPatients) {
+            existingPatients.add(new ExistingPatient(patient.getGivenName() + " " + patient.getFamilyName(),
+                    getYearOfBirth(patient.getAge()).toString(),
+                    patient.getPersonAddress().getAddress1() +
+                            "," + patient.getPersonAddress().getCountyDistrict() +
+                            "," + patient.getPersonAddress().getStateProvince(),
+                    patient.getGender()));
+        }
+        return existingPatients;
+    }
 
-        return existingPatient;
+    public String getPatientWithHealthId(String healthId) {
+        return existingPatientDao.getPatientUuidWithHealthId(healthId);
     }
 }

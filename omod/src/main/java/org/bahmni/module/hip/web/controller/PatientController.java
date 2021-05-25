@@ -13,10 +13,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
@@ -34,19 +36,33 @@ public class PatientController {
     ResponseEntity<?> getExistingPatients(@RequestParam(required = false) String patientName,
                                           @RequestParam String patientYearOfBirth,
                                           @RequestParam String patientGender,
-                                          @RequestParam String phoneNumber) {
+                                          @RequestParam String phoneNumber) throws UnsupportedEncodingException {
+        List<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber);
+        if (matchingPatients.size() == 0) {
+            matchingPatients = existingPatientService.getMatchingPatients(patientName,
+                    Integer.parseInt(patientYearOfBirth), patientGender);
+            if (matchingPatients.size() != 1) {
+                return ResponseEntity.ok().body(new ErrorRepresentation(new Error(
+                        ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
+            }
+        }
+        List<ExistingPatient> existingPatients = existingPatientService.getMatchingPatientDetails(matchingPatients);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(existingPatients);
+    }
 
-        List<Patient> matchingPatients = existingPatientService.getMatchingPatients(patientName,
-                Integer.parseInt(patientYearOfBirth), patientGender, phoneNumber);
-
-        if (matchingPatients.size() != 1)
-            return ResponseEntity.ok().body(new ErrorRepresentation(new Error(
-                    ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
-        else {
-            ExistingPatient existingPatients = existingPatientService.getMatchingPatientDetails(matchingPatients);
+    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/{healthId}")
+    @ResponseBody
+    public ResponseEntity<?> getExistingPatientsWithHealthId(@PathVariable String healthId) {
+        String patientUuid = existingPatientService.getPatientWithHealthId(healthId);
+        if (patientUuid != null) {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(existingPatients);
+                    .body(patientUuid);
+        } else {
+            return ResponseEntity.ok()
+                    .body(new ErrorRepresentation(new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
         }
     }
 }
