@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
-
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
@@ -36,7 +34,7 @@ public class PatientController {
     ResponseEntity<?> getExistingPatients(@RequestParam(required = false) String patientName,
                                           @RequestParam String patientYearOfBirth,
                                           @RequestParam String patientGender,
-                                          @RequestParam String phoneNumber) throws UnsupportedEncodingException {
+                                          @RequestParam String phoneNumber) {
         List<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber);
         if (matchingPatients.size() == 0) {
             matchingPatients = existingPatientService.getMatchingPatients(patientName,
