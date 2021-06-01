@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
@@ -58,16 +59,19 @@ public class PatientControllerTest extends TestCase {
         List<Patient> patients = new ArrayList<>();
         patients.add(patient);
 
-        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M");
+        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc");
+        when(existingPatientService.getMatchingPatients("+91-9876543210"))
+                .thenReturn(new ArrayList<>());
         when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
                 .thenReturn(patients);
         when(existingPatientService.getMatchingPatientDetails(patients))
-                .thenReturn(existingPatient);
+                .thenReturn(Collections.singletonList(existingPatient));
 
         mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients", RestConstants.VERSION_1))
                 .param("patientName", "sam tom")
                 .param("patientYearOfBirth", "1985")
                 .param("patientGender", "M")
+                .param("phoneNumber", "+91-9876543210")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -75,8 +79,8 @@ public class PatientControllerTest extends TestCase {
     @Test
     public void shouldReturnNoRecordsWhenNoMatchingPatientFound() throws Exception {
         List<Patient> patients = new ArrayList<>();
-        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M");
-
+        when(existingPatientService.getMatchingPatients("+91-9876543210"))
+                .thenReturn(new ArrayList<>());
         when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
                 .thenReturn(patients);
 
@@ -84,12 +88,39 @@ public class PatientControllerTest extends TestCase {
                 .param("patientName", "sam tom")
                 .param("patientYearOfBirth", "1985")
                 .param("patientGender", "M")
+                .param("phoneNumber", "+91-9876543210")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
         ObjectMapper objectMapper = new ObjectMapper();
         String value = objectMapper.writeValueAsString(new ErrorRepresentation
                 (new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
+        assertEquals(value,
+                mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnPatientRecordWhenMatchingPatientFoundWithPhoneNumber() throws Exception {
+        Patient patient = mock(Patient.class);
+        List<Patient> patients = new ArrayList<>();
+        patients.add(patient);
+        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc");
+        List<ExistingPatient> existingPatients = new ArrayList<>();
+        existingPatients.add(existingPatient);
+        when(existingPatientService.getMatchingPatients("+91-9876543210"))
+                .thenReturn(patients);
+        when(existingPatientService.getMatchingPatientDetails(patients))
+                .thenReturn(Collections.singletonList(existingPatient));
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients", RestConstants.VERSION_1))
+                .param("patientName", "sam tom")
+                .param("patientYearOfBirth", "1985")
+                .param("patientGender", "M")
+                .param("phoneNumber", "+91-9876543210")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String value = objectMapper.writeValueAsString(existingPatients);
         assertEquals(value,
                 mvcResult.getResponse().getContentAsString());
     }

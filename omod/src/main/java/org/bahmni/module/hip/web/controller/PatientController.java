@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import java.util.List;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
@@ -34,20 +33,21 @@ public class PatientController {
     public @ResponseBody
     ResponseEntity<?> getExistingPatients(@RequestParam(required = false) String patientName,
                                           @RequestParam String patientYearOfBirth,
-                                          @RequestParam String patientGender) {
-
-        List<Patient> matchingPatients = existingPatientService.getMatchingPatients(patientName,
-                Integer.parseInt(patientYearOfBirth), patientGender);
-
-        if (matchingPatients.size() != 1)
-            return ResponseEntity.ok().body(new ErrorRepresentation(new Error(
-                    ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
-        else {
-            ExistingPatient existingPatients = existingPatientService.getMatchingPatientDetails(matchingPatients);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(existingPatients);
+                                          @RequestParam String patientGender,
+                                          @RequestParam String phoneNumber) {
+        List<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber);
+        if (matchingPatients.size() == 0) {
+            matchingPatients = existingPatientService.getMatchingPatients(patientName,
+                    Integer.parseInt(patientYearOfBirth), patientGender);
+            if (matchingPatients.size() != 1) {
+                return ResponseEntity.ok().body(new ErrorRepresentation(new Error(
+                        ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
+            }
         }
+        List<ExistingPatient> existingPatients = existingPatientService.getMatchingPatientDetails(matchingPatients);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(existingPatients);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/{healthId}")

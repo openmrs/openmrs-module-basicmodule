@@ -14,4 +14,5 @@ public class ExistingPatient {
     String yearOfBirth;
     String address;
     String gender;
+    String uuid;
 }

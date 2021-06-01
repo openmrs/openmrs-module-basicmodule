@@ -24,12 +24,11 @@ public class ExistingPatientService {
         this.existingPatientDao = existingPatientDao;
     }
 
-    public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth,
-                                             String patientGender) {
-        return getPatients(patientName, patientYearOfBirth, patientGender);
+    public List<Patient> getMatchingPatients(String phoneNumber) {
+         return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber);
     }
 
-    private List<Patient> getPatients(String patientName, int patientYearOfBirth, String patientGender) {
+    public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {
         List<Patient> patientsMatchedWithName = filterPatientsByName(patientName);
         if (patientsMatchedWithName.size() != 1) {
             List<Patient> patientsMatchedWithNameAndAge = filterPatientsByAge(patientYearOfBirth, patientsMatchedWithName);
@@ -83,16 +82,17 @@ public class ExistingPatientService {
         return patients;
     }
 
-    public ExistingPatient getMatchingPatientDetails(List<Patient> matchingPatients) {
-        Patient patient = matchingPatients.get(0);
-        ExistingPatient existingPatient = new ExistingPatient(patient.getGivenName() + " " + patient.getFamilyName(),
-                getYearOfBirth(patient.getAge()).toString(),
-                patient.getPersonAddress().getAddress1() +
-                        "," + patient.getPersonAddress().getCountyDistrict() +
-                        "," + patient.getPersonAddress().getStateProvince(),
-                patient.getGender());
-
-        return existingPatient;
+    public List<ExistingPatient> getMatchingPatientDetails(List<Patient> matchingPatients) {
+        List<ExistingPatient> existingPatients = new ArrayList<>();
+        for (Patient patient : matchingPatients) {
+            existingPatients.add(new ExistingPatient(patient.getGivenName() + " " + patient.getFamilyName(),
+                    getYearOfBirth(patient.getAge()).toString(),
+                    patient.getPersonAddress().getAddress1() +
+                            "," + patient.getPersonAddress().getCountyDistrict() +
+                            "," + patient.getPersonAddress().getStateProvince(),
+                    patient.getGender(), patient.getUuid()));
+        }
+        return existingPatients;
     }
 
     public String getPatientWithHealthId(String healthId) {
