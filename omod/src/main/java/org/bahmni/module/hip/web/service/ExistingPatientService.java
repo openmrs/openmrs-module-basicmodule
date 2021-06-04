@@ -85,14 +85,22 @@ public class ExistingPatientService {
     public List<ExistingPatient> getMatchingPatientDetails(List<Patient> matchingPatients) {
         List<ExistingPatient> existingPatients = new ArrayList<>();
         for (Patient patient : matchingPatients) {
-            existingPatients.add(new ExistingPatient(patient.getGivenName() + " " + patient.getFamilyName(),
-                    getYearOfBirth(patient.getAge()).toString(),
-                    patient.getPersonAddress().getAddress1() +
-                            "," + patient.getPersonAddress().getCountyDistrict() +
-                            "," + patient.getPersonAddress().getStateProvince(),
-                    patient.getGender(), patient.getUuid()));
+            existingPatients.add(
+                    new ExistingPatient(patient.getGivenName() + " " + patient.getFamilyName(),
+                            getYearOfBirth(patient.getAge()).toString(),
+                            getAddress(patient),
+                            patient.getGender(), patient.getUuid()));
         }
         return existingPatients;
+    }
+
+    private String getAddress(Patient patient) {
+        if (patient.getPersonAddress() != null) {
+            return patient.getPersonAddress().getAddress1() +
+                    "," + patient.getPersonAddress().getCountyDistrict() +
+                    "," + patient.getPersonAddress().getStateProvince();
+        }
+        return "";
     }
 
     public String getPatientWithHealthId(String healthId) {
