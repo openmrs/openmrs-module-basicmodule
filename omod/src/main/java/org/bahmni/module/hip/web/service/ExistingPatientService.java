@@ -90,7 +90,7 @@ public class ExistingPatientService {
                     patient.getPersonAddress().getAddress1() +
                             "," + patient.getPersonAddress().getCountyDistrict() +
                             "," + patient.getPersonAddress().getStateProvince(),
-                    patient.getGender(), patient.getUuid()));
+                    patient.getGender(), patient.getUuid(), existingPatientDao.getPhoneNumber(patient.getPatientId())));
         }
         return existingPatients;
     }

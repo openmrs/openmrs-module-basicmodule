@@ -59,7 +59,7 @@ public class PatientControllerTest extends TestCase {
         List<Patient> patients = new ArrayList<>();
         patients.add(patient);
 
-        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc");
+        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc", "9123456780");
         when(existingPatientService.getMatchingPatients("+91-9876543210"))
                 .thenReturn(new ArrayList<>());
         when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
@@ -104,7 +104,7 @@ public class PatientControllerTest extends TestCase {
         Patient patient = mock(Patient.class);
         List<Patient> patients = new ArrayList<>();
         patients.add(patient);
-        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc");
+        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc", "9123456780");
         List<ExistingPatient> existingPatients = new ArrayList<>();
         existingPatients.add(existingPatient);
         when(existingPatientService.getMatchingPatients("+91-9876543210"))

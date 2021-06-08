@@ -15,6 +15,7 @@ import java.util.List;
 public class ExistingPatientDaoImpl implements ExistingPatientDao {
 
     private final SessionFactory sessionFactory;
+    private static final int PERSON_PHONE_NUMBER_ATTRIBUTE_TYPE_ID = 15;
 
     @Autowired
     public ExistingPatientDaoImpl(SessionFactory sessionFactory) {
@@ -38,6 +39,17 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
         criteria.createCriteria("attributes", "pa")
                 .add(Restrictions.eq("pa.value", phoneNumber));
         return criteria.list();
+    }
+
+    @Override
+    public String getPhoneNumber(Integer patientId) {
+        String getPatientPhoneNumberWithPatientIdQuery =
+                "select value from person_attribute where person_id=:patientId and person_attribute_type_id="
+                        + PERSON_PHONE_NUMBER_ATTRIBUTE_TYPE_ID + ";";
+        Query query = this.sessionFactory.openSession().createSQLQuery(getPatientPhoneNumberWithPatientIdQuery);
+        query.setParameter("patientId", patientId);
+        List<String> phoneNumbers = query.list();
+        return phoneNumbers.size() > 0 ? phoneNumbers.get(0) : null;
     }
 }
 

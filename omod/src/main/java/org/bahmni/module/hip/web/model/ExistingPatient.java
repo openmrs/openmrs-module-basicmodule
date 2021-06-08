@@ -15,4 +15,5 @@ public class ExistingPatient {
     String address;
     String gender;
     String uuid;
+    String phoneNumber;
 }
