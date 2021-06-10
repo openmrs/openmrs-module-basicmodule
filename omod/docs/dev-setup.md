@@ -8,13 +8,14 @@ Clone the basic 5 services:
 - [Default-config](https://github.com/Bahmni-Covid19/default-config)
 
 Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
-###Setup Bahmni using Vagrant
+
+### Setup Bahmni using Vagrant:
 
 1. Install [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
 2. Install [Vagrant](https://www.vagrantup.com/downloads.html) 
 3. Clone the `bahmni-vagrant` repo from github inside a folder called `bahmni`
 
-   ```bash
+   ```
    mkdir bahmni
    cd bahmni
    git clone https://github.com/Bahmni/bahmni-vagrant.git
@@ -23,7 +24,7 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
 
 4. Replace the contents of the `Vagrantfile` in `bahmni-vagrant` with the following:
     
-   ```bash
+   ```
     Vagrant.configure(2) do |config|
       config.vm.box = "bento/centos-7.6"
       config.vm.box_check_update = true
@@ -53,7 +54,7 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
     - Username: superman
     - Password: Admin123
 
-###Prerequisites for OMOD-HIP:
+### Prerequisites for OMOD-HIP:
    
 - Download following jars and fhir
     - [jackson-core-2.10.0.jar](https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.10.0/jackson-core-2.10.0.jar)
@@ -64,7 +65,7 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
 - Copy all fies to `bahmni` folder
 - Open vagrant and paste the files 
 
-  ```bash
+  ```
   cd bahmni-vagrant
   vagrant ssh
   cp /bahmni/jackson-core-2.10.0.jar /opt/openmrs/openmrs/WEB-INF/lib/
@@ -81,7 +82,7 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
 - You can also check the log file for any errors/exceptions: `vi /opt/openmrs/openmrs.log`
  in vagrant. 
  
-###Setting up the OMOD-HIP
+### Setting up the OMOD-HIP
 
 (Make sure `bahmni` folder is created and `bahmni vagrant` is setup inside `bahmni`)
 1. Clone OMOD-HIP
@@ -113,7 +114,7 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
     vi /opt/openmrs/openmrs.log
 
     ```
-###Installations:
+### Installations:
 
 Please make sure following are done before proceeding forward
 - [Yarn](https://classic.yarnpkg.com/en/)
@@ -123,11 +124,11 @@ Please make sure following are done before proceeding forward
 - [Compass](http://compass-style.org/install/) to compile the SCSS files.
 - Install Firefox to run tests for `bahmni-apps`
 
-####Setting up Bahmni-Apps
+### Setting up Bahmni-Apps
 
 1. Clone bahmni-apps
     
-   ```bash
+   ```
    cd bahmni
    git clone https://github.com/Bahmni-Covid19/openmrs-module-bahmniapps.git
    cd openmrs-module-bahmniapps
@@ -135,7 +136,7 @@ Please make sure following are done before proceeding forward
    
 2. Change branch to stream1/master (which is the current working master for Hip stream)
    
-    ```bash
+    ```
     git checkout stream1/master
     ```
    
@@ -145,11 +146,11 @@ Please make sure following are done before proceeding forward
    yarn install
    yarn default
     ```
-####Setting up ndhm-react (verify-btn pop-up)
+### Setting up ndhm-react (verify-btn pop-up)
 
 1. Clone ndhm-react
     
-   ```bash
+   ```
    cd bahmni
    git clone https://github.com/Bahmni-Covid19/ndhm-react.git
    cd ndhm-react
@@ -157,7 +158,7 @@ Please make sure following are done before proceeding forward
 
 2. In master branch run following to build project 
 
-    ```bash
+    ```
     yarn install
     yarn build
     ```
