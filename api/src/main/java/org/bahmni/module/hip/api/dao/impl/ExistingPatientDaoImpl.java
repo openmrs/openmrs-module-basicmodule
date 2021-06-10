@@ -29,7 +29,7 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
                 "\t\t\t\t   WHERE identifier = :healthId ;";
         Query query = this.sessionFactory.openSession().createSQLQuery(getPatientWithHealthIdQuery);
         query.setParameter("healthId", healthId);
-        List<String> patientUuids =  query.list();
+        List<String> patientUuids = query.list();
         return patientUuids.size() > 0 ? patientUuids.get(0) : null;
     }
 

@@ -25,7 +25,7 @@ public class ExistingPatientService {
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {
-         return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber);
+        return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber);
     }
 
     public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {
@@ -89,7 +89,7 @@ public class ExistingPatientService {
                     new ExistingPatient(patient.getGivenName() + " " + patient.getFamilyName(),
                             getYearOfBirth(patient.getAge()).toString(),
                             getAddress(patient),
-                            patient.getGender(), patient.getUuid(),existingPatientDao.getPhoneNumber(patient.getPatientId())));
+                            patient.getGender(), patient.getUuid(), existingPatientDao.getPhoneNumber(patient.getPatientId())));
         }
         return existingPatients;
     }
