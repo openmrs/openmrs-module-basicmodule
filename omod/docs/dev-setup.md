@@ -1,3 +1,11 @@
+### Important links for reference:
+- [OPENMRS WIKI](https://wiki.openmrs.org/)
+- [FHIR](https://hl7.org/FHIR/documentation.html)
+- [SBX healthID creation](https://healthidsbx.ndhm.gov.in/)
+- [HIU](https://dev.ndhm.gov.in/hiu#/)
+- [PHR/NDHM Architecture](https://sandbox.ndhm.gov.in/docs/building_blocks)
+- [HIP API Standards](https://sandbox.ndhm.gov.in/swagger/ndhm-hip.yaml)
+
 
 ## Services:
 Clone the basic 5 services:
