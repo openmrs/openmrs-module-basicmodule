@@ -162,3 +162,62 @@ Please make sure following are done before proceeding forward
     yarn install
     yarn build
     ```
+
+### Setting up default-config
+
+1. Clone default-config
+    
+   ```
+   cd bahmni
+   git clone https://github.com/Bahmni-Covid19/default-config.git
+   cd default-config
+    ```
+2. Change branch to stream1/master (which is the current working master for Hip stream)
+   
+    ```
+    git checkout stream1/master
+    ```
+3. Browse to this file `openmrs/apps/registration/extension.json` and change host to localhost in `NDHMIdentifierLookup`,`extensionParams`
+
+    ```
+    "hipUrl" : "http://localhost:9052",
+    "bahmniUrl": "https://192.168.33.10/openmrs/ws/rest/v1/hip"
+    ```
+
+## Linking the repos inside your local vagrant
+
+1. Go inside local vagrant
+ 
+    ```
+   cd bahmni-vagrant
+   vagrant ssh
+   cd /var/www/
+   ll
+    ```
+   you will see bahmniapps and bahmni_config being linked already to older versions, we will unlink and link to our local repos
+2. Unlink old links
+
+    ```
+   unlink bahmniapps
+   unlink bahmni_config
+    ```
+     
+3. Link new build repositories
+    
+    ```
+   link -s /bahmni/ndhm-react/build ndhm
+   link -s /bahmni/default-config bahmni_config
+   link -s /bahmni/openmrs-module-bahmniapps/ui/app bahmniapps 
+   ```
+
+4. Change config setting for `ndhm` redirection
+
+    ```
+   vi /etc/httpd/conf.d/ssl.conf
+    ```
+   
+5. Search for Alias by typing `/Alias` and after this line `Alias /implementer-interface /var/www/implementer_interface` add 
+    
+   ```
+    Alias /ndhm /var/www/ndhm
+    ```
