@@ -62,15 +62,15 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
     - [fhir2-omod-1.0.0-20200925.143534-163.jar](https://openmrs.jfrog.io/artifactory/public/org/openmrs/module/fhir2-omod/1.0.0-SNAPSHOT/fhir2-omod-1.0.0-20200925.143534-163.jar)
 - Rename `fhir2-omod-1.0.0-20200925.143534-163.jar` file from `.jar` to `.omod` extension.
 - Copy all fies to `bahmni` folder
-- Open vagrant and paste the files into `/opt/openmrs/modules/` directory
-  
+- Open vagrant and paste the files 
+
   ```bash
   cd bahmni-vagrant
   vagrant ssh
-  cp /bahmni/jackson-core-2.10.0.jar /opt/openmrs/modules/
-  cp /bahmni/jackson-annotations-2.10.0.jar /opt/openmrs/modules/
-  cp /bahmni/jackson-databind-2.10.0.jar /opt/openmrs/modules/
-  cp /bahmni/fhir2-omod-1.0.0-20200925.143534-163.mod /opt/openmrs/modules/
+  cp /bahmni/jackson-core-2.10.0.jar /opt/openmrs/openmrs/WEB-INF/lib/
+  cp /bahmni/jackson-annotations-2.10.0.jar /opt/openmrs/openmrs/WEB-INF/lib/
+  cp /bahmni/jackson-databind-2.10.0.jar /opt/openmrs/openmrs/WEB-INF/lib/
+  cp /bahmni/fhir2-omod-1.0.0-20200925.143534-163.omod /opt/openmrs/modules/
   ```  
 - Restart openmrs `systemctl restart openmrs`
 
@@ -112,4 +112,52 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
     ```
     vi /opt/openmrs/openmrs.log
 
+    ```
+###Installations:
+
+Please make sure following are done before proceeding forward
+- [Yarn](https://classic.yarnpkg.com/en/)
+- [Node.js(v10.11.0)](https://classic.yarnpkg.com/en/)
+- [Maven](https://maven.apache.org/)
+- [Ruby v2.1 (or above)](https://www.ruby-lang.org/en/documentation/installation/)
+- [Compass](http://compass-style.org/install/) to compile the SCSS files.
+- Install Firefox to run tests for `bahmni-apps`
+
+####Setting up Bahmni-Apps
+
+1. Clone bahmni-apps
+    
+   ```bash
+   cd bahmni
+   git clone https://github.com/Bahmni-Covid19/openmrs-module-bahmniapps.git
+   cd openmrs-module-bahmniapps
+    ```
+   
+2. Change branch to stream1/master (which is the current working master for Hip stream)
+   
+    ```bash
+    git checkout stream1/master
+    ```
+   
+3. Run following to build the project 
+    ```
+   cd /ui
+   yarn install
+   yarn default
+    ```
+####Setting up ndhm-react (verify-btn pop-up)
+
+1. Clone ndhm-react
+    
+   ```bash
+   cd bahmni
+   git clone https://github.com/Bahmni-Covid19/ndhm-react.git
+   cd ndhm-react
+    ```
+
+2. In master branch run following to build project 
+
+    ```bash
+    yarn install
+    yarn build
     ```
