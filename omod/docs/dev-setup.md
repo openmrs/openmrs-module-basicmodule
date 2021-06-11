@@ -68,9 +68,8 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
     - [jackson-core-2.10.0.jar](https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.10.0/jackson-core-2.10.0.jar)
     - [jackson-annotations-2.10.0.jar](https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.10.0/jackson-annotations-2.10.0.jar)
     - [jackson-databind-2.10.0.jar](https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.10.0/jackson-databind-2.10.0.jar)
-    - [fhir2-omod-1.0.0-20200925.143534-163.jar](https://openmrs.jfrog.io/artifactory/public/org/openmrs/module/fhir2-omod/1.0.0-SNAPSHOT/fhir2-omod-1.0.0-20200925.143534-163.jar)
-- Rename `fhir2-omod-1.0.0-20200925.143534-163.jar` file from `.jar` to `.omod` extension.
-- Copy all fies to `bahmni` folder
+    - [fhir2-omod-1.0.0-SNAPSHOT.omod](https://drive.google.com/drive/folders/180cdYOWqBU5vffZnzdRy5PsyEPvn3Ti5)
+- Copy all files to `bahmni` folder
 - Open vagrant and paste the files 
 
   ```
@@ -79,7 +78,7 @@ Others can be found here : [Bahmni-Covid19](https://github.com/Bahmni-Covid19/)
   cp /bahmni/jackson-core-2.10.0.jar /opt/openmrs/openmrs/WEB-INF/lib/
   cp /bahmni/jackson-annotations-2.10.0.jar /opt/openmrs/openmrs/WEB-INF/lib/
   cp /bahmni/jackson-databind-2.10.0.jar /opt/openmrs/openmrs/WEB-INF/lib/
-  cp /bahmni/fhir2-omod-1.0.0-20200925.143534-163.omod /opt/openmrs/modules/
+  cp /bahmni/fhir2-omod-1.0.0-SNAPSHOT.omod /opt/openmrs/modules/
   ```  
 - Restart openmrs `systemctl restart openmrs`
 
