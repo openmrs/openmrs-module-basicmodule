@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.bahmniemrapi.laborder.contract.LabOrderResult;
 
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -87,7 +88,7 @@ public class FhirLabResult {
         obs.setId(result.getTestUuid());
         obs.setCode(new CodeableConcept().setText( result.getTestName( )));
         try {
-            Float f = Float.parseFloat(result.getResult());
+            float f = result.getResult()!=null? Float.parseFloat(result.getResult()): (float) 0;
             obs.setValue(new Quantity().setValue(f).setUnit(result.getTestUnitOfMeasurement()));
         } catch (NumberFormatException ex ) {
             obs.setValue(new StringType().setValue(result.getResult()));
