@@ -163,7 +163,7 @@ Please make sure following are done before proceeding forward
    cd ndhm-react
     ```
 
-2. In master branch run following to build project 
+2. In main branch run following to build project 
 
     ```
     yarn install
@@ -212,9 +212,9 @@ Please make sure following are done before proceeding forward
 3. Link new build repositories
     
     ```
-   link -s /bahmni/ndhm-react/build ndhm
-   link -s /bahmni/default-config bahmni_config
-   link -s /bahmni/openmrs-module-bahmniapps/ui/app bahmniapps 
+   ln -s /bahmni/ndhm-react/build ndhm
+   ln -s /bahmni/default-config bahmni_config
+   ln -s /bahmni/openmrs-module-bahmniapps/ui/app bahmniapps 
    ```
 
 4. Change config setting for `ndhm` redirection
