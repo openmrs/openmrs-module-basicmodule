@@ -28,7 +28,7 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
                 "\t\t\t\t   WHERE identifier = :healthId ;";
         Query query = this.sessionFactory.openSession().createSQLQuery(getPatientWithHealthIdQuery);
         query.setParameter("healthId", healthId);
-        List<String> patientUuids =  query.list();
+        List<String> patientUuids = query.list();
         return patientUuids.size() > 0 ? patientUuids.get(0) : null;
     }
 
@@ -38,6 +38,18 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
         criteria.createCriteria("attributes", "pa")
                 .add(Restrictions.eq("pa.value", phoneNumber));
         return criteria.list();
+    }
+
+    @Override
+    public String getPhoneNumber(Integer patientId) {
+        String getPatientPhoneNumberWithPatientIdQuery =
+                " SELECT   value FROM   person_attribute   INNER JOIN person_attribute_type ON" +
+                        " person_attribute.person_attribute_type_id = person_attribute_type.person_attribute_type_id " +
+                        "where   person_id = :patientId   and name = \"primaryContact\";";
+        Query query = this.sessionFactory.openSession().createSQLQuery(getPatientPhoneNumberWithPatientIdQuery);
+        query.setParameter("patientId", patientId);
+        List<String> phoneNumbers = query.list();
+        return phoneNumbers.size() > 0 ? phoneNumbers.get(0) : null;
     }
 }
 
