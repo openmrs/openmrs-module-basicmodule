@@ -55,5 +55,17 @@
             update global_property set property_value=(SELECT CONCAT(property_value,',',uuid) from patient_identifier_type where name = 'Health ID') where property = 'bahmni.extraPatientIdentifierTypes';
         </sql>
     </changeSet>
+    
+    <changeSet id="adding-undisclosed-to-gender-global-property" author="Mahesh">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                select count(*) from global_property where property = 'mrs.genders' and property_value='{"M":"Male", "F":"Female","O":"Other"}'
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding Undisclosed to gender</comment>
+        <sql>
+            update global_property set property_value='{"M":"Male", "F":"Female","O":"Other", "U":"Undisclosed"}' where property = 'mrs.genders';
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
