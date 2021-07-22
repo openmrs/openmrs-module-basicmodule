@@ -25,7 +25,13 @@ public class ExistingPatientService {
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {
-        return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber);
+        String phoneNumberWithOutCode = phoneNumber.substring(phoneNumber.length() - 10);
+        String []formats = new String[4];
+        formats[0] = "+91-" + phoneNumberWithOutCode;
+        formats[1] = "91" + phoneNumberWithOutCode;
+        formats[2] = phoneNumberWithOutCode;
+        formats[3] = "+91" + phoneNumberWithOutCode;
+        return existingPatientDao.getPatientsWithPhoneNumber(formats);
     }
 
     public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {
