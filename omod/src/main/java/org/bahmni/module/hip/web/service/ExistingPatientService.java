@@ -25,8 +25,10 @@ public class ExistingPatientService {
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {
-        String phoneNumberWithOutCode = phoneNumber.substring(phoneNumber.length() - 10);
-        String []formats = new String[4];
+        final int PHONE_NUMBER_LENGTH = 10;
+        final int NUMBER_OF_PHONE_NUMBER_FORMATS = 4;
+        String phoneNumberWithOutCode = phoneNumber.substring(phoneNumber.length() - PHONE_NUMBER_LENGTH);
+        String []formats = new String[NUMBER_OF_PHONE_NUMBER_FORMATS];
         formats[0] = "+91-" + phoneNumberWithOutCode;
         formats[1] = "91" + phoneNumberWithOutCode;
         formats[2] = phoneNumberWithOutCode;
