@@ -15,4 +15,8 @@ public class PatientCareContext {
     private String careContextType;
     private String careContextName;
     private Integer careContextReference;
+
+    public String getCareContextName() {
+        return careContextName;
+    }
 }

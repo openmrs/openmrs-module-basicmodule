@@ -7,4 +7,6 @@ import java.util.List;
 public interface CareContextRepository {
     List<PatientCareContext> getPatientCareContext(String patientUuid);
 
+    List<PatientCareContext> getNewPatientCareContext(Integer patientId);
+
 }
