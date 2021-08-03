@@ -3,6 +3,7 @@ package org.bahmni.module.hip.web.controller;
 import org.bahmni.module.hip.model.PatientCareContext;
 import org.bahmni.module.hip.web.TestConfiguration;
 import org.bahmni.module.hip.web.client.ClientError;
+import org.bahmni.module.hip.web.model.serializers.NewCareContext;
 import org.bahmni.module.hip.web.service.CareContextService;
 import org.bahmni.module.hip.web.service.ValidationService;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -111,5 +112,47 @@ public class CareContextControllerTest {
         String content = mvcResult.getResponse().getContentAsString();
         String responseBody = new ObjectMapper().writeValueAsString(ClientError.noPatientIdProvided());
         assertEquals(responseBody, content);
+    }
+
+    @Test
+    public void shouldReturn400BadRequestWhenNoPatientIdProvidedForNewContext() throws Exception {
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext/new", RestConstants.VERSION_1))
+                .param("patientUuid", " ")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        String responseBody = new ObjectMapper().writeValueAsString(ClientError.noPatientIdProvided());
+        assertEquals(responseBody, content);
+    }
+
+    @Test
+    public void shouldReturn400BadRequestForInvalidPatientUUID() throws Exception {
+        when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/careContext/new", RestConstants.VERSION_1))
+                .param("patientUuid", "0f90531a-285c-438b-b265-bb3abb4745bd")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        String responseBody = new ObjectMapper().writeValueAsString(ClientError.invalidPatientId());
+        assertEquals(responseBody, content);
+    }
+
+    @Test
+    public void shouldReturn200OKForValidPatientUUID() throws Exception {
+        NewCareContext newCareContext = new NewCareContext("abc", "abc@sbc", "12gvx", new ArrayList<>());
+
+        when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
+        when(careContextService.newCareContextsForPatient(anyString()))
+                .thenReturn(newCareContext);
+
+        mockMvc.perform(get(String.format("/rest/%s/hip/careContext/new", RestConstants.VERSION_1))
+                .param("patientUuid", "0f90531a-285c-438b-b265-bb3abb4745bd")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+
     }
 }
