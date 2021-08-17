@@ -33,10 +33,10 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
     }
 
     @Override
-    public List<Patient> getPatientsWithPhoneNumber(String []phoneNumberFormats) {
+    public List<Patient> getPatientsWithPhoneNumber(String phoneNumber) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(Patient.class);
         criteria.createCriteria("attributes", "pa")
-                .add(Restrictions.in("pa.value", phoneNumberFormats));
+                .add(Restrictions.eq("pa.value", phoneNumber));
         return criteria.list();
     }
 
