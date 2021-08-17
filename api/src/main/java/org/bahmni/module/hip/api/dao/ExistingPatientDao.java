@@ -7,7 +7,7 @@ import java.util.List;
 public interface ExistingPatientDao {
     String getPatientUuidWithHealthId(String healthId);
 
-    List<Patient> getPatientsWithPhoneNumber(String []phoneNumberFormats);
+    List<Patient> getPatientsWithPhoneNumber(String phoneNumber);
 
     String getPhoneNumber(Integer patientId);
 
