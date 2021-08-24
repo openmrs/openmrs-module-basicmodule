@@ -72,6 +72,60 @@ public class FHIRUtils {
         return type;
     }
 
+    public static CodeableConcept getPatientDocumentType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("371530004");
+        coding.setDisplay("Clinical consultation report");
+        return type;
+    }
+
+    public static CodeableConcept getOPConsultType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("371530004");
+        coding.setDisplay("Clinical consultation report");
+        return type;
+    }
+
+    public static CodeableConcept getChiefComplaintType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("422843007");
+        coding.setDisplay("Chief complaint");
+        return type;
+    }
+
+    public static CodeableConcept getMedicalHistoryType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("422843008"); // don't know
+        coding.setDisplay("Medical history");
+        return type;
+    }
+
+    public static CodeableConcept getPhysicalExaminationType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("425044008"); // don't know
+        coding.setDisplay("Physical examination");
+        return type;
+    }
+
+    public static CodeableConcept getProcedureType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("36969009");
+        coding.setDisplay("Procedure");
+        return type;
+    }
+
     public static void addToBundleEntry(Bundle bundle, Resource resource, boolean useIdPart) {
         String resourceType = resource.getResourceType().toString();
         String id = useIdPart ? resource.getIdElement().getIdPart() : resource.getId();

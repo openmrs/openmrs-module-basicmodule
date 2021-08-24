@@ -47,4 +47,8 @@ public class DrugOrders {
     Stream<DrugOrder> stream(){
         return openMRSDrugOrders.stream();
     }
+
+    public List<DrugOrder> getOpenMRSDrugOrders() {
+        return openMRSDrugOrders;
+    }
 }

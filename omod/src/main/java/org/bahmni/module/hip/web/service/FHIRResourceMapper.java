@@ -1,14 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.Dosage;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
+import org.bahmni.module.hip.web.model.OpenMrsCondition;
+import org.hl7.fhir.r4.model.*;
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
 import org.openmrs.Obs;
@@ -79,6 +72,25 @@ public class FHIRResourceMapper {
         }
     }
 
+    public DocumentReference mapToDocumentDocumentReference(Obs obs) {
+        DocumentReference documentReference = new DocumentReference();
+        documentReference.setId(obs.getUuid());
+        List<DocumentReference.DocumentReferenceContentComponent> contents = new ArrayList<>();
+        try {
+            List<Attachment> attachments = getAttachments(obs);
+            for (Attachment attachment : attachments) {
+                DocumentReference.DocumentReferenceContentComponent documentReferenceContentComponent
+                        = new DocumentReference.DocumentReferenceContentComponent();
+                documentReferenceContentComponent.setAttachment(attachment);
+                contents.add(documentReferenceContentComponent);
+            }
+            documentReference.setContent(contents);
+            return documentReference;
+        } catch (IOException exception) {
+            return documentReference;
+        }
+    }
+
     private List<Attachment> getAttachments(Obs obs) throws IOException {
         List<Attachment> attachments = new ArrayList<>();
         Attachment attachment = new Attachment();
@@ -106,8 +118,28 @@ public class FHIRResourceMapper {
         return attachments;
     }
 
+    public Condition mapToCondition(OpenMrsCondition openMrsCondition) {
+        Condition condition = new Condition();
+        CodeableConcept concept = new CodeableConcept();
+        concept.setText(openMrsCondition.getName());
+        condition.setCode(concept);
+        condition.setId(openMrsCondition.getUuid());
+        condition.setRecordedDate(openMrsCondition.getRecordedDate());
+        return condition;
+    }
+
     public Observation mapToObs(Obs obs) {
         return observationTranslator.toFhirResource(obs);
+    }
+
+    public Procedure mapToProcedure(Obs obs) {
+        Procedure procedure = new Procedure();
+        procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+        CodeableConcept concept = new CodeableConcept();
+        concept.setText(obs.getValueCoded().getDisplayString());
+        procedure.setCode(concept);
+        procedure.setId(obs.getUuid());
+        return procedure;
     }
 
     private String getTypeOfTheObsDocument(String valueText) {

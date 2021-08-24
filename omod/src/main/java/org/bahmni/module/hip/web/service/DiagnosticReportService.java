@@ -75,7 +75,7 @@ public class DiagnosticReportService {
                 .collect(Collectors.toList());
     }
 
-    private HashMap<Encounter, List<Obs>> getAllObservationsForVisits(Date fromDate, Date toDate,
+    public HashMap<Encounter, List<Obs>> getAllObservationsForVisits(Date fromDate, Date toDate,
                                                                       Patient patient,
                                                                       String visitType) {
         HashMap<Encounter, List<Obs>> encounterListMap = new HashMap<>();

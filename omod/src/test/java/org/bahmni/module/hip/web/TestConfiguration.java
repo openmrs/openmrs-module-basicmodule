@@ -1,11 +1,12 @@
 package org.bahmni.module.hip.web;
 
-import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
-import org.bahmni.module.hip.web.service.CareContextService;
-import org.bahmni.module.hip.web.service.DiagnosticReportService;
 import org.bahmni.module.hip.web.service.ExistingPatientService;
 import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.bahmni.module.hip.web.service.ValidationService;
+import org.bahmni.module.hip.web.service.CareContextService;
+import org.bahmni.module.hip.web.service.BundleMedicationRequestService;
+import org.bahmni.module.hip.web.service.DiagnosticReportService;
+import org.bahmni.module.hip.web.service.OPConsultService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -44,4 +45,7 @@ public class TestConfiguration {
     public ExistingPatientService existingPatientService() {
         return mock(ExistingPatientService.class);
     }
+
+    @Bean
+    public OPConsultService opConsultService() {return mock(OPConsultService.class);}
 }
