@@ -90,7 +90,7 @@ public class FhirLabResult {
         try {
             float f = result.getResult()!=null? Float.parseFloat(result.getResult()): (float) 0;
             obs.setValue(new Quantity().setValue(f).setUnit(result.getTestUnitOfMeasurement()));
-        } catch (NumberFormatException ex ) {
+        } catch (NumberFormatException | NullPointerException ex) {
             obs.setValue(new StringType().setValue(result.getResult()));
         }
         obs.setStatus(Observation.ObservationStatus.FINAL);
