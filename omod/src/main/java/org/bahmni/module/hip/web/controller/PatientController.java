@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
+
 import java.util.List;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
