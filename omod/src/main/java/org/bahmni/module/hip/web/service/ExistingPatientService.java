@@ -17,6 +17,7 @@ public class ExistingPatientService {
     private final PatientService patientService;
     private final ExistingPatientDao existingPatientDao;
     static final int MATCHING_CRITERIA_CONSTANT = 2;
+    static final int PHONE_NUMBER_LENGTH = 10;
 
     @Autowired
     public ExistingPatientService(PatientService patientService, ExistingPatientDao existingPatientDao) {
@@ -25,7 +26,7 @@ public class ExistingPatientService {
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {
-        return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber);
+        return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber.substring(phoneNumber.length()-PHONE_NUMBER_LENGTH));
     }
 
     public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {
