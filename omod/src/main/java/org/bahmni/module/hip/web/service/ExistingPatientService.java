@@ -22,6 +22,8 @@ public class ExistingPatientService {
     private final PatientDao patientDao;
     private final PatientService patientService;
     private final LocationService locationService;
+    private static final String REGISTRATION_DESK = "Registration Desk";
+    private static final String PRIMARY_CONTACT = "primaryContact";
 
     @Autowired
     public ExistingPatientService(PatientDao patientDao, PatientService patientService, ExistingPatientDao existingPatientDao, LocationService locationService) {
@@ -58,7 +60,7 @@ public class ExistingPatientService {
     private List<PatientResponse> filterPatientsByName(String patientName) {
         return patientDao.getPatients("", patientName, null, null, "", 100, 0,
                 null, "", null, null, null,
-                locationService.getLocation("Registration Desk").getUuid(), false, false);
+                locationService.getLocation(REGISTRATION_DESK).getUuid(), false, false);
     }
 
 
@@ -110,7 +112,7 @@ public class ExistingPatientService {
     private String getPhoneNumber(Patient patient) {
         String phoneNumber = "";
         try {
-            phoneNumber = patient.getAttribute("primaryContact").getValue();
+            phoneNumber = patient.getAttribute(PRIMARY_CONTACT).getValue();
         } catch (NullPointerException ignored) {
 
         }
