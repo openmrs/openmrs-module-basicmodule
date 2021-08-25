@@ -24,6 +24,7 @@ public class ExistingPatientService {
     private final LocationService locationService;
     private static final String REGISTRATION_DESK = "Registration Desk";
     private static final String PRIMARY_CONTACT = "primaryContact";
+    static final int PHONE_NUMBER_LENGTH = 10;
 
     @Autowired
     public ExistingPatientService(PatientDao patientDao, PatientService patientService, ExistingPatientDao existingPatientDao, LocationService locationService) {
@@ -34,7 +35,7 @@ public class ExistingPatientService {
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {
-        return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber);
+        return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber.substring(phoneNumber.length() - PHONE_NUMBER_LENGTH));
     }
 
     public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {

@@ -37,7 +37,7 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
     public List<Patient> getPatientsWithPhoneNumber(String phoneNumber) {
         Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(Patient.class);
         criteria.createCriteria("attributes", "pa")
-                .add(Restrictions.eq("pa.value", phoneNumber));
+                .add(Restrictions.like("pa.value", "%" + phoneNumber));
         return criteria.list();
     }
 
