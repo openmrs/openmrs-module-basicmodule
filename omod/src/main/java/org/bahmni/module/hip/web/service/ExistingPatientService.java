@@ -98,7 +98,7 @@ public class ExistingPatientService {
         for (Patient patient : matchingPatients) {
             existingPatients.add(
                     new ExistingPatient(
-                            patient.getGivenName() + " " + patient.getFamilyName(),
+                            patient.getGivenName() + " " + patient.getMiddleName() + " " + patient.getFamilyName(),
                             getYearOfBirth(patient.getBirthdate()).toString(),
                             getAddress(patient),
                             patient.getGender(),
