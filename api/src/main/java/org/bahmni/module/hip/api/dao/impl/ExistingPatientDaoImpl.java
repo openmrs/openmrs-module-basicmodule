@@ -21,6 +21,7 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
         this.sessionFactory = sessionFactory;
     }
 
+
     @Override
     public String getPatientUuidWithHealthId(String healthId) {
         String getPatientWithHealthIdQuery = "SELECT p.uuid FROM person AS p INNER JOIN \n" +
@@ -51,5 +52,23 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
         List<String> phoneNumbers = query.list();
         return phoneNumbers.size() > 0 ? phoneNumbers.get(0) : null;
     }
+
+    @Override
+    public String getPatientHealthIdWithPatientId(Integer patientId) {
+        String getPatientHealthId = "select\n" +
+                "\tpi.identifier\n" +
+                "from\n" +
+                "\tpatient_identifier as pi\n" +
+                "inner join patient_identifier_type as piy on\n" +
+                "\tpi.identifier_type = piy.patient_identifier_type_id\n" +
+                "where\n" +
+                "\tpi.patient_id = :patientId\n" +
+                "\tand piy.name = 'Health ID';";
+        Query query = this.sessionFactory.openSession().createSQLQuery(getPatientHealthId);
+        query.setParameter("patientId", patientId);
+        List<String> healthIds = query.list();
+        return healthIds.size() > 0 ? healthIds.get(0) : null;
+    }
 }
 
+x

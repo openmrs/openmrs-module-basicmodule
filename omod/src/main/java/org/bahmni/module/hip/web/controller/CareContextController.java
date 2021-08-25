@@ -6,6 +6,7 @@ import org.bahmni.module.hip.web.service.ValidationService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +41,22 @@ public class CareContextController extends BaseRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ClientError.noPatientFound());
         }
         return ResponseEntity.ok(careContextForPatient);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/careContext/new", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    ResponseEntity<?> getNewCareContextForPatient(@RequestParam(required = false) String patientUuid) {
+        if (patientUuid == null || patientUuid.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
+        }
+        if (!validationService.isValidPatient(patientUuid))
+            return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
+        Object careContextForPatient = careContextService.newCareContextsForPatient(patientUuid);
+        if (careContextForPatient.equals(false)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ClientError.noPatientFound());
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(careContextForPatient);
     }
 }

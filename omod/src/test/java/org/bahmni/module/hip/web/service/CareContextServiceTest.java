@@ -1,8 +1,10 @@
 package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.api.dao.CareContextRepository;
+import org.bahmni.module.hip.api.dao.ExistingPatientDao;
 import org.bahmni.module.hip.model.PatientCareContext;
 import org.junit.Test;
+import org.openmrs.api.PatientService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +15,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class CareContextServiceTest {
-    private CareContextRepository careContextRepository = mock(CareContextRepository.class);
+    private final CareContextRepository careContextRepository = mock(CareContextRepository.class);
+    private final PatientService patientService = mock(PatientService.class);
+    private final ValidationService validationService = mock(ValidationService.class);
+    private final ExistingPatientDao existingPatientDao = mock(ExistingPatientDao.class);
 
-    private CareContextService careContextServiceObject = new CareContextService(careContextRepository);
+    private final CareContextService careContextServiceObject = new CareContextService(careContextRepository, patientService, validationService, existingPatientDao);
 
     @Test
     public void shouldFetchAllCareContextForPatient() {
