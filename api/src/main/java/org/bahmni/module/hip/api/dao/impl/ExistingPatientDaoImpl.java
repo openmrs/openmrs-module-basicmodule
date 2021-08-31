@@ -70,5 +70,3 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
         return healthIds.size() > 0 ? healthIds.get(0) : null;
     }
 }
-
-x

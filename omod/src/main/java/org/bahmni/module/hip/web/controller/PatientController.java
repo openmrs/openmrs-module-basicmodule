@@ -35,9 +35,8 @@ public class PatientController {
                                           @RequestParam String patientYearOfBirth,
                                           @RequestParam String patientGender,
                                           @RequestParam String phoneNumber) {
-        List<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber);
-        matchingPatients.addAll(existingPatientService.getMatchingPatients(patientName,
-                Integer.parseInt(patientYearOfBirth), patientGender));
+        List<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber,patientName,
+                Integer.parseInt(patientYearOfBirth), patientGender);
         if (matchingPatients.size() == 0) {
             return ResponseEntity.ok().body(new ErrorRepresentation(new Error(
                     ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));

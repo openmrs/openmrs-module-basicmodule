@@ -24,6 +24,7 @@ public class ExistingPatientService {
     private final LocationService locationService;
     private static final String REGISTRATION_DESK = "Registration Desk";
     private static final String PRIMARY_CONTACT = "primaryContact";
+    private static final String HEALTH_ID = "Health ID";
     static final int PHONE_NUMBER_LENGTH = 10;
 
     @Autowired
@@ -32,6 +33,23 @@ public class ExistingPatientService {
         this.patientService = patientService;
         this.existingPatientDao = existingPatientDao;
         this.locationService = locationService;
+    }
+
+    public List<Patient> getMatchingPatients(String phoneNumber, String patientName, int patientYearOfBirth, String patientGender) {
+        List<Patient> matchingPatients = getMatchingPatients(phoneNumber);
+        matchingPatients.addAll(getMatchingPatients(patientName, patientYearOfBirth, patientGender));
+        matchingPatients.removeIf(patient -> !getHealthId(patient).equals(""));
+        return matchingPatients;
+    }
+
+    public String getHealthId(Patient patient) {
+        String healthId = "";
+        try {
+            healthId = patient.getPatientIdentifier(HEALTH_ID).getIdentifier();
+        } catch (NullPointerException ignored) {
+
+        }
+        return healthId;
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {

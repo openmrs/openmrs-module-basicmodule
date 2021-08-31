@@ -100,32 +100,6 @@ public class PatientControllerTest extends TestCase {
     }
 
     @Test
-    public void shouldReturnPatientRecordWhenMatchingPatientFoundWithPhoneNumber() throws Exception {
-        Patient patient = mock(Patient.class);
-        List<Patient> patients = new ArrayList<>();
-        patients.add(patient);
-        ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc", "9123456780");
-        List<ExistingPatient> existingPatients = new ArrayList<>();
-        existingPatients.add(existingPatient);
-        when(existingPatientService.getMatchingPatients("+91-9876543210"))
-                .thenReturn(patients);
-        when(existingPatientService.getMatchingPatientDetails(patients))
-                .thenReturn(Collections.singletonList(existingPatient));
-
-        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients", RestConstants.VERSION_1))
-                .param("patientName", "sam tom")
-                .param("patientYearOfBirth", "1985")
-                .param("patientGender", "M")
-                .param("phoneNumber", "+91-9876543210")
-                .accept(MediaType.APPLICATION_JSON))
-                .andReturn();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String value = objectMapper.writeValueAsString(existingPatients);
-        assertEquals(value,
-                mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
     public void shouldReturnPatientUuidWhenTheHealthIdIsLinkedToAPatient() throws Exception {
         when(existingPatientService.getPatientWithHealthId("abc.xyz@sbx")).thenReturn("bd27cbfd-b395-4a8a-af71-b27535b85e31");
         mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/" + "abc.xyz@sbx", RestConstants.VERSION_1))
