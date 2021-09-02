@@ -55,7 +55,27 @@
             update global_property set property_value=(SELECT CONCAT(property_value,',',uuid) from patient_identifier_type where name = 'Health ID') where property = 'bahmni.extraPatientIdentifierTypes';
         </sql>
     </changeSet>
-    
+
+    <changeSet id="Adding-PHR-Address-IdentifierType-220420210516"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from patient_identifier_type where name='PHR Address'</sqlCheck>
+        </preConditions>
+        <comment>Adding PHR Address Identifier type</comment>
+        <sql>
+            insert into patient_identifier_type( name, description,creator, uuid, uniqueness_behavior, location_behavior, date_created) Select 'PHR Address','PHR Address identifier type',creator,uuid(),'UNIQUE','NOT_USED',now() from users where username='admin';
+        </sql>
+    </changeSet>
+
+    <changeSet id="updating-extraPatientIdentifierTypes-PHR address-global-property"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='PHR Address'</sqlCheck>
+        </preConditions>
+        <comment>Adding PHR Address Identifier type</comment>
+        <sql>
+            update global_property set property_value=(SELECT CONCAT(property_value,',',uuid) from patient_identifier_type where name = 'PHR Address') where property = 'bahmni.extraPatientIdentifierTypes';
+        </sql>
+    </changeSet>
+
     <changeSet id="adding-undisclosed-to-gender-global-property" author="Mahesh">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
