@@ -26,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
@@ -58,13 +59,12 @@ public class PatientControllerTest extends TestCase {
         Patient patient = mock(Patient.class);
         List<Patient> patients = new ArrayList<>();
         patients.add(patient);
-
         ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc", "9123456780");
         when(existingPatientService.getMatchingPatients("+91-9876543210"))
                 .thenReturn(new ArrayList<>());
         when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
                 .thenReturn(patients);
-        when(existingPatientService.getMatchingPatientDetails(patients))
+        when(existingPatientService.getMatchingPatientDetails(new HashSet<>(patients)))
                 .thenReturn(Collections.singletonList(existingPatient));
 
         mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients", RestConstants.VERSION_1))

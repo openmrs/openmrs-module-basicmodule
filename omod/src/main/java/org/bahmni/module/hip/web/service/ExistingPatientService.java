@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ExistingPatientService {
@@ -35,8 +37,9 @@ public class ExistingPatientService {
         this.locationService = locationService;
     }
 
-    public List<Patient> getMatchingPatients(String phoneNumber, String patientName, int patientYearOfBirth, String patientGender) {
-        List<Patient> matchingPatients = getMatchingPatients(phoneNumber);
+    public Set<Patient> getMatchingPatients(String phoneNumber, String patientName, int patientYearOfBirth, String patientGender) {
+        Set<Patient> matchingPatients = new HashSet<>();
+        matchingPatients.addAll(getMatchingPatients(phoneNumber));
         matchingPatients.addAll(getMatchingPatients(patientName, patientYearOfBirth, patientGender));
         matchingPatients.removeIf(patient -> !getHealthId(patient).equals(""));
         return matchingPatients;
@@ -112,7 +115,7 @@ public class ExistingPatientService {
         return patients;
     }
 
-    public List<ExistingPatient> getMatchingPatientDetails(List<Patient> matchingPatients) {
+    public List<ExistingPatient> getMatchingPatientDetails(Set<Patient> matchingPatients) {
         List<ExistingPatient> existingPatients = new ArrayList<>();
         for (Patient patient : matchingPatients) {
             existingPatients.add(

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
+import java.util.Set;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip")
 @RestController
@@ -35,7 +36,7 @@ public class PatientController {
                                           @RequestParam String patientYearOfBirth,
                                           @RequestParam String patientGender,
                                           @RequestParam String phoneNumber) {
-        List<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber,patientName,
+        Set<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber,patientName,
                 Integer.parseInt(patientYearOfBirth), patientGender);
         if (matchingPatients.size() == 0) {
             return ResponseEntity.ok().body(new ErrorRepresentation(new Error(
