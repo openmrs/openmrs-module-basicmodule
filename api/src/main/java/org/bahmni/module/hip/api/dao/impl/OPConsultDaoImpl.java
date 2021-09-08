@@ -6,6 +6,7 @@ import org.openmrs.api.ObsService;
 import org.openmrs.module.emrapi.conditionslist.Condition;
 import org.openmrs.module.emrapi.conditionslist.ConditionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.openmrs.api.OrderService;
 import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,16 +18,21 @@ public class OPConsultDaoImpl implements OPConsultDao {
     public static final String CONSULTATION = "Consultation";
     private static final String CODED_DIAGNOSIS = "Coded Diagnosis";
     public static final String OPD = "OPD";
+    public static final String ORDER_ACTION = "DISCONTINUE";
+    public static final String LAB_ORDER = "Lab Order";
+    public static final String RADIOLOGY_ORDER = "Radiology Order";
     private final ObsService obsService;
     private final ConditionService conditionService;
     private final EncounterService encounterService;
+    private final OrderService orderService;
 
 
     @Autowired
-    public OPConsultDaoImpl(ObsService obsService, ConditionService conditionService, EncounterService encounterService) {
+    public OPConsultDaoImpl(ObsService obsService, ConditionService conditionService, EncounterService encounterService, OrderService orderService) {
         this.obsService = obsService;
         this.conditionService = conditionService;
         this.encounterService = encounterService;
+        this.orderService = orderService;
     }
 
 
@@ -149,5 +155,21 @@ public class OPConsultDaoImpl implements OPConsultDao {
             }
         }
         return proceduresObsMap;
+    }
+
+    private boolean matchesVisitType(String visitType, Order order) {
+        return order.getEncounter().getVisit().getVisitType().getName().equals(visitType);
+    }
+
+    @Override
+    public List<Order> getOrders(Patient patient, String visit, Date fromDate, Date toDate) {
+        List<Order> orders = orderService.getAllOrdersByPatient(patient);
+        List<Order> orderMap = orders.stream().filter(order -> matchesVisitType(visit, order))
+                .filter(order -> order.getEncounter().getVisit().getStartDatetime().after(fromDate))
+                .filter(order -> order.getEncounter().getVisit().getStartDatetime().before(toDate))
+                .filter(order -> order.getDateStopped() == null && order.getAction().toString()!= ORDER_ACTION)
+                .filter(order -> order.getOrderType().getName().equals(LAB_ORDER) || order.getOrderType().getName().equals(RADIOLOGY_ORDER))
+                .collect(Collectors.toList());
+        return orderMap;
     }
 }

@@ -126,6 +126,15 @@ public class FHIRUtils {
         return type;
     }
 
+    public static CodeableConcept getOrdersType(){
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("721963009");
+        coding.setDisplay("Order");
+        return type;
+    }
+
     public static void addToBundleEntry(Bundle bundle, Resource resource, boolean useIdPart) {
         String resourceType = resource.getResourceType().toString();
         String id = useIdPart ? resource.getIdElement().getIdPart() : resource.getId();

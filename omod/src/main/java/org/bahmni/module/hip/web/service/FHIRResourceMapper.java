@@ -1,10 +1,24 @@
 package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Dosage;
+import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
@@ -130,6 +144,15 @@ public class FHIRResourceMapper {
 
     public Observation mapToObs(Obs obs) {
         return observationTranslator.toFhirResource(obs);
+    }
+
+    public ServiceRequest mapToOrder(Order order){
+        ServiceRequest serviceRequest = new ServiceRequest();
+        CodeableConcept concept = new CodeableConcept();
+        concept.setText(order.getConcept().getDisplayString());
+        serviceRequest.setCode(concept);
+        serviceRequest.setId(order.getUuid());
+        return serviceRequest;
     }
 
     public Procedure mapToProcedure(Obs obs) {
