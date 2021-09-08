@@ -132,7 +132,7 @@ public class ExistingPatientService {
     }
 
     private String getPhoneNumber(Patient patient) {
-        String phoneNumber = "";
+        String phoneNumber = " ";
         try {
             phoneNumber = patient.getAttribute(PRIMARY_CONTACT).getValue();
         } catch (NullPointerException ignored) {
