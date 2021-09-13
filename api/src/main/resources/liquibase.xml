@@ -66,7 +66,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="updating-extraPatientIdentifierTypes-PHR address-global-property"  author="Gogia, Swati">
+    <changeSet id="updating-PHRAddress-global-property"  author="Gogia, Swati">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='PHR Address'</sqlCheck>
         </preConditions>
