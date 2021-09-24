@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.controller;
 
+import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.client.model.Error;
 import org.bahmni.module.hip.web.client.model.ErrorCode;
 import org.bahmni.module.hip.web.client.model.ErrorRepresentation;
@@ -60,5 +61,13 @@ public class PatientController {
             return ResponseEntity.ok()
                     .body(new ErrorRepresentation(new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    ResponseEntity<?> perform(@RequestParam String healthId, @RequestParam String action) {
+        if (existingPatientService.getStatus(healthId, action)) return ResponseEntity.ok().body("");
+        else
+            return ResponseEntity.ok().body(ClientError.patientIdentifierNotFound());
     }
 }
