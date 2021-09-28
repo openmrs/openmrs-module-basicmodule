@@ -44,5 +44,8 @@ public class ClientError {
     public static ClientError invalidProgramName(){
         return new ClientError(ErrorCode.INVALID_PROGRAM_NAME.getValue(),"Program specified does not exist");
     }
+    public static ClientError patientIdentifierNotFound(){
+        return new ClientError(ErrorCode.PATIENT_IDENTIFIER_NOT_FOUND.getValue(),"Patient identifier not found");
+    }
 
 }

@@ -14,7 +14,8 @@ public enum ErrorCode {
     INVALID_VISIT_TYPE(1505),
     NO_PROGRAM_NAME_SUPPLIED (1506),
     NO_PROGRAM_ID_SUPPLIED(1507),
-    INVALID_PROGRAM_NAME(1508);
+    INVALID_PROGRAM_NAME(1508),
+    PATIENT_IDENTIFIER_NOT_FOUND(1509);
     private final int value;
 
     ErrorCode(int val) {

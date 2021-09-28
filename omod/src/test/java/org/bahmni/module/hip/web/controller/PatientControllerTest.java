@@ -3,6 +3,7 @@ package org.bahmni.module.hip.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import junit.framework.TestCase;
 import org.bahmni.module.hip.web.TestConfiguration;
+import org.bahmni.module.hip.web.client.ClientError;
 import org.bahmni.module.hip.web.client.model.Error;
 import org.bahmni.module.hip.web.client.model.ErrorCode;
 import org.bahmni.module.hip.web.client.model.ErrorRepresentation;
@@ -15,6 +16,7 @@ import org.openmrs.Patient;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -119,6 +121,34 @@ public class PatientControllerTest extends TestCase {
         String value = objectMapper.writeValueAsString(new ErrorRepresentation
                 (new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
         assertEquals(value,
+                mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnNoPatientIdentifierFoundIfHealthIsNotPresent() throws Exception {
+        when(existingPatientService.getStatus("test@sbx", "DELETED")).thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
+                .param("healthId", "test@sbx")
+                .param("action", "DELETED")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String value = objectMapper.writeValueAsString(ClientError.patientIdentifierNotFound());
+        assertEquals(value,
+                mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldNotReturnErrorWhenHealthIdIsRemoved() throws Exception {
+        when(existingPatientService.getStatus("test@sbx", "DELETED")).thenReturn(true);
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
+                .param("healthId", "test@sbx")
+                .param("action", "DELETED")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+        assertEquals("",
                 mvcResult.getResponse().getContentAsString());
     }
 }

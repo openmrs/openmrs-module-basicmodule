@@ -3,8 +3,10 @@ package org.bahmni.module.hip.web.service;
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.dao.PatientDao;
 import org.bahmni.module.hip.api.dao.ExistingPatientDao;
+import org.bahmni.module.hip.web.client.model.Status;
 import org.bahmni.module.hip.web.model.ExistingPatient;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,25 @@ public class ExistingPatientService {
 
         }
         return healthId;
+    }
+
+    public boolean getStatus(String healthId, String action) {
+        if (action.equals(Status.DELETED.toString())) {
+            return isHealthIdRemoved(healthId);
+        }
+        return false;
+    }
+
+    private boolean isHealthIdRemoved(String healthId) {
+        Patient patient = patientService.getPatientByUuid(getPatientWithHealthId(healthId));
+        try {
+            PatientIdentifier patientIdentifier = patient.getPatientIdentifier(HEALTH_ID);
+            patient.removeIdentifier(patientIdentifier);
+            patientService.purgePatientIdentifier(patientIdentifier);
+            return true;
+        } catch (NullPointerException ignored) {
+            return false;
+        }
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {
