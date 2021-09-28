@@ -140,12 +140,40 @@ public class PatientControllerTest extends TestCase {
     }
 
     @Test
+    public void shouldReturnNoPatientIdentifierFoundIfHealthIsNotPresentInDeactivation() throws Exception {
+        when(existingPatientService.getStatus("test@sbx", "DEACTIVATED")).thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
+                .param("healthId", "test@sbx")
+                .param("action", "DEACTIVATED")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String value = objectMapper.writeValueAsString(ClientError.patientIdentifierNotFound());
+        assertEquals(value,
+                mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
     public void shouldNotReturnErrorWhenHealthIdIsRemoved() throws Exception {
         when(existingPatientService.getStatus("test@sbx", "DELETED")).thenReturn(true);
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
                 .param("healthId", "test@sbx")
                 .param("action", "DELETED")
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+        assertEquals("",
+                mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldNotReturnErrorWhenHealthIdIsDeactivated() throws Exception {
+        when(existingPatientService.getStatus("test@sbx", "DEACTIVATED")).thenReturn(true);
+
+        MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
+                .param("healthId", "test@sbx")
+                .param("action", "DEACTIVATED")
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
         assertEquals("",

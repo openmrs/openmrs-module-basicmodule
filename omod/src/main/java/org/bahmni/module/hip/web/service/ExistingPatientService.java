@@ -29,6 +29,7 @@ public class ExistingPatientService {
     private static final String REGISTRATION_DESK = "Registration Desk";
     private static final String PRIMARY_CONTACT = "primaryContact";
     private static final String HEALTH_ID = "Health ID";
+    private static final String PHR_ADDRESS = "PHR Address";
     static final int PHONE_NUMBER_LENGTH = 10;
 
     @Autowired
@@ -58,14 +59,27 @@ public class ExistingPatientService {
     }
 
     public boolean getStatus(String healthId, String action) {
+        Patient patient = patientService.getPatientByUuid(getPatientWithHealthId(healthId));
         if (action.equals(Status.DELETED.toString())) {
-            return isHealthIdRemoved(healthId);
+            return isHealthIdRemoved(patient);
+        }
+        if (action.equals(Status.DEACTIVATED.toString())) {
+            return isHealthIdVoided(patient);
         }
         return false;
     }
 
-    private boolean isHealthIdRemoved(String healthId) {
-        Patient patient = patientService.getPatientByUuid(getPatientWithHealthId(healthId));
+    private boolean isHealthIdVoided(Patient patient) {
+        try {
+            PatientIdentifier patientIdentifier = patient.getPatientIdentifier(PHR_ADDRESS);
+            patientService.voidPatientIdentifier(patientIdentifier,Status.DEACTIVATED.toString());
+            return true;
+        } catch (NullPointerException ignored) {
+            return false;
+        }
+    }
+
+    private boolean isHealthIdRemoved(Patient patient) {
         try {
             PatientIdentifier patientIdentifier = patient.getPatientIdentifier(HEALTH_ID);
             patient.removeIdentifier(patientIdentifier);
