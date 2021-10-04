@@ -17,12 +17,14 @@ public class ValidationService {
     private final VisitService visitService;
     private final PatientService patientService;
     private final ProgramWorkflowService programWorkflowService;
+    private final ExistingPatientService existingPatientService;
 
     @Autowired
-    public ValidationService(VisitService visitService, PatientService patientService, ProgramWorkflowService programWorkflowService) {
+    public ValidationService(VisitService visitService, PatientService patientService, ProgramWorkflowService programWorkflowService, ExistingPatientService existingPatientService) {
         this.patientService = patientService;
         this.visitService = visitService;
         this.programWorkflowService = programWorkflowService;
+        this.existingPatientService = existingPatientService;
     }
 
     public boolean isValidVisit(String visitType) {
@@ -45,5 +47,16 @@ public class ValidationService {
         if(program != null)
             return true;
         return false;
+    }
+
+    public boolean isValidHealthId(String healthId){
+        Patient patient = null;
+        try {
+            patient = patientService.getPatientByUuid(existingPatientService.getPatientWithHealthId(healthId));
+        }
+        catch (NullPointerException ignored){
+
+        }
+        return patient != null;
     }
 }

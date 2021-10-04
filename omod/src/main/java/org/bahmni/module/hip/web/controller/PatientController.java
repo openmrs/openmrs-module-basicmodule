@@ -6,6 +6,7 @@ import org.bahmni.module.hip.web.client.model.ErrorCode;
 import org.bahmni.module.hip.web.client.model.ErrorRepresentation;
 import org.bahmni.module.hip.web.model.ExistingPatient;
 import org.bahmni.module.hip.web.service.ExistingPatientService;
+import org.bahmni.module.hip.web.service.ValidationService;
 import org.openmrs.Patient;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,12 @@ import java.util.Set;
 @RestController
 public class PatientController {
     private final ExistingPatientService existingPatientService;
+    private final ValidationService validationService;
 
     @Autowired
-    public PatientController(ExistingPatientService existingPatientService) {
+    public PatientController(ExistingPatientService existingPatientService, ValidationService validationService) {
         this.existingPatientService = existingPatientService;
+        this.validationService = validationService;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/existingPatients", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,8 +69,10 @@ public class PatientController {
     @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
     ResponseEntity<?> perform(@RequestParam String healthId, @RequestParam String action) {
-        if (existingPatientService.getStatus(healthId, action)) return ResponseEntity.ok().body("");
-        else
+        if(!validationService.isValidHealthId(healthId)) {
             return ResponseEntity.ok().body(ClientError.patientIdentifierNotFound());
+        }
+        existingPatientService.perform(healthId, action);
+        return ResponseEntity.ok().body("");
     }
 }
