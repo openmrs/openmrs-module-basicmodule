@@ -17,7 +17,8 @@ public class ValidationServiceTest {
     private final VisitService visitService = mock(VisitService.class);
     private final PatientService patientService = mock(PatientService.class);
     private final ProgramWorkflowService programWorkflowService = mock(ProgramWorkflowService.class);
-    private final ValidationService validationService = new ValidationService(visitService,patientService, programWorkflowService);
+    private final ExistingPatientService existingPatientService = mock(ExistingPatientService.class);
+    private final ValidationService validationService = new ValidationService(visitService,patientService, programWorkflowService, existingPatientService);
     @Test
     public void shouldReturnTrueForValidVisitType() {
         String visitType = "OPD";

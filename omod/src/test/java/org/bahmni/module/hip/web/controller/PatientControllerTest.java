@@ -9,6 +9,7 @@ import org.bahmni.module.hip.web.client.model.ErrorCode;
 import org.bahmni.module.hip.web.client.model.ErrorRepresentation;
 import org.bahmni.module.hip.web.model.ExistingPatient;
 import org.bahmni.module.hip.web.service.ExistingPatientService;
+import org.bahmni.module.hip.web.service.ValidationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,9 @@ public class PatientControllerTest extends TestCase {
 
     @Autowired
     private ExistingPatientService existingPatientService;
+
+    @Autowired
+    private ValidationService validationService;
 
     @Before
     public void setup() {
@@ -126,7 +130,7 @@ public class PatientControllerTest extends TestCase {
 
     @Test
     public void shouldReturnNoPatientIdentifierFoundIfHealthIsNotPresent() throws Exception {
-        when(existingPatientService.getStatus("test@sbx", "DELETED")).thenReturn(false);
+        when(validationService.isValidHealthId("test@sbx")).thenReturn(false);
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
                 .param("healthId", "test@sbx")
@@ -141,7 +145,7 @@ public class PatientControllerTest extends TestCase {
 
     @Test
     public void shouldReturnNoPatientIdentifierFoundIfHealthIsNotPresentInDeactivation() throws Exception {
-        when(existingPatientService.getStatus("test@sbx", "DEACTIVATED")).thenReturn(false);
+        when(validationService.isValidHealthId("test@sbx")).thenReturn(false);
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
                 .param("healthId", "test@sbx")
@@ -156,7 +160,7 @@ public class PatientControllerTest extends TestCase {
 
     @Test
     public void shouldNotReturnErrorWhenHealthIdIsRemoved() throws Exception {
-        when(existingPatientService.getStatus("test@sbx", "DELETED")).thenReturn(true);
+        when(validationService.isValidHealthId("test@sbx")).thenReturn(true);
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
                 .param("healthId", "test@sbx")
@@ -169,7 +173,7 @@ public class PatientControllerTest extends TestCase {
 
     @Test
     public void shouldNotReturnErrorWhenHealthIdIsDeactivated() throws Exception {
-        when(existingPatientService.getStatus("test@sbx", "DEACTIVATED")).thenReturn(true);
+        when(validationService.isValidHealthId("test@sbx")).thenReturn(true);
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients/status", RestConstants.VERSION_1))
                 .param("healthId", "test@sbx")
