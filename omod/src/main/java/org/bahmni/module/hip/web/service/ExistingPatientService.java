@@ -73,17 +73,21 @@ public class ExistingPatientService {
 
     private void voidHealthId(Patient patient) {
         try {
-            PatientIdentifier patientIdentifier = patient.getPatientIdentifier(PHR_ADDRESS);
-            if(!patientIdentifier.getVoided()) patientService.voidPatientIdentifier(patientIdentifier,Status.DEACTIVATED.toString());
+            PatientIdentifier patientIdentifierPhr = patient.getPatientIdentifier(PHR_ADDRESS);
+            PatientIdentifier patientIdentifierHealthId = patient.getPatientIdentifier(HEALTH_ID);
+            if (!patientIdentifierPhr.getVoided() && !patientIdentifierHealthId.getVoided()) {
+                patientService.voidPatientIdentifier(patientIdentifierPhr, Status.DEACTIVATED.toString());
+                patientService.voidPatientIdentifier(patientIdentifierHealthId, Status.DEACTIVATED.toString());
+            }
         } catch (NullPointerException ignored) {
         }
     }
 
-    private void unVoidHealthId(Patient patient,String healthId) {
+    private void unVoidHealthId(Patient patient, String phrAddress) {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
-            for (PatientIdentifier patientIdentifier:patientIdentifiers) {
-                if(patientIdentifier.getIdentifier().equals(healthId)){
+            for (PatientIdentifier patientIdentifier : patientIdentifiers) {
+                if (patientIdentifier.getIdentifier().equals(phrAddress) || patientIdentifier.getIdentifierType().getName().equals(HEALTH_ID)) {
                     patientIdentifier.setVoided(false);
                     patientService.savePatientIdentifier(patientIdentifier);
                 }
@@ -94,9 +98,13 @@ public class ExistingPatientService {
 
     private void removeHealthId(Patient patient) {
         try {
-            PatientIdentifier patientIdentifier = patient.getPatientIdentifier(PHR_ADDRESS);
-            patient.removeIdentifier(patientIdentifier);
-            patientService.purgePatientIdentifier(patientIdentifier);
+            PatientIdentifier patientIdentifierPHR = patient.getPatientIdentifier(PHR_ADDRESS);
+            PatientIdentifier patientIdentifierHealthId = patient.getPatientIdentifier(HEALTH_ID);
+            if (patientIdentifierHealthId != null && patientIdentifierPHR != null) {
+                patient.removeIdentifier(patientIdentifierPHR);
+                patient.removeIdentifier(patientIdentifierHealthId);
+                patientService.savePatient(patient);
+            }
         } catch (NullPointerException ignored) {
         }
     }
