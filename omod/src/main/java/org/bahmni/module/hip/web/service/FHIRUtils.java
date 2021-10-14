@@ -117,6 +117,15 @@ public class FHIRUtils {
         return type;
     }
 
+    public static CodeableConcept getCarePlanType() {
+        CodeableConcept type = new CodeableConcept();
+        Coding coding = type.addCoding();
+        coding.setSystem(Constants.FHIR_SCT_SYSTEM);
+        coding.setCode("736368003"); // don't know
+        coding.setDisplay("Care Plan");
+        return type;
+    }
+
     public static CodeableConcept getProcedureType() {
         CodeableConcept type = new CodeableConcept();
         Coding coding = type.addCoding();
