@@ -199,4 +199,18 @@ public class ExistingPatientService {
     public String getPatientWithHealthId(String healthId) {
         return existingPatientDao.getPatientUuidWithHealthId(healthId);
     }
+
+    public boolean isHealthIdVoided(String uuid){
+        Patient patient = patientService.getPatientByUuid(uuid);
+        Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
+        try {
+            for (PatientIdentifier patientIdentifier:patientIdentifiers) {
+                if(patientIdentifier.getIdentifierType().getName().equals(HEALTH_ID) || patientIdentifier.getIdentifierType().getName().equals(PHR_ADDRESS)){
+                   return patientIdentifier.getVoided();
+                }
+            }
+        } catch (NullPointerException ignored) {
+        }
+        return false;
+    }
 }

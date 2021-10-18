@@ -5,6 +5,7 @@ import org.bahmni.module.hip.web.client.model.Error;
 import org.bahmni.module.hip.web.client.model.ErrorCode;
 import org.bahmni.module.hip.web.client.model.ErrorRepresentation;
 import org.bahmni.module.hip.web.model.ExistingPatient;
+import org.bahmni.module.hip.web.model.ExistingPatientIdentifier;
 import org.bahmni.module.hip.web.service.ExistingPatientService;
 import org.bahmni.module.hip.web.service.ValidationService;
 import org.openmrs.Patient;
@@ -57,10 +58,13 @@ public class PatientController {
     public ResponseEntity<?> getExistingPatientsWithHealthId(@PathVariable String healthId) {
         String patientUuid = existingPatientService.getPatientWithHealthId(healthId);
         if (patientUuid != null) {
+            boolean isHealthIdVoided = existingPatientService.isHealthIdVoided(patientUuid);
+            ExistingPatientIdentifier existingPatientIdentifier = new ExistingPatientIdentifier(patientUuid,isHealthIdVoided);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(patientUuid);
-        } else {
+                    .body(existingPatientIdentifier);
+        }
+        else {
             return ResponseEntity.ok()
                     .body(new ErrorRepresentation(new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
         }
@@ -74,5 +78,15 @@ public class PatientController {
         }
         existingPatientService.perform(healthId, action);
         return ResponseEntity.ok().body("");
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/identifier/{patientUuid}")
+    @ResponseBody
+    public ResponseEntity<?> getIdentifierStatus(@PathVariable String patientUuid) {
+        boolean isHealthIdVoided = existingPatientService.isHealthIdVoided(patientUuid);
+        ExistingPatientIdentifier existingPatientIdentifier = new ExistingPatientIdentifier(patientUuid,isHealthIdVoided);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .body(existingPatientIdentifier);
     }
 }
