@@ -170,15 +170,17 @@ public class ExistingPatientService {
     public List<ExistingPatient> getMatchingPatientDetails(Set<Patient> matchingPatients) {
         List<ExistingPatient> existingPatients = new ArrayList<>();
         for (Patient patient : matchingPatients) {
-            existingPatients.add(
-                    new ExistingPatient(
-                            patient.getGivenName() + " " + patient.getMiddleName() + " " + patient.getFamilyName(),
-                            getYearOfBirth(patient.getBirthdate()).toString(),
-                            getAddress(patient),
-                            patient.getGender(),
-                            patient.getUuid(),
-                            getPhoneNumber(patient))
-            );
+            if (!isHealthIdVoided(patient.getUuid())) {
+                existingPatients.add(
+                        new ExistingPatient(
+                                patient.getGivenName() + " " + patient.getMiddleName() + " " + patient.getFamilyName(),
+                                getYearOfBirth(patient.getBirthdate()).toString(),
+                                getAddress(patient),
+                                patient.getGender(),
+                                patient.getUuid(),
+                                getPhoneNumber(patient))
+                );
+            }
         }
         return existingPatients;
     }
