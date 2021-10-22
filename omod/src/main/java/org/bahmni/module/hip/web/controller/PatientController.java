@@ -58,11 +58,9 @@ public class PatientController {
     public ResponseEntity<?> getExistingPatientsWithHealthId(@PathVariable String healthId) {
         String patientUuid = existingPatientService.getPatientWithHealthId(healthId);
         if (patientUuid != null) {
-            boolean isHealthIdVoided = existingPatientService.isHealthIdVoided(patientUuid);
-            ExistingPatientIdentifier existingPatientIdentifier = new ExistingPatientIdentifier(patientUuid,isHealthIdVoided);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(existingPatientIdentifier);
+                    .body(patientUuid);
         }
         else {
             return ResponseEntity.ok()
@@ -80,13 +78,12 @@ public class PatientController {
         return ResponseEntity.ok().body("");
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/identifier/{patientUuid}")
+    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/IdDeactivationStatus/{patientUuid}")
     @ResponseBody
     public ResponseEntity<?> getIdentifierStatus(@PathVariable String patientUuid) {
         boolean isHealthIdVoided = existingPatientService.isHealthIdVoided(patientUuid);
-        ExistingPatientIdentifier existingPatientIdentifier = new ExistingPatientIdentifier(patientUuid,isHealthIdVoided);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .body(existingPatientIdentifier);
+                    .body(isHealthIdVoided);
     }
 }
