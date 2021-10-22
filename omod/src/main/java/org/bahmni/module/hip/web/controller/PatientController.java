@@ -5,7 +5,6 @@ import org.bahmni.module.hip.web.client.model.Error;
 import org.bahmni.module.hip.web.client.model.ErrorCode;
 import org.bahmni.module.hip.web.client.model.ErrorRepresentation;
 import org.bahmni.module.hip.web.model.ExistingPatient;
-import org.bahmni.module.hip.web.model.ExistingPatientIdentifier;
 import org.bahmni.module.hip.web.service.ExistingPatientService;
 import org.bahmni.module.hip.web.service.ValidationService;
 import org.openmrs.Patient;
