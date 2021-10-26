@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,9 +40,9 @@ public class ConsultationService {
         this.diagnosticReportService = diagnosticReportService;
     }
 
-    public Map<Encounter, List<OpenMrsCondition>> getEncounterChiefComplaintsMap(Patient patient, String visitType, Date fromDate, Date toDate) {
+    public ConcurrentHashMap<Encounter, List<OpenMrsCondition>> getEncounterChiefComplaintsMap(Patient patient, String visitType, Date fromDate, Date toDate) {
         List<Obs> chiefComplaints = consultationDao.getChiefComplaints(patient, visitType, fromDate, toDate);
-        HashMap<Encounter, List<OpenMrsCondition>> encounterChiefComplaintsMap = new HashMap<>();
+        ConcurrentHashMap<Encounter, List<OpenMrsCondition>> encounterChiefComplaintsMap = new ConcurrentHashMap<>();
 
         for (Obs o : chiefComplaints) {
             if(!encounterChiefComplaintsMap.containsKey(o.getEncounter())){
