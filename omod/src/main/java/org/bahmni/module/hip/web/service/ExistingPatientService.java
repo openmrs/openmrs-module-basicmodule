@@ -98,11 +98,11 @@ public class ExistingPatientService {
 
     private void removeHealthId(Patient patient,PatientIdentifier patientIdentifierPHR,PatientIdentifier patientIdentifierHealthId) {
         try {
-            if (patientIdentifierHealthId != null && patientIdentifierPHR != null) {
-                patient.removeIdentifier(patientIdentifierPHR);
+            if (patientIdentifierHealthId != null)
                 patient.removeIdentifier(patientIdentifierHealthId);
-                patientService.savePatient(patient);
-            }
+            if(patientIdentifierPHR != null)
+                patient.removeIdentifier(patientIdentifierPHR);
+            patientService.savePatient(patient);
         } catch (NullPointerException ignored) {
         }
     }
