@@ -60,7 +60,8 @@ public class PatientController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .body(patientUuid);
-        } else {
+        }
+        else {
             return ResponseEntity.ok()
                     .body(new ErrorRepresentation(new Error(ErrorCode.PATIENT_ID_NOT_FOUND, "No patient found")));
         }
@@ -74,5 +75,14 @@ public class PatientController {
         }
         existingPatientService.perform(healthId, action);
         return ResponseEntity.ok().body("");
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/IdDeactivationStatus/{patientUuid}")
+    @ResponseBody
+    public ResponseEntity<?> getIdentifierStatus(@PathVariable String patientUuid) {
+        boolean isHealthIdVoided = existingPatientService.isHealthIdVoided(patientUuid);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .body(isHealthIdVoided);
     }
 }

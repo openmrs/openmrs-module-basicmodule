@@ -170,15 +170,17 @@ public class ExistingPatientService {
     public List<ExistingPatient> getMatchingPatientDetails(Set<Patient> matchingPatients) {
         List<ExistingPatient> existingPatients = new ArrayList<>();
         for (Patient patient : matchingPatients) {
-            existingPatients.add(
-                    new ExistingPatient(
-                            patient.getGivenName() + " " + patient.getMiddleName() + " " + patient.getFamilyName(),
-                            getYearOfBirth(patient.getBirthdate()).toString(),
-                            getAddress(patient),
-                            patient.getGender(),
-                            patient.getUuid(),
-                            getPhoneNumber(patient))
-            );
+            if (!isHealthIdVoided(patient.getUuid())) {
+                existingPatients.add(
+                        new ExistingPatient(
+                                patient.getGivenName() + " " + patient.getMiddleName() + " " + patient.getFamilyName(),
+                                getYearOfBirth(patient.getBirthdate()).toString(),
+                                getAddress(patient),
+                                patient.getGender(),
+                                patient.getUuid(),
+                                getPhoneNumber(patient))
+                );
+            }
         }
         return existingPatients;
     }
@@ -204,5 +206,19 @@ public class ExistingPatientService {
 
     public String getPatientWithHealthId(String healthId) {
         return existingPatientDao.getPatientUuidWithHealthId(healthId);
+    }
+
+    public boolean isHealthIdVoided(String uuid){
+        Patient patient = patientService.getPatientByUuid(uuid);
+        Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
+        try {
+            for (PatientIdentifier patientIdentifier:patientIdentifiers) {
+                if(patientIdentifier.getIdentifierType().getName().equals(HEALTH_ID) || patientIdentifier.getIdentifierType().getName().equals(PHR_ADDRESS)){
+                   return patientIdentifier.getVoided();
+                }
+            }
+        } catch (NullPointerException ignored) {
+        }
+        return false;
     }
 }
