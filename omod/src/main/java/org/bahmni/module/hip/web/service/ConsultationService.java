@@ -11,14 +11,14 @@ import org.openmrs.module.emrapi.conditionslist.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -42,6 +42,59 @@ public class ConsultationService {
 
     public ConcurrentHashMap<Encounter, List<OpenMrsCondition>> getEncounterChiefComplaintsMap(Patient patient, String visitType, Date fromDate, Date toDate) {
         List<Obs> chiefComplaints = consultationDao.getChiefComplaints(patient, visitType, fromDate, toDate);
+        return getEncounterListConcurrentHashMapForChiefComplaint(chiefComplaints);
+    }
+
+    public ConcurrentHashMap<Encounter, List<OpenMrsCondition>> getEncounterChiefComplaintsMapForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
+        List<Obs> chiefComplaints = consultationDao.getChiefComplaintForProgram(programName,fromDate, toDate,patient);
+        return getEncounterListConcurrentHashMapForChiefComplaint(chiefComplaints);
+    }
+
+    public Map<Encounter, List<Obs>> getEncounterPhysicalExaminationMap(Patient patient, String visitType, Date fromDate, Date toDate) {
+        List<Obs> physicalExaminations = consultationDao.getPhysicalExamination(patient, visitType, fromDate, toDate);
+        return getEncounterListMapForPhysicalExamination(physicalExaminations);
+    }
+
+    public Map<Encounter, List<Obs>> getEncounterPhysicalExaminationMapForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
+        List<Obs> physicalExaminations = consultationDao.getPhysicalExaminationForProgram(programName,fromDate,toDate,patient);
+        return getEncounterListMapForPhysicalExamination(physicalExaminations);
+    }
+
+    public Map<Encounter, List<OpenMrsCondition>> getEncounterMedicalHistoryConditionsMap(Patient patient, String visit, Date fromDate, Date toDate) {
+        Map<Encounter, List<Condition>> medicalHistoryConditionsMap =  opConsultDao.getMedicalHistoryConditions(patient, visit, fromDate, toDate);
+        List<Obs> medicalHistoryDiagnosisMap =  opConsultDao.getMedicalHistoryDiagnosis(patient, visit, fromDate, toDate);
+        return getEncounterListMapForMedicalHistory(medicalHistoryConditionsMap, medicalHistoryDiagnosisMap);
+    }
+
+    public Map<Encounter, List<OpenMrsCondition>> getEncounterMedicalHistoryConditionsMapForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
+        Map<Encounter, List<Condition>> medicalHistoryConditionsMap =  opConsultDao.getMedicalHistoryConditionsForProgram(programName,fromDate,toDate,patient);
+        List<Obs> medicalHistoryDiagnosisMap =  opConsultDao.getMedicalHistoryDiagnosisForProgram(programName,fromDate,toDate,patient);
+        return getEncounterListMapForMedicalHistory(medicalHistoryConditionsMap, medicalHistoryDiagnosisMap);
+    }
+
+    public Map<Encounter, List<Obs>> getEncounterPatientDocumentsMap(String visitType, Date fromDate, Date toDate, Patient patient) {
+        final int patientDocumentEncounterType = 9;
+        Map<Encounter, List<Obs>> encounterDiagnosticReportsMap = diagnosticReportService.getAllObservationsForVisits(fromDate, toDate, patient, visitType);
+        return getEncounterListMapForPatientDocument(patientDocumentEncounterType, encounterDiagnosticReportsMap);
+    }
+
+    public Map<Encounter, List<Obs>> getEncounterPatientDocumentsMapForProgram(String programName, Date fromDate, Date toDate, Patient patient,String programEnrollmentId) {
+        final int patientDocumentEncounterType = 9;
+        Map<Encounter, List<Obs>> encounterDiagnosticReportsMap = diagnosticReportService.getAllObservationsForPrograms(fromDate,toDate,patient, programName, programEnrollmentId) ;
+        return getEncounterListMapForPatientDocument(patientDocumentEncounterType, encounterDiagnosticReportsMap);
+    }
+
+    public Map<Encounter, List<Order>> getEncounterOrdersMap(String visitType, Date fromDate, Date toDate, Patient patient) {
+        List<Order> orders = consultationDao.getOrders(patient, visitType, fromDate, toDate);
+        return getEncounterListMapForOrders(orders);
+    }
+
+    public Map<Encounter, List<Order>> getEncounterOrdersMapForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
+        List<Order> orders = consultationDao.getOrdersForProgram(programName,fromDate, toDate,patient);
+        return getEncounterListMapForOrders(orders);
+    }
+
+    private ConcurrentHashMap<Encounter, List<OpenMrsCondition>> getEncounterListConcurrentHashMapForChiefComplaint(List<Obs> chiefComplaints) {
         ConcurrentHashMap<Encounter, List<OpenMrsCondition>> encounterChiefComplaintsMap = new ConcurrentHashMap<>();
 
         for (Obs o : chiefComplaints) {
@@ -53,9 +106,21 @@ public class ConsultationService {
         return encounterChiefComplaintsMap;
     }
 
-    public Map<Encounter, List<OpenMrsCondition>> getEncounterMedicalHistoryConditionsMap(Patient patient, String visit, Date fromDate, Date toDate) {
-        Map<Encounter, List<Condition>> medicalHistoryConditionsMap =  opConsultDao.getMedicalHistoryConditions(patient, visit, fromDate, toDate);
-        List<Obs> medicalHistoryDiagnosisMap =  opConsultDao.getMedicalHistoryDiagnosis(patient, visit, fromDate, toDate);
+    private Map<Encounter, List<Obs>> getEncounterListMapForPhysicalExamination(List<Obs> physicalExaminations) {
+        Map<Encounter, List<Obs>> encounterPhysicalExaminationMap = new HashMap<>();
+        for (Obs physicalExamination : physicalExaminations) {
+            Encounter encounter = physicalExamination.getEncounter();
+            List<Obs> groupMembers = new ArrayList<>();
+            getGroupMembersOfObs(physicalExamination, groupMembers);
+            if (!encounterPhysicalExaminationMap.containsKey(encounter)) {
+                encounterPhysicalExaminationMap.put(encounter, new ArrayList<>());
+            }
+            encounterPhysicalExaminationMap.get(encounter).addAll(groupMembers);
+        }
+        return encounterPhysicalExaminationMap;
+    }
+
+    private Map<Encounter, List<OpenMrsCondition>> getEncounterListMapForMedicalHistory(Map<Encounter, List<Condition>> medicalHistoryConditionsMap, List<Obs> medicalHistoryDiagnosisMap) {
         Map<Encounter, List<OpenMrsCondition>> encounterMedicalHistoryMap = new HashMap<>();
 
         for(Map.Entry<Encounter, List<Condition>> medicalHistory : medicalHistoryConditionsMap.entrySet()){
@@ -75,24 +140,7 @@ public class ConsultationService {
         return encounterMedicalHistoryMap;
     }
 
-    public Map<Encounter, List<Obs>> getEncounterPhysicalExaminationMap(Patient patient, String visitType, Date fromDate, Date toDate) {
-        List<Obs> physicalExaminations = consultationDao.getPhysicalExamination(patient, visitType, fromDate, toDate);
-        Map<Encounter, List<Obs>> encounterPhysicalExaminationMap = new HashMap<>();
-        for (Obs physicalExamination : physicalExaminations) {
-            Encounter encounter = physicalExamination.getEncounter();
-            List<Obs> groupMembers = new ArrayList<>();
-            getGroupMembersOfObs(physicalExamination, groupMembers);
-            if (!encounterPhysicalExaminationMap.containsKey(encounter)) {
-                encounterPhysicalExaminationMap.put(encounter, new ArrayList<>());
-            }
-            encounterPhysicalExaminationMap.get(encounter).addAll(groupMembers);
-        }
-        return encounterPhysicalExaminationMap;
-    }
-
-    public Map<Encounter, List<Obs>> getEncounterPatientDocumentsMap(String visitType, Date fromDate, Date toDate, Patient patient) {
-        final int patientDocumentEncounterType = 9;
-        Map<Encounter, List<Obs>> encounterDiagnosticReportsMap = diagnosticReportService.getAllObservationsForVisits(fromDate, toDate, patient, visitType);
+    private Map<Encounter, List<Obs>> getEncounterListMapForPatientDocument(int patientDocumentEncounterType, Map<Encounter, List<Obs>> encounterDiagnosticReportsMap) {
         Map<Encounter, List<Obs>> encounterPatientDocumentsMap = new HashMap<>();
         for (Encounter e : encounterDiagnosticReportsMap.keySet()) {
             List<Obs> patientDocuments = e.getAllObs().stream().
@@ -105,8 +153,7 @@ public class ConsultationService {
         return encounterPatientDocumentsMap;
     }
 
-    public Map<Encounter, List<Order>> getEncounterOrdersMap(String visitType, Date fromDate, Date toDate, Patient patient) {
-        List<Order> orders = consultationDao.getOrders(patient, visitType, fromDate, toDate);
+    private Map<Encounter, List<Order>> getEncounterListMapForOrders(List<Order> orders) {
         Map<Encounter, List<Order>> encounterOrdersMap = new HashMap<>();
         for(Order order : orders){
             if (!encounterOrdersMap.containsKey(order.getEncounter())) {
