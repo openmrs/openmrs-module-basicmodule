@@ -31,6 +31,12 @@
 
         <!-- Provided Dependencies -->
         <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>episodes-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.bahmni.module</groupId>
             <artifactId>hipmodule-api</artifactId>
             <version>0.1-SNAPSHOT</version>

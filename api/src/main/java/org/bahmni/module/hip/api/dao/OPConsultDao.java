@@ -13,4 +13,6 @@ public interface OPConsultDao {
     Map<Encounter, List<Condition>> getMedicalHistoryConditions(Patient patient, String visit, Date fromDate, Date toDate);
     List<Obs> getMedicalHistoryDiagnosis(Patient patient, String visit, Date fromDate, Date toDate);
     List<Obs> getProcedures(Patient patient, String visit, Date fromDate, Date toDate);
+    Map<Encounter, List<Condition>> getMedicalHistoryConditionsForProgram(String programName, Date fromDate, Date toDate, Patient patient);
+    List<Obs> getMedicalHistoryDiagnosisForProgram(String programName, Date fromDate, Date toDate, Patient patient);
 }

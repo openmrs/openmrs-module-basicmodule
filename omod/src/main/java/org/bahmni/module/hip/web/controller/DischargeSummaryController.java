@@ -1,9 +1,9 @@
 package org.bahmni.module.hip.web.controller;
 
 import org.bahmni.module.hip.web.client.ClientError;
-import org.bahmni.module.hip.web.model.DischargeSummaryBundle;
-import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.model.BundledDischargeSummaryResponse;
+import org.bahmni.module.hip.web.model.DateRange;
+import org.bahmni.module.hip.web.model.DischargeSummaryBundle;
 import org.bahmni.module.hip.web.service.DischargeSummaryService;
 import org.bahmni.module.hip.web.service.ValidationService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.List;
 
@@ -54,6 +56,31 @@ public class DischargeSummaryController  extends BaseRestController {
 
         List<DischargeSummaryBundle> dischargeSummaryBundle = dischargeSummaryService.getDischargeSummaryForVisit(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType);
 
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(new BundledDischargeSummaryResponse(dischargeSummaryBundle));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/program", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    ResponseEntity<?> get(
+            @RequestParam String patientId,
+            @RequestParam String fromDate,
+            @RequestParam String toDate,
+            @RequestParam String programName,
+            @RequestParam String programEnrollmentId
+    ) throws ParseException, UnsupportedEncodingException {
+        programName = URLDecoder.decode(programName, "UTF-8");
+        if (patientId == null || patientId.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
+        if (programName == null || programName.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noProgramNameProvided());
+        if (!validationService.isValidProgram(programName))
+            return ResponseEntity.badRequest().body(ClientError.invalidProgramName());
+        if (!validationService.isValidPatient(patientId))
+            return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
+        List<DischargeSummaryBundle> dischargeSummaryBundle =
+                dischargeSummaryService.getDischargeSummaryForProgram(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), programName, programEnrollmentId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledDischargeSummaryResponse(dischargeSummaryBundle));

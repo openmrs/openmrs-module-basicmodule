@@ -104,7 +104,7 @@ public class DiagnosticReportService {
 
     }
 
-    private HashMap<Encounter, List<Obs>> getAllObservationsForPrograms(Date fromDate, Date toDate,
+    public HashMap<Encounter, List<Obs>> getAllObservationsForPrograms(Date fromDate, Date toDate,
                                                                         Patient patient,
                                                                         String programName,
                                                                         String programEnrollmentId) {
