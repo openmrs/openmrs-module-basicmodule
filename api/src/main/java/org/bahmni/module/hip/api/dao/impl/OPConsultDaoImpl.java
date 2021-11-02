@@ -125,6 +125,28 @@ public class OPConsultDaoImpl implements OPConsultDao {
     }
 
     @Override
+    public List<Obs> getProceduresForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
+        List<PatientProgram> patientPrograms = programWorkflowService.getPatientPrograms(patient,programWorkflowService.getProgramByName(programName), fromDate, toDate,null,null,false);
+        Set<PatientProgram> patientProgramSet = new HashSet<>(patientPrograms);
+        List<Obs> proceduresObsSet= new ArrayList<>();
+        for (PatientProgram patientProgram: patientProgramSet) {
+            Episode episode = episodeService.getEpisodeForPatientProgram(patientProgram);
+            Set<Encounter> encounterSet = episode.getEncounters();
+            for (Encounter encounter : encounterSet) {
+                for (Obs o : encounter.getAllObs()) {
+                    if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
+                            && !o.getVoided()
+                            && Objects.equals(o.getConcept().getName().getName(), PROCEDURE_NOTES)
+                    ) {
+                        proceduresObsSet.add(o);
+                    }
+                }
+            }
+        }
+        return proceduresObsSet;
+    }
+
+    @Override
     public Map<Encounter, List<Condition>> getMedicalHistoryConditionsForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
         final String conditionStatusHistoryOf = "HISTORY_OF";
         final String conditionStatusActive = "ACTIVE";

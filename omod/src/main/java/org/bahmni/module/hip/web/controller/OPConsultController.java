@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.List;
 
@@ -47,6 +49,32 @@ public class OPConsultController extends BaseRestController {
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
         List<OPConsultBundle> opConsultBundle =
                 opConsultService.getOpConsultsForVisit(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(new BundledOPConsultResponse(opConsultBundle));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/program", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    ResponseEntity<?> get(
+            @RequestParam String patientId,
+            @RequestParam String fromDate,
+            @RequestParam String toDate,
+            @RequestParam String programName,
+            @RequestParam String programEnrollmentId)
+            throws ParseException , UnsupportedEncodingException {
+        programName = URLDecoder.decode(programName, "UTF-8");
+        if (patientId == null || patientId.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
+        if (programName == null || programName.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noProgramNameProvided());
+        if (!validationService.isValidProgram(programName))
+            return ResponseEntity.badRequest().body(ClientError.invalidProgramName());
+        if (!validationService.isValidPatient(patientId))
+            return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
+        List<OPConsultBundle> opConsultBundle =
+                opConsultService.getOpConsultsForProgram(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), programName, programEnrollmentId);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

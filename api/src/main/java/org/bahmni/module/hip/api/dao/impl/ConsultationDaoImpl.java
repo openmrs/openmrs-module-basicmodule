@@ -34,6 +34,7 @@ public class ConsultationDaoImpl implements ConsultationDao {
     public static final String ORDER_ACTION = "DISCONTINUE";
     public static final ArrayList<String> ORDER_TYPES = new ArrayList<String>() {{
         add("Lab Order");
+        add(RADIOLOGY_ORDER);
     }};
     private final ProgramWorkflowService programWorkflowService;
     private final EpisodeService episodeService;
@@ -120,7 +121,6 @@ public class ConsultationDaoImpl implements ConsultationDao {
 
     @Override
     public List<Order> getOrders(Patient patient, String visit, Date fromDate, Date toDate) {
-        if(Objects.equals(visit, OPD)) { ORDER_TYPES.add(RADIOLOGY_ORDER); }
         List<Order> orders = orderService.getAllOrdersByPatient(patient);
         return orders.stream().filter(order -> matchesVisitType(visit, order))
                               .filter(order -> order.getEncounter().getVisit().getStartDatetime().after(fromDate))
