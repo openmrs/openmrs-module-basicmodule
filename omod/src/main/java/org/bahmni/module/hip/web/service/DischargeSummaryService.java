@@ -1,7 +1,5 @@
 package org.bahmni.module.hip.web.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bahmni.module.hip.api.dao.DischargeSummaryDao;
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
 import org.bahmni.module.hip.web.model.DateRange;
