@@ -95,7 +95,7 @@ public class FHIRUtils {
         Coding coding = type.addCoding();
         coding.setSystem(Constants.FHIR_SCT_SYSTEM);
         coding.setCode("422843007");
-        coding.setDisplay("Chief complaint");
+        coding.setDisplay("Chief complaint section");
         return type;
     }
 

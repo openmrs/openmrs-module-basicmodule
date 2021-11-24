@@ -8,6 +8,8 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Procedure;
@@ -16,6 +18,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Enumerations;
 
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
@@ -170,6 +173,7 @@ public class FHIRResourceMapper {
     public DocumentReference mapToDocumentDocumentReference(Obs obs) {
         DocumentReference documentReference = new DocumentReference();
         documentReference.setId(obs.getUuid());
+        documentReference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
         List<DocumentReference.DocumentReferenceContentComponent> contents = new ArrayList<>();
         try {
             List<Attachment> attachments = getAttachments(obs);
@@ -213,13 +217,15 @@ public class FHIRResourceMapper {
         return attachments;
     }
 
-    public Condition mapToCondition(OpenMrsCondition openMrsCondition) {
+    public Condition mapToCondition(OpenMrsCondition openMrsCondition, Patient patient) {
         Condition condition = new Condition();
         CodeableConcept concept = new CodeableConcept();
         concept.setText(openMrsCondition.getName());
         condition.setCode(concept);
+        condition.setSubject(new Reference("Patient/" + patient.getId()));
         condition.setId(openMrsCondition.getUuid());
         condition.setRecordedDate(openMrsCondition.getRecordedDate());
+        condition.setClinicalStatus(new CodeableConcept(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
         return condition;
     }
 
@@ -231,6 +237,9 @@ public class FHIRResourceMapper {
         ServiceRequest serviceRequest = new ServiceRequest();
         CodeableConcept concept = new CodeableConcept();
         concept.setText(order.getConcept().getDisplayString());
+        serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+        serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+        serviceRequest.setSubject(new Reference("Patient/"+ order.getPatient().getUuid()));
         serviceRequest.setCode(concept);
         serviceRequest.setId(order.getUuid());
         return serviceRequest;
@@ -273,8 +282,9 @@ public class FHIRResourceMapper {
                 displayName(order.getDuration()) +
                 displayName(order.getDurationUnits() == null ? "" : order.getDurationUnits().getName());
         MedicationRequest medicationRequest = medicationRequestTranslator.toFhirResource(order);
+        medicationRequest.setSubject(new Reference("Patient/"+ order.getPatient().getUuid()));
         Dosage dosage = medicationRequest.getDosageInstruction().get(0);
-        dosage.setText(dosingInstrutions);
+        dosage.setText(dosingInstrutions.trim());
         return medicationRequest;
     }
 

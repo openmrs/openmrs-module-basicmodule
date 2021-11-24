@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -83,14 +84,18 @@ public class FhirDischargeSummary {
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsDischargeSummary.getEncounter().getEncounterProviders());
         List<CarePlan> carePlans = openMrsDischargeSummary.getCarePlanObs().stream().
                 map(fhirResourceMapper::mapToCarePlan).collect(Collectors.toList());
-        List<Condition> chiefComplaints = openMrsDischargeSummary.getChiefComplaints().stream().
-                map(fhirResourceMapper::mapToCondition).collect(Collectors.toList());
+        List<Condition> chiefComplaints = new ArrayList<>();
+        for(int i=0;i<openMrsDischargeSummary.getChiefComplaints().size();i++){
+            chiefComplaints.add(fhirResourceMapper.mapToCondition(openMrsDischargeSummary.getChiefComplaints().get(i), patient));
+        }
         List<MedicationRequest> medicationRequestsList = openMrsDischargeSummary.getDrugOrders().stream().
                 map(fhirResourceMapper::mapToMedicationRequest).collect(Collectors.toList());
         List<Medication> medications = openMrsDischargeSummary.getDrugOrders().stream().map(fhirResourceMapper::mapToMedication).
                 filter(medication -> !Objects.isNull(medication)).collect(Collectors.toList());
-        List<Condition> fhirMedicalHistoryList = openMrsDischargeSummary.getMedicalHistory().stream().
-                map(fhirResourceMapper::mapToCondition).collect(Collectors.toList());
+        List<Condition> fhirMedicalHistoryList = new ArrayList<>();
+        for(int i=0;i<openMrsDischargeSummary.getMedicalHistory().size();i++){
+            chiefComplaints.add(fhirResourceMapper.mapToCondition(openMrsDischargeSummary.getMedicalHistory().get(i), patient));
+        }
         List<Observation> physicalExaminations = openMrsDischargeSummary.getPhysicalExaminationObs().stream().
                 map(fhirResourceMapper::mapToObs).collect(Collectors.toList());
         List<DocumentReference> patientDocuments = openMrsDischargeSummary.getPatientDocuments().stream().

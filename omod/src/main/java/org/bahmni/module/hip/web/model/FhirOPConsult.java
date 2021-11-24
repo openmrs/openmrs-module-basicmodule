@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class FhirOPConsult {
@@ -98,10 +99,14 @@ public class FhirOPConsult {
         List<Medication> medications = openMrsOPConsult.getDrugOrders().stream().map(fhirResourceMapper::mapToMedication).
                 filter(medication -> !Objects.isNull(medication)).collect(Collectors.toList());
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsOPConsult.getEncounter().getEncounterProviders());
-        List<Condition> fhirChiefComplaintConditionList = openMrsOPConsult.getChiefComplaintConditions().stream().
-                    map(fhirResourceMapper::mapToCondition).collect(Collectors.toList());
-        List<Condition> fhirMedicalHistoryList = openMrsOPConsult.getMedicalHistoryConditions().stream().
-                    map(fhirResourceMapper::mapToCondition).collect(Collectors.toList());
+        List<Condition> fhirChiefComplaintConditionList = new ArrayList<>();
+        for(int i=0;i<openMrsOPConsult.getChiefComplaintConditions().size();i++){
+            fhirChiefComplaintConditionList.add(fhirResourceMapper.mapToCondition(openMrsOPConsult.getChiefComplaintConditions().get(i), patient));
+        }
+        List<Condition> fhirMedicalHistoryList = new ArrayList<>();
+        for(int i=0;i<openMrsOPConsult.getChiefComplaintConditions().size();i++){
+            fhirMedicalHistoryList.add(fhirResourceMapper.mapToCondition(openMrsOPConsult.getMedicalHistoryConditions().get(i), patient));
+        }
         List<Observation> fhirObservationList = openMrsOPConsult.getObservations().stream().
                     map(fhirResourceMapper::mapToObs).collect(Collectors.toList());
         Procedure procedure = openMrsOPConsult.getProcedure() != null ?
