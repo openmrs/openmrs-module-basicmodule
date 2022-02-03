@@ -88,4 +88,24 @@
         </sql>
     </changeSet>
 
+    <changeSet id="Updating-Health-Id-IdentifierType"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='Health ID'</sqlCheck>
+        </preConditions>
+        <comment>Updating Health Id Identifier type to ABHA</comment>
+        <sql>
+            update patient_identifier_type set name ='ABHA' where name= 'Health ID';
+        </sql>
+    </changeSet>
+
+    <changeSet id="Updating-PHR-Address-IdentifierType"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='PHR Address'</sqlCheck>
+        </preConditions>
+        <comment>Adding PHR Address Identifier type</comment>
+        <sql>
+            update patient_identifier_type set name ='ABHA Address' where name= 'PHR Address';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
