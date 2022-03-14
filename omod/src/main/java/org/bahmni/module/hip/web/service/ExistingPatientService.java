@@ -19,6 +19,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.bahmni.module.hip.web.service.Constants.ABHA;
+import static org.bahmni.module.hip.web.service.Constants.ABHA_ADDRESS;
+
 @Service
 public class ExistingPatientService {
     private final ExistingPatientDao existingPatientDao;
@@ -28,8 +31,6 @@ public class ExistingPatientService {
     private final LocationService locationService;
     private static final String REGISTRATION_DESK = "Registration Desk";
     private static final String PRIMARY_CONTACT = "primaryContact";
-    private static final String HEALTH_ID = "Health ID";
-    private static final String PHR_ADDRESS = "PHR Address";
     static final int PHONE_NUMBER_LENGTH = 10;
 
     @Autowired
@@ -51,7 +52,7 @@ public class ExistingPatientService {
     public String getHealthId(Patient patient) {
         String healthId = "";
         try {
-            healthId = patient.getPatientIdentifier(HEALTH_ID).getIdentifier();
+            healthId = patient.getPatientIdentifier(ABHA).getIdentifier();
         } catch (NullPointerException ignored) {
 
         }
@@ -60,8 +61,8 @@ public class ExistingPatientService {
 
     public void perform(String healthId, String action) {
         Patient patient = patientService.getPatientByUuid(getPatientWithHealthId(healthId));
-        PatientIdentifier patientIdentifierPhr = patient.getPatientIdentifier(PHR_ADDRESS);
-        PatientIdentifier patientIdentifierHealthId = patient.getPatientIdentifier(HEALTH_ID);
+        PatientIdentifier patientIdentifierPhr = patient.getPatientIdentifier(ABHA_ADDRESS);
+        PatientIdentifier patientIdentifierHealthId = patient.getPatientIdentifier(ABHA);
         if (action.equals(Status.DELETED.toString())) {
             removeHealthId(patient,patientIdentifierPhr,patientIdentifierHealthId);
         }
@@ -87,9 +88,11 @@ public class ExistingPatientService {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
             for (PatientIdentifier patientIdentifier : patientIdentifiers) {
-                if (patientIdentifier.getIdentifier().equals(phrAddress) || patientIdentifier.getIdentifierType().getName().equals(HEALTH_ID)) {
-                    patientIdentifier.setVoided(false);
-                    patientService.savePatientIdentifier(patientIdentifier);
+                if (patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS) || patientIdentifier.getIdentifierType().getName().equals(ABHA)) {
+                    if(patientIdentifier.getVoided()){
+                        patientIdentifier.setVoided(false);
+                        patientService.savePatientIdentifier(patientIdentifier);
+                    }
                 }
             }
         } catch (NullPointerException ignored) {
@@ -213,7 +216,7 @@ public class ExistingPatientService {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
             for (PatientIdentifier patientIdentifier:patientIdentifiers) {
-                if(patientIdentifier.getIdentifierType().getName().equals(HEALTH_ID) || patientIdentifier.getIdentifierType().getName().equals(PHR_ADDRESS)){
+                if(patientIdentifier.getIdentifierType().getName().equals(ABHA) || patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS)){
                    return patientIdentifier.getVoided();
                 }
             }
