@@ -28,13 +28,16 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "        when care_context = 'PROGRAM' then value_reference\n" +
                 "        else visit_type_id end as careContextReference,\n" +
                 "    care_context as careContextType,\n" +
-                "    case\n" +
-                "        when care_context = 'PROGRAM' then program_name\n" +
-                "        else visit_type_name end as careContextName\n" +
+                "    case when care_context = 'PROGRAM' then\n" +
+                "        concat (program_name,\" / \",cast(visit_startDate as Date))\n" +
+                "    else\n" +
+                "        concat (visit_type_name,\" / \",cast(visit_startDate as Date))\n" +
+                "    end as careContextName\n" +
                 "from\n" +
                 "    (\n" +
                 "        select\n" +
                 "            ppa.value_reference,p3.uuid,e.patient_id, p2.program_id, vt.visit_type_id , vt.name ,\n" +
+                "            v.date_started As visit_startDate,\n" +
                 "            pp.patient_program_id , p2.name as program_name, vt.name as visit_type_name,\n" +
                 "            case\n" +
                 "                when p2.program_id is null then 'VISIT_TYPE'\n" +
@@ -62,7 +65,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "where\n" +
                 "        a.uuid = :patientUuid\n" +
                 " group by \n" +
-                "care_context, \n" +
+                "visit_startDate, \n" +
                 "case when care_context = 'PROGRAM' \n" +
                 "then patient_program_id else visit_type_id \n" +
                 "end")
@@ -76,7 +79,11 @@ public class CareContextRepositoryImpl implements CareContextRepository {
     public List<PatientCareContext> getNewPatientCareContext(Integer patientId) {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("select\n" +
                 "  care_context_type as careContextType,\n" +
-                "  case when care_context_type = 'PROGRAM' then program_name else visit_type_name end as careContextName,\n" +
+                "  case when care_context_type = 'PROGRAM' then\n" +
+                "  concat (program_name,\" / \",cast(visit_startDate as Date))\n" +
+                "  else\n" +
+                "  concat (visit_type_name,\" / \",cast(visit_startDate as Date))\n" +
+                "  end as careContextName,\n" +
                 "  case when care_context_type = 'PROGRAM' then value_reference else visit_type_id end as careContextReference\n" +
                 "from\n" +
                 "  (\n" +
@@ -86,6 +93,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "      e.patient_id,\n" +
                 "      p2.program_id,\n" +
                 "      vt.visit_type_id,\n" +
+                "      v.date_started As visit_startDate,\n" +
                 "      vt.name,\n" +
                 "      pp.patient_program_id,\n" +
                 "      p2.name as program_name,\n" +
@@ -113,7 +121,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "      )\n" +
                 "  ) as a\n" +
                 "group by\n" +
-                "  careContextName;\n").addScalar("careContextReference", IntegerType.INSTANCE)
+                "  visit_startDate;\n").addScalar("careContextReference", IntegerType.INSTANCE)
                 .addScalar("careContextType", StringType.INSTANCE)
                 .addScalar("careContextName", StringType.INSTANCE);
         query.setParameter("patientId", patientId);
