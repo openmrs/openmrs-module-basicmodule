@@ -53,7 +53,7 @@ public class PrescriptionController extends BaseRestController {
         if (!validationService.isValidPatient(patientId))
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
         List<PrescriptionBundle> prescriptionBundle =
-                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType, visitStartDate);
+                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType, parseDate(visitStartDate));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledPrescriptionResponse(prescriptionBundle));

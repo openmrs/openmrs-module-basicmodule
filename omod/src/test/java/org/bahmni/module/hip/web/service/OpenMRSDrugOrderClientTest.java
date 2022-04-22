@@ -120,7 +120,7 @@ public class OpenMRSDrugOrderClientTest {
                 .thenReturn(patient);
         when(orderService.getOrderTypeByUuid(any())).thenReturn(orderType);
 
-        openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientUUID, dateRange, visitType, visitStartDate.toString());
+        openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientUUID, dateRange, visitType, visitStartDate);
 
         verify(prescriptionOrderDao, times(1))
                 .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), orderType, visitType, visitStartDate);

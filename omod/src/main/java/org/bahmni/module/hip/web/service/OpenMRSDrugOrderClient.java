@@ -11,6 +11,7 @@ import org.openmrs.api.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,11 +50,11 @@ class OpenMRSDrugOrderClient {
         return order.getEncounter().getVisit().getVisitType().getName().equals(visitType);
     }
 
-    List<DrugOrder> getDrugOrdersByDateAndVisitTypeFor(String forPatientUUID, DateRange dateRange, String visitType, String visitStartDate) {
+    List<DrugOrder> getDrugOrdersByDateAndVisitTypeFor(String forPatientUUID, DateRange dateRange, String visitType, Date visitStartDate) {
         Patient patient = patientService.getPatientByUuid(forPatientUUID);
         OrderType drugOrderType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
         return prescriptionOrderDao
-                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType, visitType, parseDate(visitStartDate));
+                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType, visitType, visitStartDate);
     }
 
     List<DrugOrder> getDrugOrdersByDateAndProgramFor(String forPatientUUID, DateRange dateRange, String programName, String programEnrolmentId) {

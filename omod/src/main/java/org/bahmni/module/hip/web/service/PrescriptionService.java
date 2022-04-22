@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class PrescriptionService {
     }
 
 
-    public List<PrescriptionBundle> getPrescriptions(String patientIdUuid, DateRange dateRange, String visitType, String visitStartDate) {
+    public List<PrescriptionBundle> getPrescriptions(String patientIdUuid, DateRange dateRange, String visitType, Date visitStartDate) {
         DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientIdUuid, dateRange, visitType, visitStartDate));
 
         if (drugOrders.isEmpty())
