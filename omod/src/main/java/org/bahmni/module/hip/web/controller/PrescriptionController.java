@@ -35,22 +35,25 @@ public class PrescriptionController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/visit", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    ResponseEntity<?> get(
+    ResponseEntity<?> getPrescriptionForVisit(
             @RequestParam String patientId,
             @RequestParam String fromDate,
             @RequestParam String toDate,
-            @RequestParam String visitType
+            @RequestParam String visitType,
+            @RequestParam String visitStartDate
     ) throws ParseException {
         if (patientId == null || patientId.isEmpty())
             return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
         if (visitType == null || visitType.isEmpty())
+            return ResponseEntity.badRequest().body(ClientError.noVisitTypeProvided());
+        if (visitStartDate == null || visitStartDate.isEmpty())
             return ResponseEntity.badRequest().body(ClientError.noVisitTypeProvided());
         if (!validationService.isValidVisit(visitType))
             return ResponseEntity.badRequest().body(ClientError.invalidVisitType());
         if (!validationService.isValidPatient(patientId))
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
         List<PrescriptionBundle> prescriptionBundle =
-                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType);
+                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType, visitStartDate);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledPrescriptionResponse(prescriptionBundle));
@@ -58,7 +61,7 @@ public class PrescriptionController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/program", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    ResponseEntity<?> get(
+    ResponseEntity<?> getPrescriptionForProgram(
             @RequestParam String patientId,
             @RequestParam String fromDate,
             @RequestParam String toDate,

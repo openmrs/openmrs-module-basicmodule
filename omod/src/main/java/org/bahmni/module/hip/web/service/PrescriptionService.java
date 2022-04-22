@@ -27,8 +27,8 @@ public class PrescriptionService {
     }
 
 
-    public List<PrescriptionBundle> getPrescriptions(String patientIdUuid, DateRange dateRange, String visitType) {
-        DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientIdUuid, dateRange, visitType));
+    public List<PrescriptionBundle> getPrescriptions(String patientIdUuid, DateRange dateRange, String visitType, String visitStartDate) {
+        DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientIdUuid, dateRange, visitType, visitStartDate));
 
         if (drugOrders.isEmpty())
             return new ArrayList<>();

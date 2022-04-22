@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
+
 @Service
 class OpenMRSDrugOrderClient {
 
@@ -47,11 +49,11 @@ class OpenMRSDrugOrderClient {
         return order.getEncounter().getVisit().getVisitType().getName().equals(visitType);
     }
 
-    List<DrugOrder> getDrugOrdersByDateAndVisitTypeFor(String forPatientUUID, DateRange dateRange, String visitType) {
+    List<DrugOrder> getDrugOrdersByDateAndVisitTypeFor(String forPatientUUID, DateRange dateRange, String visitType, String visitStartDate) {
         Patient patient = patientService.getPatientByUuid(forPatientUUID);
         OrderType drugOrderType = orderService.getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
         return prescriptionOrderDao
-                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType, visitType);
+                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), drugOrderType, visitType, parseDate(visitStartDate));
     }
 
     List<DrugOrder> getDrugOrdersByDateAndProgramFor(String forPatientUUID, DateRange dateRange, String programName, String programEnrolmentId) {
