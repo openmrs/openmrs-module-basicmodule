@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.List;
 
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
+import static org.bahmni.module.hip.web.utils.DateUtils.parseDateTime;
 
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/hip/prescriptions")
 @RestController
@@ -53,7 +54,7 @@ public class PrescriptionController extends BaseRestController {
         if (!validationService.isValidPatient(patientId))
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
         List<PrescriptionBundle> prescriptionBundle =
-                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType, parseDate(visitStartDate));
+                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType, parseDateTime(visitStartDate));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledPrescriptionResponse(prescriptionBundle));

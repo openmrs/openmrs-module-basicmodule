@@ -9,4 +9,9 @@ public class DateUtils {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormat.parse(date);
     }
+
+    public static Date parseDateTime(String date) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.parse(date);
+    }
 }

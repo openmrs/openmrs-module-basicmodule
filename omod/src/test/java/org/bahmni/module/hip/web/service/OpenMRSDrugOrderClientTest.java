@@ -123,6 +123,6 @@ public class OpenMRSDrugOrderClientTest {
         openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientUUID, dateRange, visitType, visitStartDate);
 
         verify(prescriptionOrderDao, times(1))
-                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), orderType, visitType, visitStartDate);
+                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), visitType, visitStartDate);
     }
 }
