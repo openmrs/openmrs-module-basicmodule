@@ -29,9 +29,9 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "        else visit_type_id end as careContextReference,\n" +
                 "    care_context as careContextType,\n" +
                 "    case when care_context = 'PROGRAM' then\n" +
-                "        concat (program_name,\" / \",cast(visit_startDate as Date))\n" +
+                "        concat (program_name,\" / \",visit_startDate)\n" +
                 "    else\n" +
-                "        concat (visit_type_name,\" / \",cast(visit_startDate as Date))\n" +
+                "        concat (visit_type_name,\" / \",visit_startDate)\n" +
                 "    end as careContextName\n" +
                 "from\n" +
                 "    (\n" +
@@ -80,9 +80,9 @@ public class CareContextRepositoryImpl implements CareContextRepository {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("select\n" +
                 "  care_context_type as careContextType,\n" +
                 "  case when care_context_type = 'PROGRAM' then\n" +
-                "  concat (program_name,\" / \",cast(visit_startDate as Date))\n" +
+                "  concat (program_name,\" / \",visit_startDate)\n" +
                 "  else\n" +
-                "  concat (visit_type_name,\" / \",cast(visit_startDate as Date))\n" +
+                "  concat (visit_type_name,\" / \",visit_startDate)\n" +
                 "  end as careContextName,\n" +
                 "  case when care_context_type = 'PROGRAM' then value_reference else visit_type_id end as careContextReference\n" +
                 "from\n" +
