@@ -44,9 +44,9 @@ public class DischargeSummaryService {
         Date fromDate = dateRange.getFrom();
         Date toDate = dateRange.getTo();
         Patient patient = patientService.getPatientByUuid(patientUuid);
-        Map<Encounter, List<Obs>> encounterDischargeSummaryMap = getEncounterCarePlanMap(patient, visitType, visitStartDate, fromDate, toDate);
         DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientUuid, dateRange, visitType,visitStartDate));
         Map<Encounter, DrugOrders> encounteredDrugOrdersMap = drugOrders.groupByEncounter();
+        Map<Encounter, List<Obs>> encounterDischargeSummaryMap = getEncounterCarePlanMap(patient, visitType, visitStartDate, fromDate, toDate);
         ConcurrentHashMap<Encounter, List<OpenMrsCondition>> encounterChiefComplaintsMap = consultationService.getEncounterChiefComplaintsMap(patient, visitType, visitStartDate, fromDate, toDate);
         Map<Encounter, List<OpenMrsCondition>> encounterMedicalHistoryMap = consultationService.getEncounterMedicalHistoryConditionsMap(patient, visitType, visitStartDate, fromDate, toDate);
         Map<Encounter, List<Obs>> encounterPhysicalExaminationMap = consultationService.getEncounterPhysicalExaminationMap(patient, visitType, visitStartDate, fromDate, toDate);
