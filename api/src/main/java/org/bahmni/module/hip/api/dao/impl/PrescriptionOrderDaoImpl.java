@@ -37,7 +37,7 @@ public class PrescriptionOrderDaoImpl implements PrescriptionOrderDao {
 
     public List<DrugOrder> getDrugOrders(Patient patient, Date fromDate, Date toDate, String visitType, Date visitStartDate) {
 
-        Integer [] encounterIds = encounterDao.GetEncounterIdsForVisitForPrescriptions(patient.getUuid(), visitType, fromDate, toDate).toArray(new Integer[0]);
+        Integer [] encounterIds = encounterDao.GetEncounterIdsForVisitForPrescriptions(patient.getUuid(), visitType,visitStartDate, fromDate, toDate).toArray(new Integer[0]);
         if(encounterIds.length == 0)
             return new ArrayList< DrugOrder > ();
 
@@ -45,12 +45,12 @@ public class PrescriptionOrderDaoImpl implements PrescriptionOrderDao {
                 .stream()
                 .filter(order -> order.getEncounter().getVisit().getDateCreated().after(fromDate)
                         && order.getEncounter().getVisit().getDateCreated().before(toDate))
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
+
         List<DrugOrder> orderLists = orders.stream()
                 .filter(order ->  Arrays.asList(encounterIds).contains(order.getEncounter().getId())
                           && order.getEncounter().getVisit().getVisitType().getName().equals(visitType)
-                          && order.getOrderType().getUuid().equals(OrderType.DRUG_ORDER_TYPE_UUID)
-                          && order.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime())
+                          && order.getOrderType().getUuid().equals(OrderType.DRUG_ORDER_TYPE_UUID))
                 .map(order -> (DrugOrder) order)
                 .collect(Collectors.toList());
 
