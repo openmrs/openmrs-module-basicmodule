@@ -56,7 +56,7 @@ public class OPConsultControllerTest {
 
         mockMvc.perform(get(String.format("/rest/%s/hip/opConsults/visit", RestConstants.VERSION_1))
                 .param("visitType", "IPD")
-                .param("visitStartDate", "2020-01-01")
+                .param("visitStartDate", "2020-01-01 12:00:00")
                 .param("patientId", "0f90531a-285c-438b-b265-bb3abb4745bd")
                 .param("fromDate", "2020-01-01")
                 .param("toDate", "2020-01-31")
