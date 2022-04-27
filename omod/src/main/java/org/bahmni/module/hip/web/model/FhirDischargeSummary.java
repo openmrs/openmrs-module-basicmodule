@@ -94,7 +94,7 @@ public class FhirDischargeSummary {
                 filter(medication -> !Objects.isNull(medication)).collect(Collectors.toList());
         List<Condition> fhirMedicalHistoryList = new ArrayList<>();
         for(int i=0;i<openMrsDischargeSummary.getMedicalHistory().size();i++){
-            chiefComplaints.add(fhirResourceMapper.mapToCondition(openMrsDischargeSummary.getMedicalHistory().get(i), patient));
+            fhirMedicalHistoryList.add(fhirResourceMapper.mapToCondition(openMrsDischargeSummary.getMedicalHistory().get(i), patient));
         }
         List<Observation> physicalExaminations = openMrsDischargeSummary.getPhysicalExaminationObs().stream().
                 map(fhirResourceMapper::mapToObs).collect(Collectors.toList());
