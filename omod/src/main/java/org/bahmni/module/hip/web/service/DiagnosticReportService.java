@@ -62,11 +62,11 @@ public class DiagnosticReportService {
 
     }
 
-    public List<DiagnosticReportBundle> getDiagnosticReportsForVisit(String patientUuid, DateRange dateRange, String visitType) {
+    public List<DiagnosticReportBundle> getDiagnosticReportsForVisit(String patientUuid, DateRange dateRange, String visitType, Date visitStartDate) {
         Date fromDate = dateRange.getFrom();
         Date toDate = dateRange.getTo();
         Patient patient = patientService.getPatientByUuid(patientUuid);
-        HashMap<Encounter, List<Obs>> encounterListMap = getAllObservationsForVisits(fromDate, toDate, patient, visitType);
+        HashMap<Encounter, List<Obs>> encounterListMap = getAllObservationsForVisits(fromDate, toDate, patient, visitType,visitStartDate);
         List<OpenMrsDiagnosticReport> openMrsDiagnosticReports = OpenMrsDiagnosticReport.fromDiagnosticReport(encounterListMap);
 
         return openMrsDiagnosticReports
@@ -77,9 +77,9 @@ public class DiagnosticReportService {
 
     public HashMap<Encounter, List<Obs>> getAllObservationsForVisits(Date fromDate, Date toDate,
                                                                       Patient patient,
-                                                                      String visitType) {
+                                                                      String visitType, Date visitStartDate) {
         HashMap<Encounter, List<Obs>> encounterListMap = new HashMap<>();
-        List<Integer> encounterIds = encounterDao.GetEncounterIdsForVisitForDiagnosticReport(patient.getUuid(), visitType, fromDate, toDate);
+        List<Integer> encounterIds = encounterDao.GetEncounterIdsForVisitForDiagnosticReport(patient.getUuid(), visitType, visitStartDate, fromDate, toDate);
         List<Encounter> finalList = new ArrayList<>();
         for(Integer encounterId : encounterIds){
             finalList.add(encounterService.getEncounter(encounterId));
@@ -148,9 +148,9 @@ public class DiagnosticReportService {
         List<DiagnosticReportBundle> bundles = labResults.stream().map(fhirBundledDiagnosticReportBuilder::fhirBundleResponseFor).collect(Collectors.toList());
         return bundles;
     }
-    public List<DiagnosticReportBundle> getLabResultsForVisits(String patientUuid, DateRange dateRange, String visittype)
+    public List<DiagnosticReportBundle> getLabResultsForVisits(String patientUuid, DateRange dateRange, String visittype, Date visitStartDate)
     {
-        List<Integer> visitsForVisitType =  hipVisitDao.GetVisitIdsForVisitForLabResults(patientUuid, visittype, dateRange.getFrom(), dateRange.getTo() );
+        List<Integer> visitsForVisitType =  hipVisitDao.GetVisitIdsForVisitForLabResults(patientUuid, visittype,visitStartDate, dateRange.getFrom(), dateRange.getTo() );
         return getLabResults(patientUuid, dateRange, visitsForVisitType);
     }
 

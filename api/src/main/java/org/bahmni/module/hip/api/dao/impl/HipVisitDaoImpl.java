@@ -25,6 +25,7 @@ public class HipVisitDaoImpl implements HipVisitDao {
                     "join encounter e on  e.visit_id = v.visit_id\n" +
                     "where \n" +
                     " vt.name = :visit \n" +
+                    " and v.date_started = :visitStartDate \n" +
                     " and v.date_started between :fromDate and :toDate and\n" +
                     "e.visit_id not in (select e1.visit_id from encounter as e1 inner join episode_encounter on episode_encounter.encounter_id = e1.encounter_id) \n" +
                     "and v.patient_id in (select person_id from person as p2 where p2.uuid = :patientUUID) ;" ;
@@ -53,13 +54,14 @@ public class HipVisitDaoImpl implements HipVisitDao {
     }
 
     @Override
-    public List<Integer> GetVisitIdsForVisitForLabResults(String patientUUID, String visit, Date fromDate, Date toDate) {
+    public List<Integer> GetVisitIdsForVisitForLabResults(String patientUUID, String visit, Date visitStartDate, Date fromDate, Date toDate) {
 
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery(sqlGetVisitIdsForVisitForLabResults);
         query.setParameter("patientUUID", patientUUID);
         query.setParameter("visit", visit);
         query.setParameter("fromDate", fromDate);
         query.setParameter("toDate", toDate);
+        query.setParameter("visitStartDate",new java.sql.Timestamp(visitStartDate.getTime()));
 
         return query.list();
     }
