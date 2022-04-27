@@ -41,13 +41,11 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
     }
 
     @Override
-    public List<Obs> getCarePlan(Patient patient, String visit, Date fromDate, Date toDate) {
+    public List<Obs> getCarePlan(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
         final String obsName = "Discharge Summary";
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
-
+        List<Obs> patientObs = getAllObsBetweenDates(patient,fromDate,toDate);
         List<Obs> carePlanObs = patientObs.stream().filter(obs -> matchesVisitType(visit, obs))
-                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().after(fromDate))
-                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().before(toDate))
+                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime())
                 .filter(obs -> obsName.equals(obs.getConcept().getName().getName()))
                 .filter(obs -> obs.getConcept().getName().getLocalePreferred())
                 .collect(Collectors.toList());
@@ -77,13 +75,12 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
     }
 
     @Override
-    public List<Obs> getProcedures(Patient patient, String visit, Date fromDate, Date toDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
+    public List<Obs> getProcedures(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
+        List<Obs> patientObs = getAllObsBetweenDates(patient,fromDate,toDate);
         List<Obs> proceduresObsMap = new ArrayList<>();
         for(Obs o :patientObs){
             if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                    && o.getEncounter().getVisit().getStartDatetime().after(fromDate)
-                    && o.getEncounter().getVisit().getStartDatetime().before(toDate)
+                    && o.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime()
                     && Objects.equals(o.getEncounter().getVisit().getVisitType().getName(), visit)
                     && o.getObsGroup() == null
                     && Objects.equals(o.getConcept().getName().getName(), PROCEDURE_NOTES)
@@ -115,5 +112,14 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
             }
         }
         return proceduresObsSet;
+    }
+
+    public List<Obs> getAllObsBetweenDates(Patient patient, Date fromDate, Date toDate) {
+        List<Obs> patientObs = obsService.getObservationsByPerson(patient)
+                .stream()
+                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().after(fromDate)
+                        && obs.getEncounter().getVisit().getStartDatetime().before(toDate))
+                .collect(Collectors.toList());
+        return patientObs;
     }
 }
