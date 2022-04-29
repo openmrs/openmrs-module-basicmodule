@@ -14,7 +14,7 @@ import lombok.Setter;
 public class PatientCareContext {
     private String careContextType;
     private String careContextName;
-    private Integer careContextReference;
+    private String careContextReference;
 
     public String getCareContextName() {
         return careContextName;

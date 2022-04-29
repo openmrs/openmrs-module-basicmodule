@@ -58,7 +58,7 @@ public class CareContextControllerTest {
         patientCareContextList.add(PatientCareContext.builder()
                 .careContextName("TB Program")
                 .careContextType("PROGRAM")
-                .careContextReference(4)
+                .careContextReference("SUPER MAN")
                 .build());
         when(careContextService.careContextForPatient(anyString()))
                 .thenReturn(patientCareContextList);
@@ -76,7 +76,7 @@ public class CareContextControllerTest {
         patientCareContextList.add(PatientCareContext.builder()
                 .careContextName("TB Program")
                 .careContextType("PROGRAM")
-                .careContextReference(4)
+                .careContextReference("SUPER MAN")
                 .build());
         when(careContextService.careContextForPatient(anyString()))
                 .thenReturn(patientCareContextList);
@@ -98,7 +98,7 @@ public class CareContextControllerTest {
         patientCareContextList.add(PatientCareContext.builder()
                 .careContextName("TB Program")
                 .careContextType("PROGRAM")
-                .careContextReference(4)
+                .careContextReference("SUPER MAN")
                 .build());
         when(careContextService.careContextForPatient(anyString()))
                 .thenReturn(patientCareContextList);

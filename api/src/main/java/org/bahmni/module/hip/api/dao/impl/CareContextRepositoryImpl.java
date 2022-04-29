@@ -24,9 +24,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
     @Override
     public List<PatientCareContext> getPatientCareContext(String patientUuid) {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("SELECT\n" +
-                "    case\n" +
-                "        when care_context = 'PROGRAM' then value_reference\n" +
-                "        else visit_type_id end as careContextReference,\n" +
+                "    provider_name as careContextReference,\n" +
                 "    care_context as careContextType,\n" +
                 "    case when care_context = 'PROGRAM' then\n" +
                 "        concat (program_name,\" / \",visit_startDate)\n" +
@@ -38,6 +36,9 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "        select\n" +
                 "            ppa.value_reference,p3.uuid,e.patient_id, p2.program_id, vt.visit_type_id , vt.name ,\n" +
                 "            v.date_started As visit_startDate,\n" +
+                "            concat(pn.given_name, ifnull(concat(' ',pn.middle_name),'')," +
+                "            ifnull(concat(' ',pn.family_name_prefix),''), ifnull(concat(' ',pn.family_name),''), " +
+                "            ifnull(concat(' ',pn.family_name2),''), ifnull(concat(' ',pn.family_name_suffix),'')) as provider_name,\n" +
                 "            pp.patient_program_id , p2.name as program_name, vt.name as visit_type_name,\n" +
                 "            case\n" +
                 "                when p2.program_id is null then 'VISIT_TYPE'\n" +
@@ -58,6 +59,8 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "                    and v.patient_id = e.patient_id\n" +
                 "                left join visit_type vt on\n" +
                 "                    v.visit_type_id = vt.visit_type_id\n" +
+                "                left join users u on e.creator = u.user_id\n" +
+                "                left join person_name pn ON pn.person_id = u.person_id\n" +
                 "                left join person p3 on\n" +
                 "                \te.patient_id = p3.person_id\n" +
                 "                left join patient_program_attribute ppa on\n" +
@@ -69,7 +72,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "case when care_context = 'PROGRAM' \n" +
                 "then patient_program_id else visit_type_id \n" +
                 "end")
-                .addScalar("careContextReference", IntegerType.INSTANCE)
+                .addScalar("careContextReference", StringType.INSTANCE)
                 .addScalar("careContextType", StringType.INSTANCE)
                 .addScalar("careContextName", StringType.INSTANCE);
         query.setParameter("patientUuid", patientUuid);
@@ -84,7 +87,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "  else\n" +
                 "  concat (visit_type_name,\" / \",visit_startDate)\n" +
                 "  end as careContextName,\n" +
-                "  case when care_context_type = 'PROGRAM' then value_reference else visit_type_id end as careContextReference\n" +
+                "  provider_name as careContextReference\n" +
                 "from\n" +
                 "  (\n" +
                 "    select\n" +
@@ -94,6 +97,9 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "      p2.program_id,\n" +
                 "      vt.visit_type_id,\n" +
                 "      v.date_started As visit_startDate,\n" +
+                "      concat(pn.given_name, ifnull(concat(' ',pn.middle_name),'')," +
+                "      ifnull(concat(' ',pn.family_name_prefix),''), ifnull(concat(' ',pn.family_name),''), " +
+                "      ifnull(concat(' ',pn.family_name2),''), ifnull(concat(' ',pn.family_name_suffix),'')) as provider_name,\n" +
                 "      vt.name,\n" +
                 "      pp.patient_program_id,\n" +
                 "      p2.name as program_name,\n" +
@@ -110,6 +116,8 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "      left join visit_type vt on v.visit_type_id = vt.visit_type_id\n" +
                 "      left join person p3 on e.patient_id = p3.person_id\n" +
                 "      left join patient_program_attribute ppa on pp.patient_program_id = ppa.patient_program_id\n" +
+                "      left join users u on e.creator = u.user_id\n" +
+                "      left join person_name pn ON pn.person_id = u.person_id\n" +
                 "    where\n" +
                 "      v.visit_id = (\n" +
                 "        select\n" +
@@ -121,7 +129,7 @@ public class CareContextRepositoryImpl implements CareContextRepository {
                 "      )\n" +
                 "  ) as a\n" +
                 "group by\n" +
-                "  visit_startDate;\n").addScalar("careContextReference", IntegerType.INSTANCE)
+                "  visit_startDate;\n").addScalar("careContextReference", StringType.INSTANCE)
                 .addScalar("careContextType", StringType.INSTANCE)
                 .addScalar("careContextName", StringType.INSTANCE);
         query.setParameter("patientId", patientId);
