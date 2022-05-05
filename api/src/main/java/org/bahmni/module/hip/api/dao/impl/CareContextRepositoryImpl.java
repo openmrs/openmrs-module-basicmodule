@@ -24,10 +24,11 @@ public class CareContextRepositoryImpl implements CareContextRepository {
     @Override
     public List<PatientCareContext> getPatientCareContext(String patientUuid) {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("SELECT\n" +
-                "    provider_name as careContextReference,\n" +
+                "    case\n" +
+                "        when care_context = 'PROGRAM' then value_reference\n" +
+                "        else provider_name end as careContextReference,\n" +
                 "    care_context as careContextType,\n" +
-                "    case when care_context = 'PROGRAM' then\n" +
-                "        concat (program_name,\" / \",visit_startDate)\n" +
+                "    case when care_context = 'PROGRAM' then program_name\n" +
                 "    else\n" +
                 "        concat (visit_type_name,\" / \",visit_startDate)\n" +
                 "    end as careContextName\n" +
@@ -82,12 +83,13 @@ public class CareContextRepositoryImpl implements CareContextRepository {
     public List<PatientCareContext> getNewPatientCareContext(Integer patientId) {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("select\n" +
                 "  care_context_type as careContextType,\n" +
-                "  case when care_context_type = 'PROGRAM' then\n" +
-                "  concat (program_name,\" / \",visit_startDate)\n" +
+                "  case when care_context_type = 'PROGRAM' then program_name\n" +
                 "  else\n" +
                 "  concat (visit_type_name,\" / \",visit_startDate)\n" +
                 "  end as careContextName,\n" +
-                "  provider_name as careContextReference\n" +
+                "  case when care_context = 'PROGRAM' then value_reference\n" +
+                "  else\n" +
+                "  provider_name end as careContextReference,\n" +
                 "from\n" +
                 "  (\n" +
                 "    select\n" +
