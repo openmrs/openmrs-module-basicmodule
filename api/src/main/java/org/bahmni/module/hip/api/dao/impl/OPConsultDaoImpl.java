@@ -47,14 +47,12 @@ public class OPConsultDaoImpl implements OPConsultDao {
     }
 
     @Override
-    public Map<Encounter, List<Condition>> getMedicalHistoryConditions(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
+    public Map<Encounter, List<Condition>> getMedicalHistoryConditions(Patient patient, String visit, Date visitStartDate) {
         final String conditionStatusHistoryOf = "HISTORY_OF";
         final String conditionStatusActive = "ACTIVE";
         List<Encounter> encounters = encounterService.getEncountersByPatient(patient)
                                                      .stream()
                                                      .filter(encounter -> Objects.equals(encounter.getEncounterType().getName(), "Consultation") &&
-                                                                         encounter.getDateCreated().after(fromDate) &&
-                                                                         encounter.getDateCreated().before(toDate) &&
                                                                          encounter.getVisit().getStartDatetime().getTime() == visitStartDate.getTime() &&
                                                                          Objects.equals(encounter.getVisit().getVisitType().getName(), visit))
                                                      .collect(Collectors.toList());
@@ -89,18 +87,9 @@ public class OPConsultDaoImpl implements OPConsultDao {
         return encounterConditionsMap;
     }
 
-    public List<Obs> getAllObsBetweenDates(Patient patient, Date fromDate, Date toDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient)
-                .stream()
-                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().after(fromDate)
-                        && obs.getEncounter().getVisit().getStartDatetime().before(toDate))
-                .collect(Collectors.toList());
-        return patientObs;
-    }
-
     @Override
-    public List<Obs> getMedicalHistoryDiagnosis(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
-        List<Obs> patientObs = getAllObsBetweenDates(patient,fromDate,toDate);
+    public List<Obs> getMedicalHistoryDiagnosis(Patient patient, String visit, Date visitStartDate) {
+        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
         List<Obs> medicalHistoryDiagnosisObsMap = new ArrayList<>();
         for(Obs o :patientObs){
             if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
@@ -116,8 +105,8 @@ public class OPConsultDaoImpl implements OPConsultDao {
     }
 
     @Override
-    public List<Obs> getProcedures(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
-        List<Obs> patientObs = getAllObsBetweenDates(patient,fromDate,toDate);
+    public List<Obs> getProcedures(Patient patient, String visit, Date visitStartDate) {
+        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
         List<Obs> proceduresObsMap = new ArrayList<>();
         for(Obs o :patientObs){
             if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)

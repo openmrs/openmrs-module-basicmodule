@@ -48,8 +48,8 @@ public class ConsultationDaoImpl implements ConsultationDao {
     }
 
     @Override
-    public List<Obs> getChiefComplaints(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
-        List<Obs> patientObs = getAllObsBetweenDates(patient, fromDate, toDate);
+    public List<Obs> getChiefComplaints(Patient patient, String visit, Date visitStartDate) {
+        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
         List<Obs> chiefComplaintObsMap = new ArrayList<>();
         for (Obs o : patientObs) {
             if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
@@ -81,15 +81,6 @@ public class ConsultationDaoImpl implements ConsultationDao {
         return obsSet;
     }
 
-    public List<Obs> getAllObsBetweenDates(Patient patient, Date fromDate, Date toDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient)
-                .stream()
-                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().after(fromDate)
-                        && obs.getEncounter().getVisit().getStartDatetime().before(toDate))
-                .collect(Collectors.toList());
-        return patientObs;
-    }
-
     public List<Obs> getAllObs(String programName, Date fromDate, Date toDate, Patient patient) {
         List<PatientProgram> patientPrograms = programWorkflowService.getPatientPrograms(patient, programWorkflowService.getProgramByName(programName), fromDate, toDate, null, null, false);
         Set<PatientProgram> patientProgramSet = new HashSet<>(patientPrograms);
@@ -105,10 +96,10 @@ public class ConsultationDaoImpl implements ConsultationDao {
     }
 
     @Override
-    public List<Obs> getPhysicalExamination(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
+    public List<Obs> getPhysicalExamination(Patient patient, String visit, Date visitStartDate) {
         final String[] formNames = new String[]{"Discharge Summary", "Death Note", "Delivery Note", "Opioid Substitution Therapy - Intake", "Opportunistic Infection",
                 "Safe Abortion", "ECG Notes", "Operative Notes", "USG Notes", "Procedure Notes", "Triage Reference", "History and Examination", "Visit Diagnoses"};
-        List<Obs> patientObs = getAllObsBetweenDates(patient,fromDate,toDate);
+        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
         List<Obs> physicalExaminationObsMap = new ArrayList<>();
         for (Obs o : patientObs) {
             if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
@@ -126,13 +117,8 @@ public class ConsultationDaoImpl implements ConsultationDao {
     }
 
     @Override
-    public List<Order> getOrders(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
-        List<Order> orders = orderService.getAllOrdersByPatient(patient)
-                             .stream()
-                             .filter(order -> order.getEncounter().getVisit().getStartDatetime().after(fromDate)
-                                     && order.getEncounter().getVisit().getStartDatetime().before(toDate))
-                             .collect(Collectors.toList());
-        return orders.stream().filter(order -> matchesVisitType(visit, order))
+    public List<Order> getOrders(Patient patient, String visit, Date visitStartDate) {
+        return orderService.getAllOrdersByPatient(patient).stream().filter(order -> matchesVisitType(visit, order))
                 .filter(order -> order.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime())
                 .filter(order -> order.getDateStopped() == null && !Objects.equals(order.getAction().toString(), ORDER_ACTION))
                 .filter(order -> ORDER_TYPES.contains(order.getOrderType().getName()))
