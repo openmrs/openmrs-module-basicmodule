@@ -51,7 +51,7 @@ public class PrescriptionControllerTest {
     public void shouldReturn200OForValidVisit() throws Exception {
         when(validationService.isValidVisit("IPD")).thenReturn(true);
         when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
-        when(prescriptionService.getPrescriptions(anyString(), any(), anyString(),any()))
+        when(prescriptionService.getPrescriptions(anyString(),anyString(),any()))
                 .thenReturn(EMPTY_LIST);
         mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions/visit", RestConstants.VERSION_1))
                 .param("visitType", "IPD")
@@ -66,7 +66,7 @@ public class PrescriptionControllerTest {
     public void shouldReturn400OnInvalidVisitType() throws Exception {
         when(validationService.isValidVisit("OP")).thenReturn(false);
         when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
-        when(prescriptionService.getPrescriptions(anyString(), any(), anyString(),any()))
+        when(prescriptionService.getPrescriptions(anyString(),anyString(),any()))
                 .thenReturn(EMPTY_LIST);
         mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions/visit", RestConstants.VERSION_1))
                 .param("visitType", "OP")
@@ -82,7 +82,7 @@ public class PrescriptionControllerTest {
     public void shouldReturn400OnInvalidPatientId() throws Exception {
         when(validationService.isValidVisit("IPD")).thenReturn(true);
         when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745")).thenReturn(false);
-        when(prescriptionService.getPrescriptions(anyString(), any(), anyString(),any()))
+        when(prescriptionService.getPrescriptions(anyString(),anyString(),any()))
                 .thenReturn(EMPTY_LIST);
         mockMvc.perform(get(String.format("/rest/%s/hip/prescriptions/visit", RestConstants.VERSION_1))
                 .param("visitType", "IPD")

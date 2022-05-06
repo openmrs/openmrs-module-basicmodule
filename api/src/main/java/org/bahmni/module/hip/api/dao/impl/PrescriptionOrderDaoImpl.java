@@ -35,19 +35,13 @@ public class PrescriptionOrderDaoImpl implements PrescriptionOrderDao {
         this.orderService = orderService;
     }
 
-    public List<DrugOrder> getDrugOrders(Patient patient, Date fromDate, Date toDate, String visitType, Date visitStartDate) {
+    public List<DrugOrder> getDrugOrders(Patient patient,String visitType, Date visitStartDate) {
 
-        Integer [] encounterIds = encounterDao.GetEncounterIdsForVisitForPrescriptions(patient.getUuid(), visitType,visitStartDate, fromDate, toDate).toArray(new Integer[0]);
+        Integer [] encounterIds = encounterDao.GetEncounterIdsForVisitForPrescriptions(patient.getUuid(), visitType,visitStartDate).toArray(new Integer[0]);
         if(encounterIds.length == 0)
             return new ArrayList< DrugOrder > ();
 
-        List<Order> orders = orderService.getAllOrdersByPatient(patient)
-                .stream()
-                .filter(order -> order.getEncounter().getVisit().getDateCreated().after(fromDate)
-                        && order.getEncounter().getVisit().getDateCreated().before(toDate))
-                .collect(Collectors.toList());
-
-        List<DrugOrder> orderLists = orders.stream()
+        List<DrugOrder> orderLists = orderService.getAllOrdersByPatient(patient).stream()
                 .filter(order ->  Arrays.asList(encounterIds).contains(order.getEncounter().getId())
                           && order.getEncounter().getVisit().getVisitType().getName().equals(visitType)
                           && order.getOrderType().getUuid().equals(OrderType.DRUG_ORDER_TYPE_UUID))

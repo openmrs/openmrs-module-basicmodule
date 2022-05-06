@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
@@ -53,8 +54,9 @@ public class PrescriptionController extends BaseRestController {
             return ResponseEntity.badRequest().body(ClientError.invalidVisitType());
         if (!validationService.isValidPatient(patientId))
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
-        List<PrescriptionBundle> prescriptionBundle =
-                prescriptionService.getPrescriptions(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType, parseDateTime(visitStartDate));
+        List<PrescriptionBundle> prescriptionBundle = new ArrayList<>();
+        if(parseDate(visitStartDate).compareTo(parseDate(fromDate)) >= 0 && parseDate(visitStartDate).compareTo(parseDate(toDate)) < 0)
+            prescriptionBundle = prescriptionService.getPrescriptions(patientId, visitType, parseDateTime(visitStartDate));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledPrescriptionResponse(prescriptionBundle));

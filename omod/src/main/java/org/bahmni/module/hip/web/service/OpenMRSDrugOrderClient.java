@@ -49,10 +49,10 @@ class OpenMRSDrugOrderClient {
         return order.getEncounter().getVisit().getVisitType().getName().equals(visitType);
     }
 
-    List<DrugOrder> getDrugOrdersByDateAndVisitTypeFor(String forPatientUUID, DateRange dateRange, String visitType, Date visitStartDate) {
+    List<DrugOrder> getDrugOrdersByDateAndVisitTypeFor(String forPatientUUID,String visitType, Date visitStartDate) {
         Patient patient = patientService.getPatientByUuid(forPatientUUID);
         return prescriptionOrderDao
-                .getDrugOrders(patient, dateRange.getFrom(), dateRange.getTo(), visitType, visitStartDate);
+                .getDrugOrders(patient, visitType, visitStartDate);
     }
 
     List<DrugOrder> getDrugOrdersByDateAndProgramFor(String forPatientUUID, DateRange dateRange, String programName, String programEnrolmentId) {
