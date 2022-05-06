@@ -40,19 +40,17 @@ public class DischargeSummaryService {
         this.consultationService = consultationService;
     }
 
-    public List<DischargeSummaryBundle> getDischargeSummaryForVisit(String patientUuid, DateRange dateRange, String visitType, Date visitStartDate) {
-        Date fromDate = dateRange.getFrom();
-        Date toDate = dateRange.getTo();
+    public List<DischargeSummaryBundle> getDischargeSummaryForVisit(String patientUuid, String visitType, Date visitStartDate) {
         Patient patient = patientService.getPatientByUuid(patientUuid);
-        DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientUuid, dateRange, visitType,visitStartDate));
+        DrugOrders drugOrders = new DrugOrders(openMRSDrugOrderClient.getDrugOrdersByDateAndVisitTypeFor(patientUuid, visitType,visitStartDate));
         Map<Encounter, DrugOrders> encounteredDrugOrdersMap = drugOrders.groupByEncounter();
-        Map<Encounter, List<Obs>> encounterDischargeSummaryMap = getEncounterCarePlanMap(patient, visitType, visitStartDate, fromDate, toDate);
-        ConcurrentHashMap<Encounter, List<OpenMrsCondition>> encounterChiefComplaintsMap = consultationService.getEncounterChiefComplaintsMap(patient, visitType, visitStartDate, fromDate, toDate);
-        Map<Encounter, List<OpenMrsCondition>> encounterMedicalHistoryMap = consultationService.getEncounterMedicalHistoryConditionsMap(patient, visitType, visitStartDate, fromDate, toDate);
-        Map<Encounter, List<Obs>> encounterPhysicalExaminationMap = consultationService.getEncounterPhysicalExaminationMap(patient, visitType, visitStartDate, fromDate, toDate);
-        Map<Encounter, List<Obs>> encounterPatientDocumentsMap = consultationService.getEncounterPatientDocumentsMap(visitType, visitStartDate, fromDate, toDate, patient);
-        Map<Encounter, Obs> encounterProcedureMap = getEncounterProcedureMap(patient, visitType, visitStartDate, fromDate, toDate);
-        Map<Encounter, List<Order>> encounterOrdersMap = consultationService.getEncounterOrdersMap(visitType, visitStartDate, fromDate, toDate, patient);
+        Map<Encounter, List<Obs>> encounterDischargeSummaryMap = getEncounterCarePlanMap(patient, visitType, visitStartDate);
+        ConcurrentHashMap<Encounter, List<OpenMrsCondition>> encounterChiefComplaintsMap = consultationService.getEncounterChiefComplaintsMap(patient, visitType, visitStartDate);
+        Map<Encounter, List<OpenMrsCondition>> encounterMedicalHistoryMap = consultationService.getEncounterMedicalHistoryConditionsMap(patient, visitType, visitStartDate);
+        Map<Encounter, List<Obs>> encounterPhysicalExaminationMap = consultationService.getEncounterPhysicalExaminationMap(patient, visitType, visitStartDate);
+        Map<Encounter, List<Obs>> encounterPatientDocumentsMap = consultationService.getEncounterPatientDocumentsMap(visitType, visitStartDate, patient);
+        Map<Encounter, Obs> encounterProcedureMap = getEncounterProcedureMap(patient, visitType, visitStartDate);
+        Map<Encounter, List<Order>> encounterOrdersMap = consultationService.getEncounterOrdersMap(visitType, visitStartDate, patient);
 
         List<OpenMrsDischargeSummary> openMrsDischargeSummaryList = OpenMrsDischargeSummary.getOpenMrsDischargeSummaryList(encounterDischargeSummaryMap, encounteredDrugOrdersMap, encounterChiefComplaintsMap, encounterMedicalHistoryMap, encounterPhysicalExaminationMap, encounterPatientDocumentsMap, encounterProcedureMap, encounterOrdersMap, patient);
         return openMrsDischargeSummaryList.stream().map(fhirBundledDischargeSummaryBuilder::fhirBundleResponseFor).collect(Collectors.toList());
@@ -76,8 +74,8 @@ public class DischargeSummaryService {
     }
 
 
-    private Map<Encounter, List<Obs>> getEncounterCarePlanMap(Patient patient, String visitType,  Date visitStartDate, Date fromDate, Date toDate) {
-        List<Obs> carePlanObs = dischargeSummaryDao.getCarePlan(patient, visitType,visitStartDate, fromDate, toDate);
+    private Map<Encounter, List<Obs>> getEncounterCarePlanMap(Patient patient, String visitType,  Date visitStartDate) {
+        List<Obs> carePlanObs = dischargeSummaryDao.getCarePlan(patient, visitType,visitStartDate);
         return getEncounterListMapForCarePlan(carePlanObs);
     }
 
@@ -98,8 +96,8 @@ public class DischargeSummaryService {
         return getEncounterListMapForCarePlan(carePlanObs);
     }
 
-    private Map<Encounter, Obs> getEncounterProcedureMap(Patient patient, String visitType, Date visitStartDate, Date fromDate, Date toDate) {
-        List<Obs> obsProcedures = dischargeSummaryDao.getProcedures(patient, visitType, visitStartDate, fromDate, toDate);
+    private Map<Encounter, Obs> getEncounterProcedureMap(Patient patient, String visitType, Date visitStartDate) {
+        List<Obs> obsProcedures = dischargeSummaryDao.getProcedures(patient, visitType, visitStartDate);
         Map<Encounter, Obs> encounterProcedureMap = new HashMap<>();
         for(Obs o: obsProcedures){
             encounterProcedureMap.put(o.getEncounter(), o);

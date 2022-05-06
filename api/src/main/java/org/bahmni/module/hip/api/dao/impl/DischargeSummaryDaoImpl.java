@@ -41,9 +41,9 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
     }
 
     @Override
-    public List<Obs> getCarePlan(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
+    public List<Obs> getCarePlan(Patient patient, String visit, Date visitStartDate) {
         final String obsName = "Discharge Summary";
-        List<Obs> patientObs = getAllObsBetweenDates(patient,fromDate,toDate);
+        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
         List<Obs> carePlanObs = patientObs.stream().filter(obs -> matchesVisitType(visit, obs))
                 .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime())
                 .filter(obs -> obsName.equals(obs.getConcept().getName().getName()))
@@ -75,8 +75,8 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
     }
 
     @Override
-    public List<Obs> getProcedures(Patient patient, String visit, Date visitStartDate, Date fromDate, Date toDate) {
-        List<Obs> patientObs = getAllObsBetweenDates(patient,fromDate,toDate);
+    public List<Obs> getProcedures(Patient patient, String visit, Date visitStartDate) {
+        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
         List<Obs> proceduresObsMap = new ArrayList<>();
         for(Obs o :patientObs){
             if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
@@ -112,14 +112,5 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
             }
         }
         return proceduresObsSet;
-    }
-
-    public List<Obs> getAllObsBetweenDates(Patient patient, Date fromDate, Date toDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient)
-                .stream()
-                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().after(fromDate)
-                        && obs.getEncounter().getVisit().getStartDatetime().before(toDate))
-                .collect(Collectors.toList());
-        return patientObs;
     }
 }

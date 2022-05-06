@@ -51,7 +51,7 @@ public class DiagnosticReportControllerTest extends TestCase {
     public void shouldReturn200ForVisits() throws Exception {
         when(validationService.isValidVisit("IPD")).thenReturn(true);
         when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
-        when(diagnosticReportService.getDiagnosticReportsForVisit(anyString(), any(), anyString(),any()))
+        when(diagnosticReportService.getDiagnosticReportsForVisit(anyString(), anyString(),any()))
                 .thenReturn(EMPTY_LIST);
 
         mockMvc.perform(get(String.format("/rest/%s/hip/diagnosticReports/visit", RestConstants.VERSION_1))
@@ -68,7 +68,7 @@ public class DiagnosticReportControllerTest extends TestCase {
     public void shouldReturn400OnInvalidVisitType() throws Exception {
         when(validationService.isValidVisit("OP")).thenReturn(false);
         when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745bd")).thenReturn(true);
-        when(diagnosticReportService.getDiagnosticReportsForVisit(anyString(), any(), anyString(),any()))
+        when(diagnosticReportService.getDiagnosticReportsForVisit(anyString(), anyString(),any()))
                 .thenReturn(EMPTY_LIST);
 
         mockMvc.perform(get(String.format("/rest/%s/hip/diagnosticReports/visit", RestConstants.VERSION_1))
@@ -85,7 +85,7 @@ public class DiagnosticReportControllerTest extends TestCase {
     public void shouldReturn400OnInvalidPatientId() throws Exception {
         when(validationService.isValidVisit("IPD")).thenReturn(true);
         when(validationService.isValidPatient("0f90531a-285c-438b-b265-bb3abb4745")).thenReturn(false);
-        when(diagnosticReportService.getDiagnosticReportsForVisit(anyString(), any(), anyString(),any()))
+        when(diagnosticReportService.getDiagnosticReportsForVisit(anyString(), anyString(),any()))
                 .thenReturn(EMPTY_LIST);
 
         mockMvc.perform(get(String.format("/rest/%s/hip/diagnosticReports/visit", RestConstants.VERSION_1))

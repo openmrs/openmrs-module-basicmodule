@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
@@ -55,11 +56,13 @@ public class DiagnosticReportController extends BaseRestController {
             return ResponseEntity.badRequest().body(ClientError.invalidVisitType());
         if (!validationService.isValidPatient(patientId))
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
-        List<DiagnosticReportBundle> diagnosticReportBundle =
-                diagnosticReportService.getDiagnosticReportsForVisit(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType,parseDateTime(visitStartDate));
 
-        diagnosticReportBundle.addAll( diagnosticReportService.getLabResultsForVisits(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), visitType ,parseDateTime(visitStartDate)));
+        List<DiagnosticReportBundle> diagnosticReportBundle = new ArrayList<>();
+        if(parseDate(visitStartDate).compareTo(parseDate(fromDate)) >= 0 && parseDate(visitStartDate).compareTo(parseDate(toDate)) < 0) {
+            diagnosticReportBundle = diagnosticReportService.getDiagnosticReportsForVisit(patientId, visitType, parseDateTime(visitStartDate));
 
+            diagnosticReportBundle.addAll(diagnosticReportService.getLabResultsForVisits(patientId, visitType, parseDateTime(visitStartDate)));
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(new BundledDiagnosticReportResponse(diagnosticReportBundle));
