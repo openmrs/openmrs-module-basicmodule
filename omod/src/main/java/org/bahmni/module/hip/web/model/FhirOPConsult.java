@@ -104,7 +104,7 @@ public class FhirOPConsult {
             fhirChiefComplaintConditionList.add(fhirResourceMapper.mapToCondition(openMrsOPConsult.getChiefComplaintConditions().get(i), patient));
         }
         List<Condition> fhirMedicalHistoryList = new ArrayList<>();
-        for(int i=0;i<openMrsOPConsult.getChiefComplaintConditions().size();i++){
+        for(int i=0;i<openMrsOPConsult.getMedicalHistoryConditions().size();i++){
             fhirMedicalHistoryList.add(fhirResourceMapper.mapToCondition(openMrsOPConsult.getMedicalHistoryConditions().get(i), patient));
         }
         List<Observation> fhirObservationList = openMrsOPConsult.getObservations().stream().
