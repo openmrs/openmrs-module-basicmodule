@@ -38,7 +38,6 @@ public class EncounterDaoImpl implements EncounterDao {
             "\t\tencounter_id\n" +
             "\tfrom\n" +
             "\t\tepisode_encounter)\n" +
-            "\tand v.date_started between :fromDate and :toDate\n" +
             "\tand v.patient_id = (select person_id from person as p2 where p2.uuid = :patientUUID);";
 
     private String sqlGetEncounterIdsForProgramForPrescriptions = "SELECT\n" +
@@ -111,8 +110,6 @@ public class EncounterDaoImpl implements EncounterDao {
             "          inner join episode_encounter ee on e2.encounter_id = ee.encounter_id\n" +
             "      )\n" +
             "  )\n" +
-            "  and v.date_started between :fromDate\n" +
-            "  and :toDate\n" +
             "  and v.patient_id = (\n" +
             "    select\n" +
             "      person_id\n" +
@@ -180,13 +177,11 @@ public class EncounterDaoImpl implements EncounterDao {
             "  and :toDate ;\n";
 
     @Override
-    public List<Integer> GetEncounterIdsForVisitForPrescriptions(String patientUUID, String visit, Date visitStartDate, Date fromDate, Date toDate) {
+    public List<Integer> GetEncounterIdsForVisitForPrescriptions(String patientUUID, String visit, Date visitStartDate) {
 
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery(sqlGetEncounterIdsForVisitForPrescriptions);
         query.setParameter("patientUUID", patientUUID);
         query.setParameter("visit", visit);
-        query.setParameter("fromDate", fromDate);
-        query.setParameter("toDate", toDate);
         query.setParameter("visitStartDate",new java.sql.Timestamp(visitStartDate.getTime()));
         return query.list();
 
@@ -217,13 +212,11 @@ public class EncounterDaoImpl implements EncounterDao {
     }
 
     @Override
-    public List<Integer> GetEncounterIdsForVisitForDiagnosticReport(String patientUUID, String visit, Date visitStartDate, Date fromDate, Date toDate) {
+    public List<Integer> GetEncounterIdsForVisitForDiagnosticReport(String patientUUID, String visit, Date visitStartDate) {
 
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery(sqlGetEncounterIdsForVisitForDiagnosticReports);
         query.setParameter("patientUUID", patientUUID);
         query.setParameter("visit", visit);
-        query.setParameter("fromDate", fromDate);
-        query.setParameter("toDate", toDate);
         query.setParameter("visitStartDate",new java.sql.Timestamp(visitStartDate.getTime()));
 
         return query.list();
