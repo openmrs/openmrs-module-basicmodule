@@ -8,12 +8,14 @@ on:
     branches:
      - master
  workflow_dispatch:
+env:
+  ORG_NAME: BahmniIndiaDistro
+  EVENT_TYPE: hip-module-trigger
 
 jobs:
   build:
-
+    name: build and upload hip omod
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
