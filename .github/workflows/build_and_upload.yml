@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    name: build and deploy hip omod
+    name: build and upload hip omod
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
