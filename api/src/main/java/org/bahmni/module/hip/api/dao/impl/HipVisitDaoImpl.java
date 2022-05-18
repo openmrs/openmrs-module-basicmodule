@@ -3,20 +3,26 @@ package org.bahmni.module.hip.api.dao.impl;
 import org.bahmni.module.hip.api.dao.HipVisitDao;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.openmrs.Patient;
+import org.openmrs.Visit;
+import org.openmrs.api.VisitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class HipVisitDaoImpl implements HipVisitDao {
 
     private SessionFactory sessionFactory;
+    private VisitService visitService;
 
     @Autowired
-    public HipVisitDaoImpl(SessionFactory sessionFactory) {
+    public HipVisitDaoImpl(SessionFactory sessionFactory, VisitService visitService) {
         this.sessionFactory = sessionFactory;
+        this.visitService = visitService;
     }
 
     private String sqlGetVisitIdsForVisitForLabResults =
@@ -60,5 +66,13 @@ public class HipVisitDaoImpl implements HipVisitDao {
         query.setParameter("visit", visit);
         query.setParameter("visitStartDate",new java.sql.Timestamp(visitStartDate.getTime()));
         return query.list();
+    }
+
+    @Override
+    public Visit getPatientVisit(Patient patient, String visitType, Date visitStartDate){
+        Visit visit = visitService.getVisitsByPatient(patient)
+                .stream().filter(obj -> obj.getStartDatetime().getTime() == visitStartDate.getTime())
+                .filter(obj -> obj.getVisitType().getName().equals(visitType)).collect(Collectors.toList()).get(0);
+        return visit;
     }
 }

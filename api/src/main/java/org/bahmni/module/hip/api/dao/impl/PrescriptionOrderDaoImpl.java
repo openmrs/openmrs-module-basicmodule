@@ -11,19 +11,18 @@ import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.OrderType;
 import org.openmrs.Patient;
+import org.openmrs.Visit;
 import org.openmrs.api.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
 public class PrescriptionOrderDaoImpl implements PrescriptionOrderDao {
-    protected static final Log log = LogFactory.getLog(PrescriptionOrderDaoImpl.class);
     private SessionFactory sessionFactory;
     private EncounterDao encounterDao;
     private final OrderService orderService;
@@ -35,18 +34,11 @@ public class PrescriptionOrderDaoImpl implements PrescriptionOrderDao {
         this.orderService = orderService;
     }
 
-    public List<DrugOrder> getDrugOrders(Patient patient,String visitType, Date visitStartDate) {
-
-        Integer [] encounterIds = encounterDao.GetEncounterIdsForVisitForPrescriptions(patient.getUuid(), visitType,visitStartDate).toArray(new Integer[0]);
-        if(encounterIds.length == 0)
-            return new ArrayList< DrugOrder > ();
-
-        List<DrugOrder> orderLists = orderService.getAllOrdersByPatient(patient).stream()
-                .filter(order ->  Arrays.asList(encounterIds).contains(order.getEncounter().getId())
-                          && order.getEncounter().getVisit().getVisitType().getName().equals(visitType)
-                          && order.getOrderType().getUuid().equals(OrderType.DRUG_ORDER_TYPE_UUID))
-                .map(order -> (DrugOrder) order)
-                .collect(Collectors.toList());
+    public List<DrugOrder> getDrugOrders(Visit visit) {
+        List<DrugOrder> orderLists = encounterDao.GetOrdersForVisit(visit).stream()
+                            .filter(order -> order.getOrderType().getUuid().equals(OrderType.DRUG_ORDER_TYPE_UUID))
+                            .map(order -> (DrugOrder) order)
+                             .collect(Collectors.toList());
 
         return orderLists;
     }
