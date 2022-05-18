@@ -39,6 +39,9 @@ public class DiagnosticReportService {
     private HipVisitDao hipVisitDao;
     private OrderDao orderDao;
     private final String ORDER_TYPE = "Order";
+    private static final String RADIOLOGY_TYPE = "RADIOLOGY";
+    private static final String PATIENT_DOCUMENT_TYPE = "Patient Document";
+    private static final String DOCUMENT_TYPE = "Document";
 
 
     private LabOrderResultsService labOrderResultsService;
@@ -64,7 +67,8 @@ public class DiagnosticReportService {
 
     public List<DiagnosticReportBundle> getDiagnosticReportsForVisit(String patientUuid, String visitType, Date visitStartDate) {
         Patient patient = patientService.getPatientByUuid(patientUuid);
-        HashMap<Encounter, List<Obs>> encounterListMap = getAllObservationsForVisits(patient, visitType,visitStartDate);
+        Visit visit = hipVisitDao.getPatientVisit(patient,visitType,visitStartDate);
+        HashMap<Encounter, List<Obs>> encounterListMap = getAllObservationsForVisits(visit);
         List<OpenMrsDiagnosticReport> openMrsDiagnosticReports = OpenMrsDiagnosticReport.fromDiagnosticReport(encounterListMap);
 
         return openMrsDiagnosticReports
@@ -73,18 +77,18 @@ public class DiagnosticReportService {
                 .collect(Collectors.toList());
     }
 
-    public HashMap<Encounter, List<Obs>> getAllObservationsForVisits(Patient patient,
-                                                                      String visitType, Date visitStartDate) {
+    public HashMap<Encounter, List<Obs>> getAllObservationsForVisits(Visit visit) {
+        List<Obs> patientObs = encounterDao.GetAllObsForVisit(visit, RADIOLOGY_TYPE, DOCUMENT_TYPE);
+        patientObs.addAll(encounterDao.GetAllObsForVisit(visit, PATIENT_DOCUMENT_TYPE, DOCUMENT_TYPE));
         HashMap<Encounter, List<Obs>> encounterListMap = new HashMap<>();
-        List<Integer> encounterIds = encounterDao.GetEncounterIdsForVisitForDiagnosticReport(patient.getUuid(), visitType, visitStartDate);
-        List<Encounter> finalList = new ArrayList<>();
-        for(Integer encounterId : encounterIds){
-            finalList.add(encounterService.getEncounter(encounterId));
-        }
-        for (Encounter e : finalList) {
-            encounterListMap.put(e, new ArrayList<>(e.getAllObs()));
+        for (Obs obs: patientObs) {
+            Encounter encounter = obs.getEncounter();
+            if(!encounterListMap.containsKey(encounter))
+               encounterListMap.put(encounter, new ArrayList<Obs>(){{ add(obs); }});
+            encounterListMap.get(encounter).add(obs);
         }
         return encounterListMap;
+
     }
 
     public List<DiagnosticReportBundle> getDiagnosticReportsForProgram(String patientUuid, DateRange dateRange, String programName, String programEnrollmentId) {
