@@ -7,6 +7,7 @@ import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
+import org.openmrs.Visit;
 import org.openmrs.module.emrapi.conditionslist.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class ConsultationService {
     private final ConsultationDao consultationDao;
     private final OPConsultDao opConsultDao;
     private final DiagnosticReportService diagnosticReportService;
+
     public static Set<String> conceptNames = new HashSet<>(Arrays.asList("Tuberculosis, Treatment Plan","Tuberculosis, Next Followup Visit","Tuberculosis, Plan for next visit","Tuberculosis, Patient Category","Current Followup Visit After",
             "Tuberculosis, Plan for next visit","Malaria, Parents Name","Malaria, Death Date", "Childhood Illness, Vitamin A Capsules Provided","Childhood Illness, Albendazole Given","Childhood Illness, Referred out",
             "Childhood Illness, Vitamin A Capsules Provided","Childhood Illness, Albendazole Given","Nutrition, Bal Vita Provided by FCHV","Bal Vita Provided by FCHV","ART, Condoms given","HIVTC, Marital Status","Malaria, Contact number",
@@ -40,8 +42,8 @@ public class ConsultationService {
         this.diagnosticReportService = diagnosticReportService;
     }
 
-    public ConcurrentHashMap<Encounter, List<OpenMrsCondition>> getEncounterChiefComplaintsMap(Patient patient, String visitType, Date visitStartDate) {
-        List<Obs> chiefComplaints = consultationDao.getChiefComplaints(patient, visitType, visitStartDate);
+    public ConcurrentHashMap<Encounter, List<OpenMrsCondition>> getEncounterChiefComplaintsMap(Visit visit) {
+        List<Obs> chiefComplaints = consultationDao.getChiefComplaints(visit);
         return getEncounterListConcurrentHashMapForChiefComplaint(chiefComplaints);
     }
 
@@ -50,8 +52,8 @@ public class ConsultationService {
         return getEncounterListConcurrentHashMapForChiefComplaint(chiefComplaints);
     }
 
-    public Map<Encounter, List<Obs>> getEncounterPhysicalExaminationMap(Patient patient, String visitType, Date visitStartDate) {
-        List<Obs> physicalExaminations = consultationDao.getPhysicalExamination(patient, visitType, visitStartDate);
+    public Map<Encounter, List<Obs>> getEncounterPhysicalExaminationMap(Visit visit) {
+        List<Obs> physicalExaminations = consultationDao.getPhysicalExamination(visit);
         return getEncounterListMapForPhysicalExamination(physicalExaminations);
     }
 
@@ -60,9 +62,9 @@ public class ConsultationService {
         return getEncounterListMapForPhysicalExamination(physicalExaminations);
     }
 
-    public Map<Encounter, List<OpenMrsCondition>> getEncounterMedicalHistoryConditionsMap(Patient patient, String visit, Date visitStartDate) {
-        Map<Encounter, List<Condition>> medicalHistoryConditionsMap =  opConsultDao.getMedicalHistoryConditions(patient, visit, visitStartDate);
-        List<Obs> medicalHistoryDiagnosisMap =  opConsultDao.getMedicalHistoryDiagnosis(patient, visit, visitStartDate);
+    public Map<Encounter, List<OpenMrsCondition>> getEncounterMedicalHistoryConditionsMap(Visit visit) {
+        Map<Encounter, List<Condition>> medicalHistoryConditionsMap =  opConsultDao.getMedicalHistoryConditions(visit);
+        List<Obs> medicalHistoryDiagnosisMap =  opConsultDao.getMedicalHistoryDiagnosis(visit);
         return getEncounterListMapForMedicalHistory(medicalHistoryConditionsMap, medicalHistoryDiagnosisMap);
     }
 
@@ -72,9 +74,9 @@ public class ConsultationService {
         return getEncounterListMapForMedicalHistory(medicalHistoryConditionsMap, medicalHistoryDiagnosisMap);
     }
 
-    public Map<Encounter, List<Obs>> getEncounterPatientDocumentsMap(String visitType, Date visitStartDate, Patient patient) {
+    public Map<Encounter, List<Obs>> getEncounterPatientDocumentsMap(Visit visit) {
         final int patientDocumentEncounterType = 9;
-        Map<Encounter, List<Obs>> encounterDiagnosticReportsMap = diagnosticReportService.getAllObservationsForVisits(patient, visitType, visitStartDate);
+        Map<Encounter, List<Obs>> encounterDiagnosticReportsMap = diagnosticReportService.getAllObservationsForVisits(visit);
         return getEncounterListMapForPatientDocument(patientDocumentEncounterType, encounterDiagnosticReportsMap);
     }
 
@@ -84,8 +86,8 @@ public class ConsultationService {
         return getEncounterListMapForPatientDocument(patientDocumentEncounterType, encounterDiagnosticReportsMap);
     }
 
-    public Map<Encounter, List<Order>> getEncounterOrdersMap(String visitType, Date visitStartDate, Patient patient) {
-        List<Order> orders = consultationDao.getOrders(patient, visitType, visitStartDate);
+    public Map<Encounter, List<Order>> getEncounterOrdersMap(Visit visit) {
+        List<Order> orders = consultationDao.getOrders(visit);
         return getEncounterListMapForOrders(orders);
     }
 

@@ -1,11 +1,13 @@
 package org.bahmni.module.hip.api.dao.impl;
 
 import org.bahmni.module.hip.api.dao.ConsultationDao;
+import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
+import org.openmrs.Visit;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.ProgramWorkflowService;
@@ -38,31 +40,22 @@ public class ConsultationDaoImpl implements ConsultationDao {
     }};
     private final ProgramWorkflowService programWorkflowService;
     private final EpisodeService episodeService;
+    private final EncounterDao encounterDao;
 
     @Autowired
-    public ConsultationDaoImpl(ObsService obsService, OrderService orderService, ProgramWorkflowService programWorkflowService, EpisodeService episodeService) {
+    public ConsultationDaoImpl(ObsService obsService, OrderService orderService, ProgramWorkflowService programWorkflowService, EpisodeService episodeService, EncounterDao encounterDao) {
         this.obsService = obsService;
         this.orderService = orderService;
         this.programWorkflowService = programWorkflowService;
         this.episodeService = episodeService;
+        this.encounterDao = encounterDao;
     }
 
     @Override
-    public List<Obs> getChiefComplaints(Patient patient, String visit, Date visitStartDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
-        List<Obs> chiefComplaintObsMap = new ArrayList<>();
-        for (Obs o : patientObs) {
-            if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                    && o.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime()
-                    && Objects.equals(o.getEncounter().getVisit().getVisitType().getName(), visit)
-                    && Objects.equals(o.getConcept().getName().getName(), CHIEF_COMPLAINT)
-                    && o.getValueCoded() != null
-                    && o.getConcept().getName().getLocalePreferred()
-            )
-            {
-                chiefComplaintObsMap.add(o);
-            }
-        }
+    public List<Obs> getChiefComplaints(Visit visit) {
+        List<Obs> chiefComplaintObsMap = encounterDao.GetAllObsForVisit(visit,CONSULTATION,CHIEF_COMPLAINT)
+                .stream().filter(o -> o.getValueCoded() != null && o.getConcept().getName().getLocalePreferred())
+                .collect(Collectors.toList());
         return chiefComplaintObsMap;
     }
 
@@ -96,37 +89,22 @@ public class ConsultationDaoImpl implements ConsultationDao {
     }
 
     @Override
-    public List<Obs> getPhysicalExamination(Patient patient, String visit, Date visitStartDate) {
+    public List<Obs> getPhysicalExamination(Visit visit) {
         final String[] formNames = new String[]{"Discharge Summary", "Death Note", "Delivery Note", "Opioid Substitution Therapy - Intake", "Opportunistic Infection",
                 "Safe Abortion", "ECG Notes", "Operative Notes", "USG Notes", "Procedure Notes", "Triage Reference", "History and Examination", "Visit Diagnoses"};
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
-        List<Obs> physicalExaminationObsMap = new ArrayList<>();
-        for (Obs o : patientObs) {
-            if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                    && o.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime()
-                    && Objects.equals(o.getEncounter().getVisit().getVisitType().getName(), visit)
-                    && o.getValueCoded() == null
-                    && o.getConcept().getName().getLocalePreferred()
-                    && o.getObsGroup() == null
-                    && !Arrays.asList(formNames).contains(o.getConcept().getName().getName())
-            ) {
-                physicalExaminationObsMap.add(o);
-            }
-        }
+        List<Obs> physicalExaminationObsMap = encounterDao.GetAllObsForVisit(visit,CONSULTATION,null)
+                .stream().filter(o -> o.getValueCoded() == null &&  o.getObsGroup() == null
+                        && !Arrays.asList(formNames).contains(o.getConcept().getName().getName()) )
+                .collect(Collectors.toList());
         return physicalExaminationObsMap;
     }
 
     @Override
-    public List<Order> getOrders(Patient patient, String visit, Date visitStartDate) {
-        return orderService.getAllOrdersByPatient(patient).stream().filter(order -> matchesVisitType(visit, order))
-                .filter(order -> order.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime())
+    public List<Order> getOrders(Visit visit) {
+        return  encounterDao.GetOrdersForVisit(visit).stream()
                 .filter(order -> order.getDateStopped() == null && !Objects.equals(order.getAction().toString(), ORDER_ACTION))
                 .filter(order -> ORDER_TYPES.contains(order.getOrderType().getName()))
                 .collect(Collectors.toList());
-    }
-
-    private boolean matchesVisitType(String visitType, Order order) {
-        return order.getEncounter().getVisit().getVisitType().getName().equals(visitType);
     }
 
     @Override

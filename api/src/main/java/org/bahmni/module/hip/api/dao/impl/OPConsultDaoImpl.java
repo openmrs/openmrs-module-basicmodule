@@ -1,9 +1,11 @@
 package org.bahmni.module.hip.api.dao.impl;
+import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.api.dao.OPConsultDao;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
+import org.openmrs.Visit;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.ProgramWorkflowService;
@@ -35,44 +37,40 @@ public class OPConsultDaoImpl implements OPConsultDao {
     private final EncounterService encounterService;
     private final ProgramWorkflowService programWorkflowService;
     private final EpisodeService episodeService;
+    private final EncounterDao encounterDao;
 
 
     @Autowired
-    public OPConsultDaoImpl(ObsService obsService, ConditionService conditionService, EncounterService encounterService, ProgramWorkflowService programWorkflowService, EpisodeService episodeService) {
+    public OPConsultDaoImpl(ObsService obsService, ConditionService conditionService, EncounterService encounterService, ProgramWorkflowService programWorkflowService, EpisodeService episodeService, EncounterDao encounterDao) {
         this.obsService = obsService;
         this.conditionService = conditionService;
         this.encounterService = encounterService;
         this.programWorkflowService = programWorkflowService;
         this.episodeService = episodeService;
+        this.encounterDao = encounterDao;
     }
 
     @Override
-    public Map<Encounter, List<Condition>> getMedicalHistoryConditions(Patient patient, String visit, Date visitStartDate) {
+    public Map<Encounter, List<Condition>> getMedicalHistoryConditions(Visit visit) {
         final String conditionStatusHistoryOf = "HISTORY_OF";
         final String conditionStatusActive = "ACTIVE";
-        List<Encounter> encounters = encounterService.getEncountersByPatient(patient)
-                                                     .stream()
-                                                     .filter(encounter -> Objects.equals(encounter.getEncounterType().getName(), "Consultation") &&
-                                                                         encounter.getVisit().getStartDatetime().getTime() == visitStartDate.getTime() &&
-                                                                         Objects.equals(encounter.getVisit().getVisitType().getName(), visit))
-                                                     .collect(Collectors.toList());
-        List<Condition> conditions = conditionService.getActiveConditions(patient)
+        List<Encounter> encounters = encounterDao.GetEncountersForVisit(visit, CONSULTATION);
+        List<Condition> conditions = conditionService.getActiveConditions(visit.getPatient())
                                                      .stream()
                                                      .filter(condition -> condition.getStatus().name().equals(conditionStatusActive) ||
                                                                           condition.getStatus().name().equals(conditionStatusHistoryOf))
                                                      .collect(Collectors.toList());
-
         Map<Encounter,List<Condition>> encounterConditionsMap = new HashMap<>();
 
         for(Condition condition : conditions){
             for(Encounter encounter : encounters){
-                Encounter nextEncounter;
-                Encounter encounterForNxtVisit = encounterService.getEncounter(encounter.getId() + 1);
-                Date nextEncounterDate = encounterForNxtVisit != null ? encounterForNxtVisit.getDateCreated() : new Date();
-                if(encounters.indexOf(encounter) < (encounters.size() - 1)){
-                    nextEncounter = encounterService.getEncounter(encounters.get(encounters.indexOf(encounter)+1).getId());
+                Date nextEncounterDate;
+                if(encounters.indexOf(encounter) != 0){
+                    Encounter nextEncounter = encounterService.getEncounter(encounters.get(encounters.indexOf(encounter)-1).getId());
                     nextEncounterDate = nextEncounter.getDateCreated();
                 }
+                else
+                   nextEncounterDate = new Date();
                 if (condition.getDateCreated().equals(encounter.getDateCreated()) || condition.getDateCreated().after(encounter.getDateCreated()) && condition.getDateCreated().before(nextEncounterDate)) {
                     if (encounterConditionsMap.containsKey(encounter)) {
                         encounterConditionsMap.get(encounter).add(condition);
@@ -87,38 +85,19 @@ public class OPConsultDaoImpl implements OPConsultDao {
         return encounterConditionsMap;
     }
 
+
     @Override
-    public List<Obs> getMedicalHistoryDiagnosis(Patient patient, String visit, Date visitStartDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
-        List<Obs> medicalHistoryDiagnosisObsMap = new ArrayList<>();
-        for(Obs o :patientObs){
-            if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                    && o.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime()
-                    && Objects.equals(o.getEncounter().getVisit().getVisitType().getName(), visit)
-                    && Objects.equals(o.getConcept().getName().getName(), CODED_DIAGNOSIS)
-            )
-            {
-                medicalHistoryDiagnosisObsMap.add(o);
-            }
-        }
+    public List<Obs> getMedicalHistoryDiagnosis(Visit visit) {
+        List<Obs> medicalHistoryDiagnosisObsMap = encounterDao.GetAllObsForVisit(visit, CONSULTATION, CODED_DIAGNOSIS);
         return medicalHistoryDiagnosisObsMap;
     }
 
     @Override
-    public List<Obs> getProcedures(Patient patient, String visit, Date visitStartDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
-        List<Obs> proceduresObsMap = new ArrayList<>();
-        for(Obs o :patientObs){
-            if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                    && o.getEncounter().getVisit().getStartDatetime().getTime() == visitStartDate.getTime()
-                    && Objects.equals(o.getEncounter().getVisit().getVisitType().getName(), visit)
-                    && Objects.equals(o.getConcept().getName().getName(), PROCEDURE_NOTES)
-                    && !o.getVoided()
-            )
-            {
-                proceduresObsMap.add(o);
-            }
-        }
+    public List<Obs> getProcedures(Visit visit) {
+        List<Obs> proceduresObsMap = encounterDao.GetAllObsForVisit(visit, CONSULTATION, PROCEDURE_NOTES).stream()
+                .filter(o -> !o.getVoided())
+                .collect(Collectors.toList());
+
         return proceduresObsMap;
     }
 
