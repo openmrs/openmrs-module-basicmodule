@@ -3,11 +3,12 @@ package org.bahmni.module.hip.api.dao.impl;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.openmrs.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class EncounterDaoImpl implements EncounterDao {
@@ -22,23 +23,10 @@ public class EncounterDaoImpl implements EncounterDao {
         this.sessionFactory = sessionFactory;
     }
 
-    private String sqlGetEncounterIdsForVisitForPrescriptions = "select\n" +
-            "\te.encounter_id\n" +
-            "from\n" +
-            "\tvisit as v\n" +
-            "inner join visit_type as vt on\n" +
-            "\tvt.visit_type_id = v.visit_type_id\n" +
-            "inner join encounter as e on\n" +
-            "\te.visit_id = v.visit_id\n" +
-            "where\n" +
-            "\tvt.name = :visit\n" +
-            "\tand v.date_started = :visitStartDate\n" +
-            "\tand e.encounter_id not in (\n" +
-            "\tselect\n" +
+    private String sqlGetEpisodeEncounterIds = "select\n" +
             "\t\tencounter_id\n" +
             "\tfrom\n" +
-            "\t\tepisode_encounter)\n" +
-            "\tand v.patient_id = (select person_id from person as p2 where p2.uuid = :patientUUID);";
+            "\t\tepisode_encounter\n";
 
     private String sqlGetEncounterIdsForProgramForPrescriptions = "SELECT\n" +
             "  le.encounter_id\n" +
@@ -78,46 +66,6 @@ public class EncounterDaoImpl implements EncounterDao {
             "      AND value_reference = :programEnrollmentId\n" +
             "  )\n" +
             "  AND le.date_started BETWEEN :fromDate AND :toDate ;\n";
-
-    private String sqlGetEncounterIdsForVisitForDiagnosticReports = "select\n" +
-            "  e.encounter_id\n" +
-            "from\n" +
-            "  visit as v\n" +
-            "  inner join visit_type as vt on vt.visit_type_id = v.visit_type_id\n" +
-            "  inner join encounter as e on e.visit_id = v.visit_id\n" +
-            "  inner join obs o on o.encounter_id = e.encounter_id\n" +
-            "  inner join encounter_type as et on et.encounter_type_id = e.encounter_type\n" +
-            "  inner join concept_name as cn on cn.concept_id = o.concept_id\n" +
-            "where\n" +
-            "  (\n" +
-            "    et.name ='" + RADIOLOGY_TYPE + "' or et.name = '" + PATIENT_DOCUMENT_TYPE + "'\n" +
-            "  )\n" +
-            "  and vt.name = :visit\n" +
-            "  and v.date_started = :visitStartDate\n" +
-            "  and cn.name = '" + DOCUMENT_TYPE + "'\n" +
-            "  and o.void_reason is null\n" +
-            "  and e.encounter_id not in (\n" +
-            "    SELECT\n" +
-            "      encounter_id\n" +
-            "    from\n" +
-            "      encounter e\n" +
-            "    where\n" +
-            "      e.visit_id in (\n" +
-            "        SELECT\n" +
-            "          visit_id\n" +
-            "        from\n" +
-            "          encounter e2\n" +
-            "          inner join episode_encounter ee on e2.encounter_id = ee.encounter_id\n" +
-            "      )\n" +
-            "  )\n" +
-            "  and v.patient_id = (\n" +
-            "    select\n" +
-            "      person_id\n" +
-            "    from\n" +
-            "      person as p2\n" +
-            "    where\n" +
-            "      p2.uuid = :patientUUID\n" +
-            "  );";
 
     private String sqlGetEncounterIdsForProgramForDiagnosticReports = "SELECT\n" +
             "  res.encounter_id\n" +
@@ -177,14 +125,47 @@ public class EncounterDaoImpl implements EncounterDao {
             "  and :toDate ;\n";
 
     @Override
-    public List<Integer> GetEncounterIdsForVisitForPrescriptions(String patientUUID, String visit, Date visitStartDate) {
+    public List<Integer> GetEpisodeEncounterIds() {
 
-        Query query = this.sessionFactory.getCurrentSession().createSQLQuery(sqlGetEncounterIdsForVisitForPrescriptions);
-        query.setParameter("patientUUID", patientUUID);
-        query.setParameter("visit", visit);
-        query.setParameter("visitStartDate",new java.sql.Timestamp(visitStartDate.getTime()));
+        Query query = this.sessionFactory.getCurrentSession().createSQLQuery(sqlGetEpisodeEncounterIds);
         return query.list();
+    }
 
+    @Override
+    public List<Encounter> GetEncountersForVisit(Visit visit, String encounterType) {
+        List<Integer> episodeEncounters = GetEpisodeEncounterIds();
+        List<Encounter> encounters = visit.getEncounters().stream()
+                .filter(encounter -> !episodeEncounters.contains(encounter.getId()))
+                .filter(encounter -> Objects.equals(encounter.getEncounterType().getName(), encounterType))
+                .collect(Collectors.toList());
+        return encounters;
+    }
+
+    @Override
+    public List<Obs> GetAllObsForVisit(Visit visit, String encounterType, String conceptName) {
+        List<Obs> observations = new ArrayList<>();
+        List<Encounter> encounters = GetEncountersForVisit(visit,encounterType);
+        for (Encounter encounter : encounters) {
+            if(conceptName == null)
+                observations.addAll(encounter.getAllObs());
+            observations.addAll(encounter.getAllObs().stream()
+                                .filter(o -> Objects.equals(o.getConcept().getName().getName(), conceptName))
+                                .collect(Collectors.toList()));
+        }
+        return observations;
+    }
+
+    @Override
+    public List<Order> GetOrdersForVisit(Visit visit) {
+        List<Integer> episodeEncounters = GetEpisodeEncounterIds();
+        List<Encounter> encounters = visit.getEncounters().stream()
+                .filter(encounter -> !episodeEncounters.contains(encounter.getId()))
+                .collect(Collectors.toList());
+        List<Order> orderList = new ArrayList<>();
+        for (Encounter encounter: encounters) {
+            orderList.addAll(encounter.getOrders());
+        }
+        return orderList;
     }
 
     @Override
@@ -207,17 +188,6 @@ public class EncounterDaoImpl implements EncounterDao {
         query.setParameter("programEnrollmentId", programEnrollmentID);
         query.setParameter("fromDate", fromDate);
         query.setParameter("toDate", toDate);
-
-        return query.list();
-    }
-
-    @Override
-    public List<Integer> GetEncounterIdsForVisitForDiagnosticReport(String patientUUID, String visit, Date visitStartDate) {
-
-        Query query = this.sessionFactory.getCurrentSession().createSQLQuery(sqlGetEncounterIdsForVisitForDiagnosticReports);
-        query.setParameter("patientUUID", patientUUID);
-        query.setParameter("visit", visit);
-        query.setParameter("visitStartDate",new java.sql.Timestamp(visitStartDate.getTime()));
 
         return query.list();
     }
