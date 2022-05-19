@@ -1,141 +1,128 @@
 package org.bahmni.module.hip.api.dao.impl;
 
 import org.bahmni.module.hip.api.dao.CareContextRepository;
+import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.model.PatientCareContext;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
-import org.hibernate.transform.Transformers;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.StringType;
+import org.openmrs.Encounter;
+import org.openmrs.Patient;
+import org.openmrs.PatientProgram;
+import org.openmrs.Visit;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
+import org.openmrs.api.VisitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class CareContextRepositoryImpl implements CareContextRepository {
     private SessionFactory sessionFactory;
+    private PatientService  patientService;
+    private VisitService visitService;
+    private ProgramWorkflowService programWorkflowService;
+    private  EncounterDao encounterDao;
+
 
     @Autowired
-    public CareContextRepositoryImpl(SessionFactory sessionFactory) {
+    public CareContextRepositoryImpl(SessionFactory sessionFactory, PatientService patientService, VisitService visitService, ProgramWorkflowService programWorkflowService, EncounterDao encounterDao) {
         this.sessionFactory = sessionFactory;
+        this.patientService = patientService;
+        this.visitService = visitService;
+        this.programWorkflowService = programWorkflowService;
+        this.encounterDao = encounterDao;
     }
 
     @Override
     public List<PatientCareContext> getPatientCareContext(String patientUuid) {
-        Query query = this.sessionFactory.getCurrentSession().createSQLQuery("SELECT\n" +
-                "    case\n" +
-                "        when care_context = 'PROGRAM' then value_reference\n" +
-                "        else provider_name end as careContextReference,\n" +
-                "    care_context as careContextType,\n" +
-                "    case when care_context = 'PROGRAM' then program_name\n" +
-                "    else\n" +
-                "        concat (visit_type_name,\" / \",visit_startDate)\n" +
-                "    end as careContextName\n" +
-                "from\n" +
-                "    (\n" +
-                "        select\n" +
-                "            ppa.value_reference,p3.uuid,e.patient_id, p2.program_id, vt.visit_type_id , vt.name ,\n" +
-                "            v.date_started As visit_startDate,\n" +
-                "            concat(pn.given_name, ifnull(concat(' ',pn.middle_name),'')," +
-                "            ifnull(concat(' ',pn.family_name_prefix),''), ifnull(concat(' ',pn.family_name),''), " +
-                "            ifnull(concat(' ',pn.family_name2),''), ifnull(concat(' ',pn.family_name_suffix),'')) as provider_name,\n" +
-                "            pp.patient_program_id , p2.name as program_name, vt.name as visit_type_name,\n" +
-                "            case\n" +
-                "                when p2.program_id is null then 'VISIT_TYPE'\n" +
-                "                else 'PROGRAM'\n" +
-                "                end as care_context\n" +
-                "        from\n" +
-                "            encounter e\n" +
-                "                left join episode_encounter ee on\n" +
-                "                    e.encounter_id = ee.encounter_id\n" +
-                "                left join episode_patient_program epp on\n" +
-                "                    ee.episode_id = epp.episode_id\n" +
-                "                left join patient_program pp on\n" +
-                "                    epp.patient_program_id = pp.patient_program_id\n" +
-                "                left join program p2 on\n" +
-                "                    pp.program_id = p2.program_id\n" +
-                "                left join visit v on\n" +
-                "                        v.visit_id = e.visit_id\n" +
-                "                    and v.patient_id = e.patient_id\n" +
-                "                left join visit_type vt on\n" +
-                "                    v.visit_type_id = vt.visit_type_id\n" +
-                "                left join users u on e.creator = u.user_id\n" +
-                "                left join person_name pn ON pn.person_id = u.person_id\n" +
-                "                left join person p3 on\n" +
-                "                \te.patient_id = p3.person_id\n" +
-                "                left join patient_program_attribute ppa on\n" +
-                "                \tpp.patient_program_id=ppa.patient_program_id) as a\n" +
-                "where\n" +
-                "        a.uuid = :patientUuid\n" +
-                " group by \n" +
-                "visit_startDate, \n" +
-                "case when care_context = 'PROGRAM' \n" +
-                "then patient_program_id else visit_type_id \n" +
-                "end")
-                .addScalar("careContextReference", StringType.INSTANCE)
-                .addScalar("careContextType", StringType.INSTANCE)
-                .addScalar("careContextName", StringType.INSTANCE);
-        query.setParameter("patientUuid", patientUuid);
-        return query.setResultTransformer(Transformers.aliasToBean(PatientCareContext.class)).list();
+        List<PatientCareContext> careContexts = new ArrayList<>();
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+        List<Visit> visits = getAllVisitForPatient(patient);
+        List<PatientProgram> patientPrograms = getAllPrograms(patient);
+        for (Visit visit: visits) {
+            careContexts.add(getPatientCareContext(visit));
+        }
+        for (PatientProgram program: patientPrograms) {
+            careContexts.add(getPatientCareContext(program));
+        }
+        return careContexts;
     }
 
-    public List<PatientCareContext> getNewPatientCareContext(Integer patientId) {
+
+    @Override
+    public List<PatientCareContext> getNewPatientCareContext(Patient patient) {
+        List<PatientCareContext> careContexts = new ArrayList<>();
+        List<Visit> visits = getAllVisitForPatient(patient);
+        List<PatientProgram> patientPrograms = getAllPrograms(patient);
+        Visit visit = !visits.isEmpty() ? visits.get(0) : null;
+        PatientProgram program = !patientPrograms.isEmpty() ? patientPrograms.get(0) : null;
+        if(visit == null && program != null)
+            getPatientCareContext(program);
+        else if(visit != null && program == null)
+            getPatientCareContext(visit);
+        else if(visit != null && program != null) {
+            if (program.getDateCreated().before(visit.getStartDatetime()))
+                careContexts.add(getPatientCareContext(visit));
+            else
+                careContexts.add(getPatientCareContext(program));
+        }
+        return careContexts;
+    }
+
+    private PatientCareContext getPatientCareContext(Visit visit) {
+        return new PatientCareContext("VISIT_TYPE",
+                visit.getVisitType().getName().concat(" / ").concat(visit.getStartDatetime().toString()),
+                visit.getCreator().getPersonName().getFullName());
+    }
+
+    private PatientCareContext getPatientCareContext(PatientProgram program) {
+        return new PatientCareContext("PROGRAM",
+                program.getProgram().getName(),
+                getProgramEnrollementId(program.getPatientProgramId()).get(0));
+    }
+
+    private List<Integer> getEpisodeIds() {
         Query query = this.sessionFactory.getCurrentSession().createSQLQuery("select\n" +
-                "  care_context_type as careContextType,\n" +
-                "  case when care_context_type = 'PROGRAM' then program_name\n" +
-                "  else\n" +
-                "  concat (visit_type_name,\" / \",visit_startDate)\n" +
-                "  end as careContextName,\n" +
-                "  case when care_context = 'PROGRAM' then value_reference\n" +
-                "  else\n" +
-                "  provider_name end as careContextReference,\n" +
-                "from\n" +
-                "  (\n" +
-                "    select\n" +
-                "      ppa.value_reference,\n" +
-                "      p3.uuid,\n" +
-                "      e.patient_id,\n" +
-                "      p2.program_id,\n" +
-                "      vt.visit_type_id,\n" +
-                "      v.date_started As visit_startDate,\n" +
-                "      concat(pn.given_name, ifnull(concat(' ',pn.middle_name),'')," +
-                "      ifnull(concat(' ',pn.family_name_prefix),''), ifnull(concat(' ',pn.family_name),''), " +
-                "      ifnull(concat(' ',pn.family_name2),''), ifnull(concat(' ',pn.family_name_suffix),'')) as provider_name,\n" +
-                "      vt.name,\n" +
-                "      pp.patient_program_id,\n" +
-                "      p2.name as program_name,\n" +
-                "      vt.name as visit_type_name,\n" +
-                "      case when p2.program_id is null then 'VISIT_TYPE' else 'PROGRAM' end as care_context_type\n" +
-                "    from\n" +
-                "      encounter as e\n" +
-                "      left join episode_encounter ee on e.encounter_id = ee.encounter_id\n" +
-                "      left join episode_patient_program epp on ee.episode_id = epp.episode_id\n" +
-                "      left join patient_program pp on epp.patient_program_id = pp.patient_program_id\n" +
-                "      left join program p2 on pp.program_id = p2.program_id\n" +
-                "      left join visit v on v.visit_id = e.visit_id\n" +
-                "      and v.patient_id = e.patient_id\n" +
-                "      left join visit_type vt on v.visit_type_id = vt.visit_type_id\n" +
-                "      left join person p3 on e.patient_id = p3.person_id\n" +
-                "      left join patient_program_attribute ppa on pp.patient_program_id = ppa.patient_program_id\n" +
-                "      left join users u on e.creator = u.user_id\n" +
-                "      left join person_name pn ON pn.person_id = u.person_id\n" +
-                "    where\n" +
-                "      v.visit_id = (\n" +
-                "        select\n" +
-                "          max(visit_id)\n" +
-                "        from\n" +
-                "          visit\n" +
-                "        where\n" +
-                "          patient_id = :patientId\n" +
-                "      )\n" +
-                "  ) as a\n" +
-                "group by\n" +
-                "  visit_startDate;\n").addScalar("careContextReference", StringType.INSTANCE)
-                .addScalar("careContextType", StringType.INSTANCE)
-                .addScalar("careContextName", StringType.INSTANCE);
-        query.setParameter("patientId", patientId);
-        return query.setResultTransformer(Transformers.aliasToBean(PatientCareContext.class)).list();
+                "\t\tepisode_id\n" +
+                "\tfrom\n" +
+                "\t\tepisode_encounter\n");
+        return query.list();
+    }
+
+    private List<String> getProgramEnrollementId(Integer patientProgramId) {
+        Query query = this.sessionFactory.getCurrentSession().createSQLQuery("SELECT\n" +
+                "    value_reference FROM patient_program_attribute WHERE patient_program_id = :patientProgramId\n");
+        query.setParameter("patientProgramId", patientProgramId);
+        return query.list();
+    }
+
+    private List<Visit> getAllVisitForPatient(Patient patient){
+        List<Visit> visits = new ArrayList<>();
+        for (Visit visit: visitService.getVisitsByPatient(patient)) {
+            Set<Encounter> encounters = visit.getEncounters().stream()
+                    .filter(encounter -> !encounterDao.GetEpisodeEncounterIds().contains(encounter.getEncounterId()))
+                    .collect(Collectors.toSet());
+            if(!encounters.isEmpty())
+                visits.add(visit);
+        }
+        return visits;
+    }
+
+    private List<PatientProgram> getAllPrograms(Patient patient){
+        List<PatientProgram> programs = new ArrayList<>();
+        List<Integer> episodeIds = getEpisodeIds();
+        Set<PatientProgram> patientPrograms = new HashSet<>(programWorkflowService.getPatientPrograms(patient, null, null, null, null, null, false));
+        for (PatientProgram program: patientPrograms) {
+            if(episodeIds.contains(program.getId()))
+                programs.add(program);
+        }
+        return programs;
     }
 
 }
