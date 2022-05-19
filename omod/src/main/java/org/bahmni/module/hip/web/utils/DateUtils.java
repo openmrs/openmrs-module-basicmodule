@@ -14,4 +14,8 @@ public class DateUtils {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.parse(date);
     }
+
+    public static boolean isDateBetweenDateRange(String date, String fromDate, String toDate) throws ParseException {
+        return parseDate(date).compareTo(parseDate(fromDate)) >= 0 && parseDate(date).compareTo(parseDate(toDate)) < 0;
+    }
 }

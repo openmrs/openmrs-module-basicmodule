@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.bahmni.module.hip.web.utils.DateUtils.isDateBetweenDateRange;
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDateTime;
 
@@ -53,7 +54,7 @@ public class OPConsultController extends BaseRestController {
         if (!validationService.isValidPatient(patientId))
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
         List<OPConsultBundle> opConsultBundle = new ArrayList<>();
-        if(parseDate(visitStartDate).compareTo(parseDate(fromDate)) >= 0 && parseDate(visitStartDate).compareTo(parseDate(toDate)) < 0)
+        if(isDateBetweenDateRange(visitStartDate,fromDate,toDate))
             opConsultBundle = opConsultService.getOpConsultsForVisit(patientId,visitType,parseDateTime(visitStartDate));
 
         return ResponseEntity.ok()

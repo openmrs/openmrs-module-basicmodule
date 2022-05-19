@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.bahmni.module.hip.web.utils.DateUtils.isDateBetweenDateRange;
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDate;
 import static org.bahmni.module.hip.web.utils.DateUtils.parseDateTime;
 
@@ -60,7 +61,7 @@ public class DischargeSummaryController  extends BaseRestController {
             return ResponseEntity.badRequest().body(ClientError.invalidPatientId());
 
         List<DischargeSummaryBundle> dischargeSummaryBundle = new ArrayList<>();
-        if(parseDate(visitStartDate).compareTo(parseDate(fromDate)) >= 0 && parseDate(visitStartDate).compareTo(parseDate(toDate)) < 0) {
+        if(isDateBetweenDateRange(visitStartDate,fromDate,toDate)) {
             dischargeSummaryBundle = dischargeSummaryService.getDischargeSummaryForVisit(patientId, visitType, parseDateTime(visitStartDate));
         }
         return ResponseEntity.ok()
