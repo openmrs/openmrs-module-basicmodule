@@ -26,11 +26,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.bahmni.module.hip.api.dao.Constants.CODED_DIAGNOSIS;
+import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
+import static org.bahmni.module.hip.api.dao.Constants.PROCEDURE_NOTES;
+
 @Repository
 public class OPConsultDaoImpl implements OPConsultDao {
-    public static final String PROCEDURE_NOTES = "Procedure Notes, Procedure";
-    public static final String CONSULTATION = "Consultation";
-    private static final String CODED_DIAGNOSIS = "Coded Diagnosis";
 
     private final ObsService obsService;
     private final ConditionService conditionService;

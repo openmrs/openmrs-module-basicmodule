@@ -25,22 +25,24 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.bahmni.module.hip.api.dao.Constants.CHIEF_COMPLAINT;
+import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
+import static org.bahmni.module.hip.api.dao.Constants.LAB_ORDER;
+import static org.bahmni.module.hip.api.dao.Constants.ORDER_ACTION;
+import static org.bahmni.module.hip.api.dao.Constants.RADIOLOGY_ORDER;
+
 @Repository
 public class ConsultationDaoImpl implements ConsultationDao {
-    public static final String RADIOLOGY_ORDER = "Radiology Order";
-    public static final String OPD = "OPD";
-    private final ObsService obsService;
-    private final OrderService orderService;
-    public static final String CONSULTATION = "Consultation";
-    public static final String CHIEF_COMPLAINT = "Chief Complaint";
-    public static final String ORDER_ACTION = "DISCONTINUE";
+
     public static final ArrayList<String> ORDER_TYPES = new ArrayList<String>() {{
-        add("Lab Order");
+        add(LAB_ORDER);
         add(RADIOLOGY_ORDER);
     }};
     private final ProgramWorkflowService programWorkflowService;
     private final EpisodeService episodeService;
     private final EncounterDao encounterDao;
+    private final ObsService obsService;
+    private final OrderService orderService;
 
     @Autowired
     public ConsultationDaoImpl(ObsService obsService, OrderService orderService, ProgramWorkflowService programWorkflowService, EpisodeService episodeService, EncounterDao encounterDao) {

@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.bahmni.module.hip.api.dao.Constants.PROGRAM;
+import static org.bahmni.module.hip.api.dao.Constants.VISIT_TYPE;
+
 @Repository
 public class CareContextRepositoryImpl implements CareContextRepository {
     private SessionFactory sessionFactory;
@@ -76,13 +79,13 @@ public class CareContextRepositoryImpl implements CareContextRepository {
     }
 
     private PatientCareContext getPatientCareContext(Visit visit) {
-        return new PatientCareContext("VISIT_TYPE",
+        return new PatientCareContext(VISIT_TYPE,
                 visit.getVisitType().getName().concat(" / ").concat(visit.getStartDatetime().toString()),
                 visit.getCreator().getPersonName().getFullName());
     }
 
     private PatientCareContext getPatientCareContext(PatientProgram program) {
-        return new PatientCareContext("PROGRAM",
+        return new PatientCareContext(PROGRAM,
                 program.getProgram().getName(),
                 getProgramEnrollementId(program.getPatientProgramId()).get(0));
     }

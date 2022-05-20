@@ -22,11 +22,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
+import static org.bahmni.module.hip.api.dao.Constants.DISCHARGE_SUMMARY;
+import static org.bahmni.module.hip.api.dao.Constants.PROCEDURE_NOTES;
+
 @Repository
 public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
 
-    public static final String CONSULTATION = "Consultation";
-    public static final String PROCEDURE_NOTES = "Procedure Notes";
     private final ObsService obsService;
     private final ProgramWorkflowService programWorkflowService;
     private final EpisodeService episodeService;
@@ -42,8 +44,7 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
 
     @Override
     public List<Obs> getCarePlan(Visit visit) {
-        final String obsName = "Discharge Summary";
-        List<Obs> carePlanObs = encounterDao.GetAllObsForVisit(visit, CONSULTATION, obsName).stream()
+        List<Obs> carePlanObs = encounterDao.GetAllObsForVisit(visit, CONSULTATION, DISCHARGE_SUMMARY).stream()
                 .filter(obs -> obs.getConcept().getName().getLocalePreferred())
                 .collect(Collectors.toList());
 
@@ -52,7 +53,6 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
 
     @Override
     public List<Obs> getCarePlanForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
-        final String obsName = "Discharge Summary";
         List<PatientProgram> patientPrograms = programWorkflowService.getPatientPrograms(patient,programWorkflowService.getProgramByName(programName), fromDate, toDate,null,null,false);
         Set<PatientProgram> patientProgramSet = new HashSet<>(patientPrograms);
         List<Obs> carePlanObs= new ArrayList<>();
@@ -61,7 +61,7 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
             Set<Encounter> encounterSet = episode.getEncounters();
             for (Encounter encounter : encounterSet) {
                 for (Obs o : encounter.getAllObs()) {
-                    if (obsName.equals(o.getConcept().getName().getName())
+                    if (DISCHARGE_SUMMARY.equals(o.getConcept().getName().getName())
                             &&  o.getConcept().getName().getLocalePreferred()) {
                         carePlanObs.add(o);
                     }

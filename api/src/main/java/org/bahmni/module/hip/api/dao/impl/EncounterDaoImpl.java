@@ -3,19 +3,27 @@ package org.bahmni.module.hip.api.dao.impl;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
-import org.openmrs.*;
+import org.openmrs.Encounter;
+import org.openmrs.Obs;
+import org.openmrs.Order;
+import org.openmrs.Visit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.bahmni.module.hip.api.dao.Constants.DOCUMENT_TYPE;
+import static org.bahmni.module.hip.api.dao.Constants.PATIENT_DOCUMENT_TYPE;
+import static org.bahmni.module.hip.api.dao.Constants.RADIOLOGY_TYPE;
+
 
 @Repository
 public class EncounterDaoImpl implements EncounterDao {
 
-    private static final String RADIOLOGY_TYPE = "RADIOLOGY";
-    private static final String PATIENT_DOCUMENT_TYPE = "Patient Document";
-    private static final String DOCUMENT_TYPE = "Document";
     private SessionFactory sessionFactory;
 
     @Autowired
