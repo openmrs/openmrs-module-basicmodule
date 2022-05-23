@@ -32,6 +32,9 @@ public class ClientError {
     public static ClientError noVisitTypeProvided(){
         return new ClientError(ErrorCode.NO_VISIT_TYPE_SUPPLIED.getValue(),"No Visit type is supplied");
     }
+    public static ClientError noVisitStartDateProvided(){
+        return new ClientError(ErrorCode.NO_VISIT_START_DATE_SUPPLIED.getValue(),"No Visit start date is supplied");
+    }
     public static ClientError invalidVisitType(){
         return new ClientError(ErrorCode.INVALID_VISIT_TYPE.getValue(),"Visit Type is invalid");
     }

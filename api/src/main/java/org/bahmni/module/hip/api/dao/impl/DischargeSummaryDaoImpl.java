@@ -1,10 +1,12 @@
 package org.bahmni.module.hip.api.dao.impl;
 
 import org.bahmni.module.hip.api.dao.DischargeSummaryDao;
+import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
+import org.openmrs.Visit;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.module.episodes.Episode;
@@ -20,35 +22,29 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
+import static org.bahmni.module.hip.api.dao.Constants.DISCHARGE_SUMMARY;
+import static org.bahmni.module.hip.api.dao.Constants.PROCEDURE_NOTES;
+
 @Repository
 public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
 
-    public static final String CONSULTATION = "Consultation";
-    public static final String PROCEDURE_NOTES = "Procedure Notes";
     private final ObsService obsService;
     private final ProgramWorkflowService programWorkflowService;
     private final EpisodeService episodeService;
+    private final EncounterDao encounterDao;
 
     @Autowired
-    public DischargeSummaryDaoImpl(ObsService obsService, ProgramWorkflowService programWorkflowService, EpisodeService episodeService) {
+    public DischargeSummaryDaoImpl(ObsService obsService, ProgramWorkflowService programWorkflowService, EpisodeService episodeService, EncounterDao encounterDao) {
         this.obsService = obsService;
         this.programWorkflowService = programWorkflowService;
         this.episodeService = episodeService;
-    }
-
-    private boolean matchesVisitType(String visitType, Obs obs) {
-        return obs.getEncounter().getVisit().getVisitType().getName().equals(visitType);
+        this.encounterDao = encounterDao;
     }
 
     @Override
-    public List<Obs> getCarePlan(Patient patient, String visit, Date fromDate, Date toDate) {
-        final String obsName = "Discharge Summary";
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
-
-        List<Obs> carePlanObs = patientObs.stream().filter(obs -> matchesVisitType(visit, obs))
-                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().after(fromDate))
-                .filter(obs -> obs.getEncounter().getVisit().getStartDatetime().before(toDate))
-                .filter(obs -> obsName.equals(obs.getConcept().getName().getName()))
+    public List<Obs> getCarePlan(Visit visit) {
+        List<Obs> carePlanObs = encounterDao.GetAllObsForVisit(visit, CONSULTATION, DISCHARGE_SUMMARY).stream()
                 .filter(obs -> obs.getConcept().getName().getLocalePreferred())
                 .collect(Collectors.toList());
 
@@ -57,7 +53,6 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
 
     @Override
     public List<Obs> getCarePlanForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
-        final String obsName = "Discharge Summary";
         List<PatientProgram> patientPrograms = programWorkflowService.getPatientPrograms(patient,programWorkflowService.getProgramByName(programName), fromDate, toDate,null,null,false);
         Set<PatientProgram> patientProgramSet = new HashSet<>(patientPrograms);
         List<Obs> carePlanObs= new ArrayList<>();
@@ -66,7 +61,7 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
             Set<Encounter> encounterSet = episode.getEncounters();
             for (Encounter encounter : encounterSet) {
                 for (Obs o : encounter.getAllObs()) {
-                    if (obsName.equals(o.getConcept().getName().getName())
+                    if (DISCHARGE_SUMMARY.equals(o.getConcept().getName().getName())
                             &&  o.getConcept().getName().getLocalePreferred()) {
                         carePlanObs.add(o);
                     }
@@ -77,21 +72,10 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
     }
 
     @Override
-    public List<Obs> getProcedures(Patient patient, String visit, Date fromDate, Date toDate) {
-        List<Obs> patientObs = obsService.getObservationsByPerson(patient);
-        List<Obs> proceduresObsMap = new ArrayList<>();
-        for(Obs o :patientObs){
-            if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                    && o.getEncounter().getVisit().getStartDatetime().after(fromDate)
-                    && o.getEncounter().getVisit().getStartDatetime().before(toDate)
-                    && Objects.equals(o.getEncounter().getVisit().getVisitType().getName(), visit)
-                    && o.getObsGroup() == null
-                    && Objects.equals(o.getConcept().getName().getName(), PROCEDURE_NOTES)
-            )
-            {
-                proceduresObsMap.add(o);
-            }
-        }
+    public List<Obs> getProcedures(Visit visit) {
+        List<Obs> proceduresObsMap = encounterDao.GetAllObsForVisit(visit,CONSULTATION, PROCEDURE_NOTES).stream()
+                .filter(obs -> obs.getObsGroup() == null)
+                .collect(Collectors.toList());
         return proceduresObsMap;
     }
 
