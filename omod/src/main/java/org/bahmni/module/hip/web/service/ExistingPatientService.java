@@ -111,7 +111,9 @@ public class ExistingPatientService {
     }
 
     public List<Patient> getMatchingPatients(String phoneNumber) {
-        return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber.substring(phoneNumber.length() - PHONE_NUMBER_LENGTH));
+        if(!phoneNumber.equals("undefined"))
+            return existingPatientDao.getPatientsWithPhoneNumber(phoneNumber.substring(phoneNumber.length() - PHONE_NUMBER_LENGTH));
+        return new ArrayList<>();
     }
 
     public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {
