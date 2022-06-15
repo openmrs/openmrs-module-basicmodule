@@ -22,7 +22,7 @@
 
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
-		<require_module version="1.3.0">org.openmrs.module.fhir2</require_module>
+		<require_module version="1.4.0-SNAPSHOT">org.openmrs.module.fhir2</require_module>
 		<require_module>org.openmrs.module.emrapi</require_module>
 		<require_module>org.bahmni.module.bahmnicore</require_module>
 	</require_modules>
