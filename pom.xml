@@ -17,7 +17,7 @@
 		<module>omod</module>
 	</modules>
 	<properties>
-		<openMRSVersion>2.0.4</openMRSVersion>
+		<openMRSVersion>2.1.7</openMRSVersion>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,16 +61,29 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>fhir2-api-2.1</artifactId>
+				<version>1.4.0-SNAPSHOT</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>fhir2-api</artifactId>
+				<version>1.4.0-SNAPSHOT</version>
+				<scope>provided</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>emrapi-api</artifactId>
-				<version>1.32.0</version>
+				<version>1.24.8</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>emrapi-omod</artifactId>
-				<version>1.32.0</version>
+				<version>1.24.8</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.api</groupId>

@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>fhir2-omod</artifactId>
-            <version>1.0.0-20200925.143534-163</version>
+            <version>1.4.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -101,6 +101,12 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.10.1</version>
             <scope>test</scope>
         </dependency>
 
