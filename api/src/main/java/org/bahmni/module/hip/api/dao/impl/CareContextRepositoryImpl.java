@@ -66,9 +66,9 @@ public class CareContextRepositoryImpl implements CareContextRepository {
         Visit visit = !visits.isEmpty() ? visits.get(0) : null;
         PatientProgram program = !patientPrograms.isEmpty() ? patientPrograms.get(0) : null;
         if(visit == null && program != null)
-            getPatientCareContext(program);
+            careContexts.add(getPatientCareContext(program));
         else if(visit != null && program == null)
-            getPatientCareContext(visit);
+            careContexts.add(getPatientCareContext(visit));
         else if(visit != null && program != null) {
             if (program.getDateCreated().before(visit.getStartDatetime()))
                 careContexts.add(getPatientCareContext(visit));
