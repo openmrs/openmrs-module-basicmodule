@@ -4,7 +4,20 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
- 
+
+    <changeSet id="Updating_Users-260620220317" author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM users where username = 'admin'
+            </sqlCheck>
+        </preConditions>
+        <comment>Populate username for admin user</comment>
+        <update tableName="users">
+            <column name="username" value="admin"/>
+            <where>system_id='admin'</where>
+        </update>
+    </changeSet>
+
 
     <changeSet id="Adding-ABHA-IdentifierType-220420210516"  author="Gogia, Swati">
         <preConditions onFail="MARK_RAN">
