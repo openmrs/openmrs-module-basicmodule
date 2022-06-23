@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.bahmni.module.hip.web.service.Constants.ABHA;
 import static org.bahmni.module.hip.web.service.Constants.ABHA_ADDRESS;
 
 @Service
@@ -52,7 +51,7 @@ public class ExistingPatientService {
     public String getHealthId(Patient patient) {
         String healthId = "";
         try {
-            healthId = patient.getPatientIdentifier(ABHA).getIdentifier();
+            healthId = patient.getPatientIdentifier(ABHA_ADDRESS).getIdentifier();
         } catch (NullPointerException ignored) {
 
         }
@@ -62,23 +61,21 @@ public class ExistingPatientService {
     public void perform(String healthId, String action) {
         Patient patient = patientService.getPatientByUuid(getPatientWithHealthId(healthId));
         PatientIdentifier patientIdentifierPhr = patient.getPatientIdentifier(ABHA_ADDRESS);
-        PatientIdentifier patientIdentifierHealthId = patient.getPatientIdentifier(ABHA);
         if (action.equals(Status.DELETED.toString())) {
-            removeHealthId(patient,patientIdentifierPhr,patientIdentifierHealthId);
+            removeHealthId(patient,patientIdentifierPhr);
         }
         if (action.equals(Status.DEACTIVATED.toString())) {
-            voidHealthId(patientIdentifierPhr,patientIdentifierHealthId);
+            voidHealthId(patientIdentifierPhr);
         }
         if (action.equals(Status.REACTIVATED.toString())) {
             unVoidHealthId(patient,healthId);
         }
     }
 
-    private void voidHealthId(PatientIdentifier patientIdentifierPHR,PatientIdentifier patientIdentifierHealthId) {
+    private void voidHealthId(PatientIdentifier patientIdentifierPHR) {
         try {
-            if (!patientIdentifierPHR.getVoided() && !patientIdentifierHealthId.getVoided()) {
+            if (!patientIdentifierPHR.getVoided()) {
                 patientService.voidPatientIdentifier(patientIdentifierPHR, Status.DEACTIVATED.toString());
-                patientService.voidPatientIdentifier(patientIdentifierHealthId, Status.DEACTIVATED.toString());
             }
         } catch (NullPointerException ignored) {
         }
@@ -88,7 +85,7 @@ public class ExistingPatientService {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
             for (PatientIdentifier patientIdentifier : patientIdentifiers) {
-                if (patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS) || patientIdentifier.getIdentifierType().getName().equals(ABHA)) {
+                if (patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS)) {
                     if(patientIdentifier.getVoided()){
                         patientIdentifier.setVoided(false);
                         patientService.savePatientIdentifier(patientIdentifier);
@@ -99,10 +96,8 @@ public class ExistingPatientService {
         }
     }
 
-    private void removeHealthId(Patient patient,PatientIdentifier patientIdentifierPHR,PatientIdentifier patientIdentifierHealthId) {
+    private void removeHealthId(Patient patient,PatientIdentifier patientIdentifierPHR) {
         try {
-            if (patientIdentifierHealthId != null)
-                patient.removeIdentifier(patientIdentifierHealthId);
             if(patientIdentifierPHR != null)
                 patient.removeIdentifier(patientIdentifierPHR);
             patientService.savePatient(patient);
@@ -218,7 +213,7 @@ public class ExistingPatientService {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
             for (PatientIdentifier patientIdentifier:patientIdentifiers) {
-                if(patientIdentifier.getIdentifierType().getName().equals(ABHA) || patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS)){
+                if(patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS)){
                    return patientIdentifier.getVoided();
                 }
             }
