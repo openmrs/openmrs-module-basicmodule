@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ExistingPatient {
     String name;
-    String yearOfBirth;
+    String dateOfBirth;
     String address;
     String gender;
     String uuid;

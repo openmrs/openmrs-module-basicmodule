@@ -179,7 +179,7 @@ public class ExistingPatientService {
                 existingPatients.add(
                         new ExistingPatient(
                                 patient.getGivenName() + " " + patient.getMiddleName() + " " + patient.getFamilyName(),
-                                getYearOfBirth(patient.getBirthdate()).toString(),
+                                patient.getBirthdate().toString(),
                                 getAddress(patient),
                                 patient.getGender(),
                                 patient.getUuid(),
