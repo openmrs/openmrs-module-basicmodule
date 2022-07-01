@@ -37,6 +37,5 @@ public class Constants {
     public static final String RADIOLOGY_REPORT = "Radiology Report";
     public static final String PATIENT_DOCUMENT = "Patient Document";
 
-    public static final String ABHA = "ABHA";
     public static final String ABHA_ADDRESS = "ABHA Address";
 }

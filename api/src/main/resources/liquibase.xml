@@ -18,24 +18,24 @@
         </update>
     </changeSet>
 
-
-    <changeSet id="Adding-ABHA-IdentifierType-220420210516"  author="Gogia, Swati">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from patient_identifier_type where name='ABHA'</sqlCheck>
-        </preConditions>
-        <comment>Adding ABHA Identifier type</comment>
-        <sql>
-            insert into patient_identifier_type( name, description,creator, uuid, uniqueness_behavior, location_behavior, date_created) Select 'ABHA','Health Id identifier type',creator,uuid(),'UNIQUE','NOT_USED',now() from users where username='admin';
-        </sql>
-    </changeSet>
-
-    <changeSet id="updating-ABHA-globalProperty"  author="Gogia, Swati">
+    <changeSet id="Removing-ABHA-globalProperty-230620221617"  author="Sameera, Kavitha">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='ABHA'</sqlCheck>
         </preConditions>
-        <comment>Updating global property for ABHA identifier</comment>
+        <comment>Removing ABHA identifier from global property</comment>
         <sql>
-            update global_property set property_value=(SELECT CONCAT(COALESCE(property_value,''),',',uuid) from patient_identifier_type where name = 'ABHA') where property = 'bahmni.extraPatientIdentifierTypes';
+            update global_property set property_value=replace(property_value,concat((SELECT uuid from patient_identifier_type where name='ABHA'),","),"") where property = 'bahmni.extraPatientIdentifierTypes';
+        </sql>
+    </changeSet>
+
+    <changeSet id="Removing-ABHA-IdentifierType"  author="Sameera, Kavitha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='ABHA'</sqlCheck>
+        </preConditions>
+        <comment>Removing ABHA Identifier type</comment>
+        <sql>
+            delete from patient_identifier where identifier_type=(select patient_identifier_type_id from patient_identifier_type where name='ABHA');
+            delete from patient_identifier_type where name='ABHA';
         </sql>
     </changeSet>
 
