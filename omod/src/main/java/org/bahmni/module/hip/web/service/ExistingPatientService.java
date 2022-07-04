@@ -29,7 +29,7 @@ public class ExistingPatientService {
     private final PatientService patientService;
     private final LocationService locationService;
     private static final String REGISTRATION_DESK = "Registration Desk";
-    private static final String PRIMARY_CONTACT = "primaryContact";
+    private static final String PHONE_NUMBER = "phoneNumber";
     static final int PHONE_NUMBER_LENGTH = 10;
 
     @Autowired
@@ -188,7 +188,7 @@ public class ExistingPatientService {
     private String getPhoneNumber(Patient patient) {
         String phoneNumber = " ";
         try {
-            phoneNumber = patient.getAttribute(PRIMARY_CONTACT).getValue();
+            phoneNumber = patient.getAttribute(PHONE_NUMBER).getValue();
         } catch (NullPointerException ignored) {
 
         }
