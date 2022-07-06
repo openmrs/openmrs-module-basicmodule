@@ -46,7 +46,7 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
         String getPatientPhoneNumberWithPatientIdQuery =
                 " SELECT   value FROM   person_attribute   INNER JOIN person_attribute_type ON" +
                         " person_attribute.person_attribute_type_id = person_attribute_type.person_attribute_type_id " +
-                        "where   person_id = :patientId   and name = \"primaryContact\";";
+                        "where   person_id = :patientId   and name = \"phoneNumber\";";
         Query query = this.sessionFactory.openSession().createSQLQuery(getPatientPhoneNumberWithPatientIdQuery);
         query.setParameter("patientId", patientId);
         List<String> phoneNumbers = query.list();
