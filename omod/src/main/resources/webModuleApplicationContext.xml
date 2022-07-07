@@ -24,10 +24,11 @@
 
 
 	<!-- Annotation based controllers -->
-	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
 
-	<context:component-scan base-package="org.bahmni.module.hip" />
-	<context:component-scan base-package="org.openmrs.module.bahmniemrapi.laborder.service" />
+<!--	<context:component-scan base-package="org.bahmni.module.hip" />-->
+<!--	<context:component-scan base-package="org.openmrs.module.bahmniemrapi.laborder.service" />-->
+	<context:component-scan base-package="org.bahmni.module.hip.web.controller" />
 
 	<bean class="org.openmrs.module.bahmniemrapi.laborder.service.LabOrderResultsServiceImpl" id="labOrderResultsService"/>
 
