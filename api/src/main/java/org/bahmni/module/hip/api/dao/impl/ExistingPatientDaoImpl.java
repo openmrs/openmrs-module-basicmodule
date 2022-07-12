@@ -15,6 +15,7 @@ import java.util.List;
 public class ExistingPatientDaoImpl implements ExistingPatientDao {
 
     private final SessionFactory sessionFactory;
+    public static final String ABHA_ADDRESS = "ABHA Address";
 
     @Autowired
     public ExistingPatientDaoImpl(SessionFactory sessionFactory) {
@@ -63,9 +64,10 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
                 "\tpi.identifier_type = piy.patient_identifier_type_id\n" +
                 "where\n" +
                 "\tpi.patient_id = :patientId\n" +
-                "\tand piy.name = 'Health ID';";
+                "\tand piy.name = :healthId ;";
         Query query = this.sessionFactory.openSession().createSQLQuery(getPatientHealthId);
         query.setParameter("patientId", patientId);
+        query.setParameter("healthId", ABHA_ADDRESS);
         List<String> healthIds = query.list();
         return healthIds.size() > 0 ? healthIds.get(0) : null;
     }
