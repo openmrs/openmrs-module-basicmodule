@@ -77,16 +77,6 @@
         </preConditions>
         <comment>Adding global property for encounter types to be ignored</comment>
         <sql>
-            insert into global_property(property,description,property_value,uuid) values('abdm.encounterTypesToBeIgnored','Encounter types to be ignored for hip atomfeeds','',uuid());
-        </sql>
-    </changeSet>
-
-    <changeSet id="Adding-global-property-encounterTypesToBeIgnored"  author="Sameera, Kavitha">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from global_property where property='abdm.encounterTypesToBeIgnored'</sqlCheck>
-        </preConditions>
-        <comment>Adding global property for encounter types to be ignored</comment>
-        <sql>
             insert into global_property(property,description,property_value,uuid) values('abdm.encounterTypesToBeIgnored','Encounter types to be ignored for hip atomfeeds','ADMISSION,REG,TRANSFER,VALIDATION NOTES',uuid());
         </sql>
     </changeSet>
