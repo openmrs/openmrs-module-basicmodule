@@ -1,6 +1,8 @@
 package org.bahmni.module.hip.api.dao.impl;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.api.dao.OPConsultDao;
+import org.openmrs.Concept;
+import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
@@ -9,12 +11,14 @@ import org.openmrs.Visit;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.ProgramWorkflowService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.emrapi.conditionslist.Condition;
-import org.openmrs.module.emrapi.conditionslist.ConditionService;
 import org.openmrs.module.episodes.Episode;
 import org.openmrs.module.episodes.service.EpisodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import org.openmrs.api.ConditionService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,19 +55,26 @@ public class OPConsultDaoImpl implements OPConsultDao {
         this.encounterDao = encounterDao;
     }
 
+
     @Override
     public Map<Encounter, List<Condition>> getMedicalHistoryConditions(Visit visit) {
         final String conditionStatusHistoryOf = "HISTORY_OF";
         final String conditionStatusActive = "ACTIVE";
         List<Encounter> encounters = encounterDao.GetEncountersForVisit(visit, CONSULTATION);
-        List<Condition> conditions = conditionService.getActiveConditions(visit.getPatient())
+        List<org.openmrs.Condition> conditions = conditionService.getActiveConditions(visit.getPatient())
                                                      .stream()
-                                                     .filter(condition -> condition.getStatus().name().equals(conditionStatusActive) ||
-                                                                          condition.getStatus().name().equals(conditionStatusHistoryOf))
-                                                     .collect(Collectors.toList());
-        Map<Encounter,List<Condition>> encounterConditionsMap = new HashMap<>();
+                                                     .filter(condition -> condition.getClinicalStatus().name().equals(conditionStatusActive) ||
+                                                                          condition.getClinicalStatus().name().equals(conditionStatusHistoryOf))
 
-        for(Condition condition : conditions){
+                                                     .collect(Collectors.toList());
+        List<org.openmrs.module.emrapi.conditionslist.Condition> emrapiconditions = new ArrayList<>();
+        for(org.openmrs.Condition condition : conditions){
+            org.openmrs.module.emrapi.conditionslist.Condition emrapicondition = convertCoreConditionToEmrapiCondition(condition);
+            emrapiconditions.add(emrapicondition);
+        }
+
+        Map<Encounter,List<Condition>> encounterConditionsMap = new HashMap<>();
+        for(Condition condition : emrapiconditions){
             for(Encounter encounter : encounters){
                 Date nextEncounterDate;
                 if(encounters.indexOf(encounter) != 0){
@@ -139,15 +150,21 @@ public class OPConsultDaoImpl implements OPConsultDao {
                 .stream()
                 .filter(encounter -> Objects.equals(encounter.getEncounterType().getName(), "Consultation"))
                 .collect(Collectors.toList());
-        Set<Condition> conditions = conditionService.getActiveConditions(patient)
+        List<org.openmrs.Condition> conditions = conditionService.getActiveConditions(patient)
                 .stream()
-                .filter(condition -> condition.getStatus().name().equals(conditionStatusActive) ||
-                        condition.getStatus().name().equals(conditionStatusHistoryOf))
-                .collect(Collectors.toSet());
+                .filter(condition -> condition.getClinicalStatus().name().equals(conditionStatusActive) ||
+                        condition.getClinicalStatus().name().equals(conditionStatusHistoryOf))
+                .collect(Collectors.toList());
+
+        List<org.openmrs.module.emrapi.conditionslist.Condition> emrapiconditions = new ArrayList<>();
+        for(org.openmrs.Condition condition : conditions){
+            org.openmrs.module.emrapi.conditionslist.Condition emrapicondition = convertCoreConditionToEmrapiCondition(condition);
+            emrapiconditions.add(emrapicondition);
+        }
 
         Map<Encounter,List<Condition>> encounterConditionsMap = new HashMap<>();
 
-        for(Condition condition : conditions){
+        for(Condition condition : emrapiconditions){
             for(Encounter encounter : encounters){
                 Encounter nextEncounter;
                 Date nextEncounterDate = new Date();
@@ -190,5 +207,54 @@ public class OPConsultDaoImpl implements OPConsultDao {
             }
         }
         return obsSet;
+    }
+
+
+    private org.openmrs.module.emrapi.conditionslist.Condition convertCoreConditionToEmrapiCondition(org.openmrs.Condition coreCondition) {
+        org.openmrs.module.emrapi.conditionslist.Condition cListCondition = new org.openmrs.module.emrapi.conditionslist.Condition();
+        Concept concept;
+
+        if (coreCondition.getCondition().getCoded() != null) {
+            concept = Context.getConceptService()
+                    .getConceptByUuid(coreCondition.getCondition().getCoded().getUuid());
+
+            if(coreCondition.getCondition().getSpecificName() == null) {
+                coreCondition.getCondition().setSpecificName(coreCondition.getCondition().getCoded().getName(Context.getLocale()));
+            }
+        } else {
+            concept = new Concept();
+        }
+
+        cListCondition.setUuid(coreCondition.getUuid());
+        cListCondition.setConcept(concept);
+        cListCondition.setAdditionalDetail(coreCondition.getAdditionalDetail());
+        cListCondition.setPatient(coreCondition.getPatient());
+        cListCondition.setConditionNonCoded(coreCondition.getCondition().getNonCoded());
+        cListCondition.setOnsetDate(coreCondition.getOnsetDate());
+        cListCondition.setVoided(coreCondition.getVoided());
+        cListCondition.setVoidReason(coreCondition.getVoidReason());
+        cListCondition.setEndDate(coreCondition.getEndDate());
+        cListCondition.setCreator(coreCondition.getCreator());
+        cListCondition.setDateCreated(coreCondition.getDateCreated());
+        cListCondition.setStatus(convertClinicalStatus(coreCondition.getClinicalStatus()));
+        if (coreCondition.getPreviousVersion() != null) {
+            cListCondition.setPreviousCondition(convertCoreConditionToEmrapiCondition(coreCondition.getPreviousVersion()));
+        }
+
+        return cListCondition;
+    }
+
+    private Condition.Status convertClinicalStatus(ConditionClinicalStatus clinicalStatus) {
+        Condition.Status convertedStatus = Condition.Status.ACTIVE;
+
+        if (clinicalStatus == ConditionClinicalStatus.ACTIVE) {
+            convertedStatus = Condition.Status.ACTIVE;
+        } else if (clinicalStatus == ConditionClinicalStatus.INACTIVE) {
+            convertedStatus = Condition.Status.INACTIVE;
+        } else if (clinicalStatus == ConditionClinicalStatus.HISTORY_OF) {
+            convertedStatus = Condition.Status.HISTORY_OF;
+        }
+
+        return convertedStatus;
     }
 }
