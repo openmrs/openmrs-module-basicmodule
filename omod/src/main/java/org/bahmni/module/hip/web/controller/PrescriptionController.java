@@ -6,6 +6,7 @@ import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.model.PrescriptionBundle;
 import org.bahmni.module.hip.web.service.PrescriptionService;
 import org.bahmni.module.hip.web.service.ValidationService;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
@@ -29,6 +31,7 @@ import static org.bahmni.module.hip.web.utils.DateUtils.parseDateTime;
 public class PrescriptionController extends BaseRestController {
     private final PrescriptionService prescriptionService;
     private final ValidationService validationService;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public PrescriptionController(PrescriptionService prescriptionService, ValidationService validationService) {
@@ -44,7 +47,7 @@ public class PrescriptionController extends BaseRestController {
             @RequestParam String toDate,
             @RequestParam String visitType,
             @RequestParam String visitStartDate
-    ) throws ParseException {
+    ) throws ParseException, IOException {
         if (patientId == null || patientId.isEmpty())
             return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
         if (visitType == null || visitType.isEmpty())
@@ -60,7 +63,7 @@ public class PrescriptionController extends BaseRestController {
             prescriptionBundle = prescriptionService.getPrescriptions(patientId, visitType, parseDateTime(visitStartDate));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(new BundledPrescriptionResponse(prescriptionBundle));
+                .body(mapper.writeValueAsString(new BundledPrescriptionResponse(prescriptionBundle)));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/program", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -71,7 +74,7 @@ public class PrescriptionController extends BaseRestController {
             @RequestParam String toDate,
             @RequestParam String programName,
             @RequestParam String programEnrollmentId
-    ) throws ParseException, UnsupportedEncodingException {
+    ) throws ParseException, IOException {
         programName = URLDecoder.decode(programName, "UTF-8");
         if (patientId == null || patientId.isEmpty())
             return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
@@ -85,6 +88,6 @@ public class PrescriptionController extends BaseRestController {
                 prescriptionService.getPrescriptionsForProgram(patientId, new DateRange(parseDate(fromDate), parseDate(toDate)), programName, programEnrollmentId);
          return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(new BundledPrescriptionResponse(prescriptionBundle));
+                .body(mapper.writeValueAsString(new BundledPrescriptionResponse(prescriptionBundle)));
     }
 }
