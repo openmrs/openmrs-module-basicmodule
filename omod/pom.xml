@@ -115,13 +115,6 @@
             <version>2.10.1</version>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.openmrs.api</groupId>-->
-<!--            <artifactId>openmrs-api</artifactId>-->
-<!--            <version>${openMRSVersion}</version>-->
-<!--            <type>test-jar</type>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
 
         <!--Compile time Dependencies-->
 
