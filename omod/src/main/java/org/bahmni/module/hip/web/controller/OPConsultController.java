@@ -6,6 +6,7 @@ import org.bahmni.module.hip.web.model.DateRange;
 import org.bahmni.module.hip.web.model.OPConsultBundle;
 import org.bahmni.module.hip.web.service.OPConsultService;
 import org.bahmni.module.hip.web.service.ValidationService;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
@@ -29,6 +31,7 @@ import static org.bahmni.module.hip.web.utils.DateUtils.parseDateTime;
 public class OPConsultController extends BaseRestController {
     private final OPConsultService opConsultService;
     private final ValidationService validationService;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public OPConsultController(OPConsultService opConsultService, ValidationService validationService) {
@@ -42,7 +45,7 @@ public class OPConsultController extends BaseRestController {
                           @RequestParam String visitType,
                           @RequestParam String visitStartDate,
                           @RequestParam String fromDate,
-                          @RequestParam String toDate) throws ParseException {
+                          @RequestParam String toDate) throws ParseException, IOException {
         if (patientId == null || patientId.isEmpty())
             return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
         if (visitType == null || visitType.isEmpty())
@@ -57,9 +60,10 @@ public class OPConsultController extends BaseRestController {
         if(isDateBetweenDateRange(visitStartDate,fromDate,toDate))
             opConsultBundle = opConsultService.getOpConsultsForVisit(patientId,visitType,parseDateTime(visitStartDate));
 
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(new BundledOPConsultResponse(opConsultBundle));
+                .body(mapper.writeValueAsString(new BundledOPConsultResponse(opConsultBundle)));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/program", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -70,7 +74,7 @@ public class OPConsultController extends BaseRestController {
             @RequestParam String toDate,
             @RequestParam String programName,
             @RequestParam String programEnrollmentId)
-            throws ParseException , UnsupportedEncodingException {
+            throws ParseException, IOException {
         programName = URLDecoder.decode(programName, "UTF-8");
         if (patientId == null || patientId.isEmpty())
             return ResponseEntity.badRequest().body(ClientError.noPatientIdProvided());
@@ -85,6 +89,6 @@ public class OPConsultController extends BaseRestController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(new BundledOPConsultResponse(opConsultBundle));
+                .body(mapper.writeValueAsString(new BundledOPConsultResponse(opConsultBundle)));
     }
 }

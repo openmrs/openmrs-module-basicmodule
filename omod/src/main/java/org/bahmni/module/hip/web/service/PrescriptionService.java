@@ -1,7 +1,8 @@
 package org.bahmni.module.hip.web.service;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bahmni.module.hip.api.dao.HipVisitDao;
 import org.bahmni.module.hip.web.model.PrescriptionBundle;
 import org.bahmni.module.hip.web.model.DateRange;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class PrescriptionService {
-    private static final Logger log = Logger.getLogger(PrescriptionService.class);
+    private static Logger logger = LogManager.getLogger(PrescriptionService.class);
 
     private final OpenMRSDrugOrderClient openMRSDrugOrderClient;
     private final FhirBundledPrescriptionBuilder fhirBundledPrescriptionBuilder;
