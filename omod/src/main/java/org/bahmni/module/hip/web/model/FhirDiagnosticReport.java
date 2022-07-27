@@ -74,7 +74,7 @@ public class FhirDiagnosticReport {
         Integer encounterId = openMrsDiagnosticReport.getEncounter().getId();
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsDiagnosticReport.getEncounterProviders());
         List<Obs> observationNotDocumentType = openMrsDiagnosticReport.getEncounter().getAllObs().stream()
-                .filter(obs -> (!obs.getConcept().getId().toString().equals(DOCUMENT_TYPE))).collect(Collectors.toList());
+                .filter(obs -> (!obs.getConcept().getName().getName().equals(DOCUMENT_TYPE))).collect(Collectors.toList());
         List<Observation> observations = observationNotDocumentType.stream()
                 .map(fhirResourceMapper::mapToObs).collect(Collectors.toList());
         List<DiagnosticReport> diagnosticReports = observationNotDocumentType.stream()

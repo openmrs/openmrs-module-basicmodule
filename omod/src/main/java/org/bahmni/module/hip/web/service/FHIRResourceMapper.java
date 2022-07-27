@@ -197,7 +197,7 @@ public class FHIRResourceMapper {
         StringBuilder valueText = new StringBuilder();
         StringBuilder contentType = new StringBuilder();
         for(Obs obs1 : obsList){
-            if(obs1.getConcept().getId().toString().equals(DOCUMENT_TYPE)){
+            if(obs1.getConcept().getName().getName().equals(DOCUMENT_TYPE)){
                 valueText.append(obs1.getValueText());
                 contentType.append(getTypeOfTheObsDocument(obs1.getValueText()));
             }
