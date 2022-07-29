@@ -122,43 +122,57 @@ public class DiagnosticReportService {
         return encounterListMap;
     }
 
-    private List<DiagnosticReportBundle> getLabResults(String patientUuid, List<Integer> visitsForVisitType) {
-        Patient patient = patientService.getPatientByUuid(patientUuid);
-
-        List<Visit> visits, visitsWithOrdersForVisitType ;
-
-        visits = orderDao.getVisitsWithAllOrders(patient, ORDER_TYPE, null, null );
-        visitsWithOrdersForVisitType = visits.stream().filter( visit -> visitsForVisitType.contains(visit.getVisitId()) ).collect(Collectors.toList());;
-        List<Order> orders = orderDao.getAllOrdersForVisits(new OrderType(3), visitsWithOrdersForVisitType);
-
+    private List<DiagnosticReportBundle> getLabResults(Patient patient,List<Visit> visits,List<Visit> visitsWithOrdersForVisitType) {
+        List<Order> orders = orderDao.getAllOrdersForVisits(new OrderType(4), visitsWithOrdersForVisitType);
 
         LabOrderResults results = labOrderResultsService.getAll(patient, visits, Integer.MAX_VALUE);
         Map<String, List<LabOrderResult>> groupedByOrderUUID = results.getResults().stream().collect(Collectors.groupingBy(LabOrderResult::getOrderUuid));
+        Map<Order,String> labReportDocuments = new HashMap<>();
+
+        for (Visit visit: visits) {
+            for (Obs o: encounterDao.GetAllObsForVisit(visit,LAB_RESULT,LAB_REPORT).stream().filter(o -> !o.getVoided()).collect(Collectors.toList())) {
+                labReportDocuments.put(o.getOrder(),o.getValueText());
+            }
+        }
 
 
         List<OpenMrsLabResults> labResults = groupedByOrderUUID.entrySet().stream().map(entry -> {
-                    Optional<Order> orderForUuid = orders
-                            .stream()
-                            .filter(order -> order.getUuid().equals(entry.getKey()))
-                            .findFirst();
-                    if (orderForUuid.isPresent())
-                    return new OpenMrsLabResults(orderForUuid.get().getEncounter(), orderForUuid.get().getPatient(), entry.getValue());
-                    else return null;
-                } ).filter(Objects::nonNull).collect(Collectors.toList());
+            Optional<Order> orderForUuid = orders
+                    .stream()
+                    .filter(order -> order.getUuid().equals(entry.getKey()))
+                    .findFirst();
+            if (orderForUuid.isPresent()) {
+                return new OpenMrsLabResults(orderForUuid.get().getEncounter(), orderForUuid.get().getPatient(), entry.getValue(), labReportDocuments.get(orderForUuid.get()));
+            }
+            else return null;
+        } ).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<DiagnosticReportBundle> bundles = labResults.stream().map(fhirBundledDiagnosticReportBuilder::fhirBundleResponseFor).collect(Collectors.toList());
         return bundles;
     }
+
     public List<DiagnosticReportBundle> getLabResultsForVisits(String patientUuid, String visittype, Date visitStartDate)
     {
-        List<Integer> visitsForVisitType =  hipVisitDao.GetVisitIdsForVisitForLabResults(patientUuid, visittype,visitStartDate );
-        return getLabResults(patientUuid, visitsForVisitType);
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+        Visit visit = hipVisitDao.getPatientVisit(patient,visittype,visitStartDate);
+        List<Visit> visits, visitsWithOrdersForVisitType = new ArrayList<>();
+
+        visits = orderDao.getVisitsWithAllOrders(patient, ORDER_TYPE, null, null );
+        Boolean isOrderVisit = visits.contains(visit);
+        if(isOrderVisit) { visitsWithOrdersForVisitType.add(visit); };
+        return getLabResults(patient, visits,visitsWithOrdersForVisitType);
     }
 
     public List<DiagnosticReportBundle> getLabResultsForPrograms(String patientUuid, DateRange dateRange, String programName, String programEnrollmentId)
     {
         List<Integer> visitsForProgram =  hipVisitDao.GetVisitIdsForProgramForLabResults(patientUuid, programName, programEnrollmentId, dateRange.getFrom(), dateRange.getTo() );
-        return getLabResults(patientUuid, visitsForProgram);
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+
+        List<Visit> visits, visitsWithOrdersForProgram ;
+
+        visits = orderDao.getVisitsWithAllOrders(patient, ORDER_TYPE, null, null );
+        visitsWithOrdersForProgram = visits.stream().filter( visit -> visitsForProgram.contains(visit.getVisitId()) ).collect(Collectors.toList());;
+        return getLabResults(patient, visits, visitsWithOrdersForProgram);
     }
 
 }
