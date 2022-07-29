@@ -2,6 +2,7 @@ package org.bahmni.module.hip.web.model;
 
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -10,18 +11,30 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.bahmniemrapi.laborder.contract.LabOrderResult;
 
-import javax.validation.constraints.Null;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.bahmni.module.hip.web.service.Constants.GIF;
+import static org.bahmni.module.hip.web.service.Constants.IMAGE;
+import static org.bahmni.module.hip.web.service.Constants.JPEG;
+import static org.bahmni.module.hip.web.service.Constants.JPG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_IMAGE_JPEG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_PDF;
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
+import static org.bahmni.module.hip.web.service.Constants.PDF;
+import static org.bahmni.module.hip.web.service.Constants.PNG;
 
 public class FhirLabResult {
 
@@ -69,6 +82,11 @@ public class FhirLabResult {
         reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
         reports.setSubject(FHIRUtils.getReferenceToResource(patient));
         reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
+        try {
+            reports.setPresentedForm(getAttachments(labresult.getUploadedFilePath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         List<Observation> results = new ArrayList<>();
 
@@ -128,5 +146,30 @@ public class FhirLabResult {
         composition.setType(FHIRUtils.getDiagnosticReportType());
         composition.setTitle("Diagnostic Report");
         return composition;
+    }
+
+    private static List<Attachment> getAttachments(String path) throws IOException {
+        List<Attachment> attachments = new ArrayList<>();
+        Attachment attachment = new Attachment();
+        attachment.setContentType(getTypeOfTheObsDocument(path));
+        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + path).toPath());
+        attachment.setData(fileContent);
+        attachment.setTitle("LAB REPORT");
+        attachments.add(attachment);
+        return attachments;
+    }
+
+    private static String getTypeOfTheObsDocument(String valueText) {
+        if (valueText == null) return "";
+        String extension = valueText.substring(valueText.indexOf('.') + 1);
+        if (extension.compareTo(JPEG) == 0 || extension.compareTo(JPG) == 0) {
+            return MIMETYPE_IMAGE_JPEG;
+        } else if (extension.compareTo(PNG) == 0 || extension.compareTo(GIF) == 0) {
+            return IMAGE + extension;
+        } else if (extension.compareTo(PDF) == 0) {
+            return MIMETYPE_PDF;
+        } else {
+            return "";
+        }
     }
 }
