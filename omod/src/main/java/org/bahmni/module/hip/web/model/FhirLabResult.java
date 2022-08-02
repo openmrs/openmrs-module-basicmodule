@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.openmrs.Obs;
 import org.openmrs.module.bahmniemrapi.laborder.contract.LabOrderResult;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -75,15 +77,21 @@ public class FhirLabResult {
         List<Practitioner> practitioners = labresult.getEncounterProviders().stream().map(fhirResourceMapper::mapToPractitioner).collect(Collectors.toList());
 
         DiagnosticReport reports = new DiagnosticReport();
-        LabOrderResult firstresult = labresult.getLabOrderResults().get(0);
+        LabOrderResult firstresult = labresult.getLabOrderResults().size() != 0 ? labresult.getLabOrderResults().get(0) : null;
 
-        reports.setId(firstresult.getOrderUuid());
-        reports.setCode(new CodeableConcept().setText(firstresult.getPanelName()).addCoding(new Coding().setDisplay(firstresult.getPanelName())));
+        String panelName = null;
+        for(Map.Entry<Obs, String> report : labresult.getObservationsWithTestName().entrySet()){
+            if(panelName == null) panelName = report.getValue();
+            else panelName = panelName + " , " + report.getValue();
+        }
+
+        reports.setId(firstresult != null ? firstresult.getOrderUuid() : UUID.randomUUID().toString());
+        reports.setCode(new CodeableConcept().setText(panelName).addCoding(new Coding().setDisplay(panelName)));
         reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
         reports.setSubject(FHIRUtils.getReferenceToResource(patient));
         reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
         try {
-            reports.setPresentedForm(getAttachments(labresult.getUploadedFilePath()));
+            reports.setPresentedForm(getAttachments(labresult.getObservationsWithTestName()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -92,7 +100,9 @@ public class FhirLabResult {
 
         labresult.getLabOrderResults().stream().forEach( result -> FhirLabResult.mapToObsFromLabResult(result, patient, reports, results) );
 
-        FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient() ), labresult.getLabOrderResults().get(0).getPanelName(),
+
+
+        FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient() ), panelName,
                 fhirResourceMapper.mapToEncounter( labresult.getEncounter() ),
                 labresult.getEncounter().getEncounterDatetime(), reports, results, practitioners);
 
@@ -148,14 +158,16 @@ public class FhirLabResult {
         return composition;
     }
 
-    private static List<Attachment> getAttachments(String path) throws IOException {
+    private static List<Attachment> getAttachments(Map<Obs, String> obs) throws IOException {
         List<Attachment> attachments = new ArrayList<>();
-        Attachment attachment = new Attachment();
-        attachment.setContentType(getTypeOfTheObsDocument(path));
-        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + path).toPath());
-        attachment.setData(fileContent);
-        attachment.setTitle("LAB REPORT");
-        attachments.add(attachment);
+        for (Map.Entry<Obs, String> o: obs.entrySet()) {
+            Attachment attachment = new Attachment();
+            attachment.setContentType(getTypeOfTheObsDocument(o.getKey().getValueText()));
+            byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + o.getKey().getValueText()).toPath());
+            attachment.setData(fileContent);
+            attachment.setTitle("LAB REPORT : " + o.getValue());
+            attachments.add(attachment);
+        }
         return attachments;
     }
 
