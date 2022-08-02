@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterProvider;
+import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.module.bahmniemrapi.laborder.contract.LabOrderResult;
@@ -19,19 +20,19 @@ public class OpenMrsLabResults {
     private List<LabOrderResult> labOrderResults;
     private Patient patient;
     private final Set<EncounterProvider> encounterProviders;
-    private final String uploadedFilePath;
+    private final Map<Obs , String> observationsWithTestName;
 
 
-    public OpenMrsLabResults(@NotEmpty Encounter encounter, Patient patient, List<LabOrderResult> labOrderResults, String uploadedFilePath1) {
+    public OpenMrsLabResults(@NotEmpty Encounter encounter, Patient patient, List<LabOrderResult> labOrderResults, Map<Obs, String> observationsWithTestName) {
         this.encounter = encounter;
         this.patient = patient;
         this.labOrderResults = labOrderResults;
         this.encounterProviders = encounter.getEncounterProviders();
-        this.uploadedFilePath = uploadedFilePath1;
+        this.observationsWithTestName = observationsWithTestName;
     }
 
 
-    public static List<OpenMrsLabResults> from(Map<Order, List<LabOrderResult>> labOrderResultsMap, Map<Order,String> labReportDocuments) {
+    public static List<OpenMrsLabResults> from(Map<Order, List<LabOrderResult>> labOrderResultsMap, Map<Order,Map<Obs, String>> labReportDocuments) {
         return labOrderResultsMap
                 .entrySet()
                 .stream()
