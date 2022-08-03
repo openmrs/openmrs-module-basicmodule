@@ -9,6 +9,7 @@ import org.hibernate.SessionFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.Person;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
@@ -27,15 +28,16 @@ import java.util.stream.Collectors;
 public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
 
     private SessionFactory sessionFactory;
-
-    PersonService personService;
-    ObsService obsService;
-    ConceptService conceptService;
-    EncounterService encounterService;
-    EncounterDao encounterDao;
-    PatientService patientService;
+    private PersonService personService;
+    private ObsService obsService;
+    private ConceptService conceptService;
+    private EncounterService encounterService;
+    private EncounterDao encounterDao;
+    private PatientService patientService;
 
     private static Logger logger = LogManager.getLogger(DiagnosticReportDaoImpl.class);
+    private static final String LAB_REPORT = "LAB_REPORT";
+    private static final String LAB_RESULT = "LAB_RESULT";
 
 
     @Autowired
@@ -69,7 +71,7 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
     }
 
     @Override
-    public Map<Encounter,List<Obs>> getAllLabReportsForVisit(String patientUUID, Visit visit){
+    public Map<Encounter,List<Obs>> getAllUnorderedUploadsForVisit(String patientUUID, Visit visit){
         Map<Encounter,List<Obs>> labReportsMap = new HashMap<>();;
         List<Obs> labReports = getAllObsForDiagnosticReports(patientUUID);
         List<Encounter> encounters = encounterService.getEncountersByVisit(visit,false);
@@ -96,5 +98,16 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
             }
         }
         return labReportsMap;
+    }
+
+    @Override
+    public Map<Order,Obs> getAllOrderedTestUploads(List<Visit> visitList) {
+        Map<Order,Obs> documentObs = new HashMap<>();
+        for (Visit visit : visitList) {
+            for (Obs o : encounterDao.GetAllObsForVisit(visit, LAB_RESULT, LAB_REPORT).stream().filter(o -> !o.getVoided()).collect(Collectors.toList())) {
+                documentObs.put(o.getOrder(), o);
+            }
+        }
+        return documentObs;
     }
 }

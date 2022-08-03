@@ -44,8 +44,6 @@ public class DiagnosticReportService {
     private static final String RADIOLOGY_TYPE = "RADIOLOGY";
     private static final String PATIENT_DOCUMENT_TYPE = "Patient Document";
     private static final String DOCUMENT_TYPE = "Document";
-    private static final String LAB_REPORT = "LAB_REPORT";
-    private static final String LAB_RESULT = "LAB_RESULT";
 
 
     private LabOrderResultsService labOrderResultsService;
@@ -127,21 +125,36 @@ public class DiagnosticReportService {
         return encounterListMap;
     }
 
+    private  Map<Obs , String> getLabUploadsMap(Map<Order,Obs> orderedTestUploads, Map<Encounter,List<Obs>> unorderedUploads, Order order) {
+        Map<Obs , String> labReports = new HashMap<Obs , String>() {{
+            if (orderedTestUploads.get(order) != null) {
+                Obs o = orderedTestUploads.get(order);
+                put(o,diagnosticReportDao.getTestNameForLabReports(o));
+            }
+        }};
+        Encounter encounter = order.getEncounter();
+        if(unorderedUploads.containsKey(encounter)) {
+            putAllObsIntoMap(unorderedUploads.get(encounter),labReports);
+            unorderedUploads.remove(encounter);
+        }
+        return labReports;
+    }
+
+    private void putAllObsIntoMap(List<Obs> obs,Map<Obs , String> labReports) {
+        for (Obs o: obs) {
+            labReports.put(o, diagnosticReportDao.getTestNameForLabReports(o));
+        }
+    }
 
     private List<DiagnosticReportBundle> getLabResults(Patient patient, List<Visit> visitList) {
-        List<Order> orders = orderDao.getAllOrdersForVisits(new OrderType(4), visitList);
+
+        Map<Order,Obs> orderedTestUploads = diagnosticReportDao.getAllOrderedTestUploads(visitList);
+        Map<Encounter,List<Obs>> unorderedUploads = diagnosticReportDao.getAllUnorderedUploadsForVisit(patient.getUuid(), visitList.size() != 0 ? visitList.get(0) : null);
 
         LabOrderResults results = labOrderResultsService.getAll(patient, visitList, Integer.MAX_VALUE);
         Map<String, List<LabOrderResult>> groupedByOrderUUID = results.getResults().stream().collect(Collectors.groupingBy(LabOrderResult::getOrderUuid));
-        Map<Order,Obs> labReportDocuments = new HashMap<>();
 
-        for (Visit visit: visitList) {
-            for (Obs o: encounterDao.GetAllObsForVisit(visit,LAB_RESULT,LAB_REPORT).stream().filter(o -> !o.getVoided()).collect(Collectors.toList())) {
-                labReportDocuments.put(o.getOrder(),o);
-            }
-        }
-        
-        Map<Encounter,List<Obs>> labUploads = diagnosticReportDao.getAllLabReportsForVisit(patient.getUuid(), visitList.size() != 0 ? visitList.get(0) : null);
+        List<Order> orders = orderDao.getAllOrdersForVisits(new OrderType(4), visitList);
 
         List<OpenMrsLabResults> labResults = groupedByOrderUUID.entrySet().stream().map(entry -> {
             Optional<Order> orderForUuid = orders
@@ -149,30 +162,16 @@ public class DiagnosticReportService {
                     .filter(order -> order.getUuid().equals(entry.getKey()))
                     .findFirst();
             if (orderForUuid.isPresent()) {
-                Map<Obs , String> labReports = new HashMap<Obs , String>() {{
-                    if (labReportDocuments.get(orderForUuid.get()) != null) {
-                        Obs o = labReportDocuments.get(orderForUuid.get());
-                        put(o,diagnosticReportDao.getTestNameForLabReports(o));
-                    }
-                }};
-                Encounter encounter = orderForUuid.get().getEncounter();
-                if(labUploads.containsKey(encounter)) {
-                    for (Obs o: labUploads.get(encounter)) {
-                        labReports.put(o,diagnosticReportDao.getTestNameForLabReports(o));
-                    }
-                    labUploads.remove(encounter);
-                }
-                return new OpenMrsLabResults(encounter, orderForUuid.get().getPatient(), entry.getValue(), labReports);
+                return new OpenMrsLabResults(orderForUuid.get().getEncounter(), orderForUuid.get().getPatient(), entry.getValue(),
+                        getLabUploadsMap(orderedTestUploads,unorderedUploads,orderForUuid.get()));
             }
             else return null;
         } ).filter(Objects::nonNull).collect(Collectors.toList());
 
 
-        labResults.addAll(labUploads.entrySet().stream().map(entry -> {
-            Map<Obs, String> labReports = new HashMap<>();
-            for (Obs o: entry.getValue()) {
-                labReports.put(o, diagnosticReportDao.getTestNameForLabReports(o));
-            }
+        labResults.addAll(unorderedUploads.entrySet().stream().map(entry -> {
+            Map<Obs , String> labReports = new HashMap<>();
+            putAllObsIntoMap(entry.getValue(),labReports);
             return new OpenMrsLabResults(entry.getKey(), entry.getKey().getPatient(), new ArrayList<>(),labReports);
         } ).collect(Collectors.toList()));
 
