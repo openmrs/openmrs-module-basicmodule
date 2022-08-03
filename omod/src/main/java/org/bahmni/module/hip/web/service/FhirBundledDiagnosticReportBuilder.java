@@ -47,8 +47,13 @@ public class FhirBundledDiagnosticReportBuilder {
         Bundle diagnosticReportBundle = FhirLabResult.fromOpenMrsLabResults(results, fhirResourceMapper)
                 .bundleLabResults(organizationContext.webUrl(), fhirResourceMapper);
 
+        CareContext careContext = careContextService.careContextFor(
+                results.getEncounter(),
+                organizationContext.careContextType());
+
         return DiagnosticReportBundle.builder()
                 .bundle(diagnosticReportBundle)
+                .careContext(careContext)
                 .build();
     }
 }
