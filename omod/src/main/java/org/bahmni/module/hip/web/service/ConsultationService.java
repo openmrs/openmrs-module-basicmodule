@@ -130,8 +130,7 @@ public class ConsultationService {
                 encounterMedicalHistoryMap.put(medicalHistory.getKey(), new ArrayList<>());
             }
             for(Condition condition : medicalHistory.getValue()){
-                encounterMedicalHistoryMap.get(medicalHistory.getKey()).add(new OpenMrsCondition(condition.getUuid(), condition.getConcept().getDisplayString(), condition.getDateCreated()));
-            }
+                encounterMedicalHistoryMap.get(medicalHistory.getKey()).add(new OpenMrsCondition(condition.getUuid(), condition.getConditionNonCoded() != null ? condition.getConditionNonCoded() : condition.getConcept().getDisplayString(), condition.getDateCreated()));            }
         }
         for(Obs obs : medicalHistoryDiagnosisMap){
             if (!encounterMedicalHistoryMap.containsKey(obs.getEncounter())){
