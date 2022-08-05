@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static org.bahmni.module.hip.api.dao.Constants.CODED_DIAGNOSIS;
 import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
+import static org.bahmni.module.hip.api.dao.Constants.NON_CODED_DIAGNOSIS;
 import static org.bahmni.module.hip.api.dao.Constants.PROCEDURE_NOTES;
 
 @Repository
@@ -101,6 +102,7 @@ public class OPConsultDaoImpl implements OPConsultDao {
     @Override
     public List<Obs> getMedicalHistoryDiagnosis(Visit visit) {
         List<Obs> medicalHistoryDiagnosisObsMap = encounterDao.GetAllObsForVisit(visit, CONSULTATION, CODED_DIAGNOSIS);
+        medicalHistoryDiagnosisObsMap.addAll(encounterDao.GetAllObsForVisit(visit, CONSULTATION, NON_CODED_DIAGNOSIS));
         return medicalHistoryDiagnosisObsMap;
     }
 
