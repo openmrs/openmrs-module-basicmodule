@@ -28,7 +28,7 @@ public class ExistingPatientService {
     private final PatientDao patientDao;
     private final PatientService patientService;
     private final LocationService locationService;
-    private static final String REGISTRATION_DESK = "Registration Desk";
+    private static final String LOCATION = "Bahmni Clinic";
     private static final String PHONE_NUMBER = "phoneNumber";
     static final int PHONE_NUMBER_LENGTH = 10;
 
@@ -134,7 +134,7 @@ public class ExistingPatientService {
     private List<PatientResponse> filterPatientsByName(String patientName) {
         return patientDao.getPatients("", patientName, null, null, "", 100, 0,
                 null, "", null, null, null,
-                locationService.getLocation(REGISTRATION_DESK).getUuid(), false, false);
+                locationService.getLocation(LOCATION).getUuid(), false, false);
     }
 
 
