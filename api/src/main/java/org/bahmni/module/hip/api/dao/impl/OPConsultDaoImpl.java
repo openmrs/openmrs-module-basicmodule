@@ -62,6 +62,8 @@ public class OPConsultDaoImpl implements OPConsultDao {
         final String conditionStatusHistoryOf = "HISTORY_OF";
         final String conditionStatusActive = "ACTIVE";
         List<Encounter> encounters = encounterDao.GetEncountersForVisit(visit, CONSULTATION);
+        if(encounters.size() == 0)
+            return new HashMap<>();
         List<org.openmrs.Condition> conditions = conditionService.getActiveConditions(visit.getPatient())
                                                      .stream()
                                                      .filter(condition -> condition.getClinicalStatus().name().equals(conditionStatusActive) ||
@@ -75,16 +77,18 @@ public class OPConsultDaoImpl implements OPConsultDao {
         }
 
         Map<Encounter,List<Condition>> encounterConditionsMap = new HashMap<>();
-        for(Condition condition : emrapiconditions){
-            for(Encounter encounter : encounters){
-                Date nextEncounterDate;
-                if(encounters.indexOf(encounter) != 0){
-                    Encounter nextEncounter = encounterService.getEncounter(encounters.get(encounters.indexOf(encounter)-1).getId());
+        List<Encounter> nextEncounters = encounterService.getEncountersByPatient(visit.getPatient()).stream().filter(e ->
+                encounters.get(encounters.size()-1).getId() < e.getId()
+        ).collect(Collectors.toList());
+        for(Condition condition : emrapiconditions) {
+            for (Encounter encounter: encounters) {
+                Encounter nextEncounter;
+                Date nextEncounterDate = nextEncounters.size() != 0 ? nextEncounters.get(0).getDateCreated() : new Date();
+                if(encounters.indexOf(encounter) < (encounters.size() - 1)){
+                    nextEncounter = encounterService.getEncounter(encounters.get(encounters.indexOf(encounter)+1).getId());
                     nextEncounterDate = nextEncounter.getDateCreated();
                 }
-                else
-                   nextEncounterDate = new Date();
-                if (condition.getDateCreated().equals(encounter.getDateCreated()) || condition.getDateCreated().after(encounter.getDateCreated()) && condition.getDateCreated().before(nextEncounterDate)) {
+                if(condition.getDateCreated().equals(encounter.getDateCreated()) || (condition.getDateCreated().before(nextEncounterDate) && condition.getDateCreated().after(encounter.getDateCreated()))){
                     if (encounterConditionsMap.containsKey(encounter)) {
                         encounterConditionsMap.get(encounter).add(condition);
                     } else {
