@@ -27,15 +27,15 @@ public class FhirLabResult {
 
     private final Patient patient;
     private final Encounter encounter;
-    private final Date encounterTime;
+    private final Date visitTime;
     private final DiagnosticReport report;
     private final List<Observation> results;
     private final List<Practitioner> practitioners;
 
-    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date encounterTime, DiagnosticReport report, List<Observation> results, List<Practitioner> practitioners) {
+    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date visitTime, DiagnosticReport report, List<Observation> results, List<Practitioner> practitioners) {
         this.patient = patient;
         this.encounter = encounter;
-        this.encounterTime = encounterTime;
+        this.visitTime = visitTime;
         this.report = report;
         this.results = results;
         this.practitioners = practitioners;
@@ -44,7 +44,7 @@ public class FhirLabResult {
     public Bundle bundleLabResults (String webUrl, FHIRResourceMapper fhirResourceMapper) {
         String bundleID = String.format("LR-%s", encounter.getId());
 
-        Bundle bundle = FHIRUtils.createBundle(encounterTime, bundleID, webUrl);
+        Bundle bundle = FHIRUtils.createBundle(visitTime, bundleID, webUrl);
 
         FHIRUtils.addToBundleEntry(bundle, compositionFrom(webUrl), false);
 
@@ -76,7 +76,7 @@ public class FhirLabResult {
 
         FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient() ), labresult.getLabOrderResults().get(0).getPanelName(),
                 fhirResourceMapper.mapToEncounter( labresult.getEncounter() ),
-                labresult.getEncounter().getEncounterDatetime(), reports, results, practitioners);
+                labresult.getEncounter().getVisit().getDateCreated(), reports, results, practitioners);
 
         return fhirLabResult;
     }
@@ -101,7 +101,7 @@ public class FhirLabResult {
     }
 
     private Composition compositionFrom(String webURL) {
-        Composition composition = initializeComposition(encounterTime, webURL);
+        Composition composition = initializeComposition(visitTime, webURL);
         Composition.SectionComponent compositionSection = composition.addSection();
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
 
@@ -118,11 +118,11 @@ public class FhirLabResult {
         return composition;
     }
 
-    private Composition initializeComposition(Date encounterTimestamp, String webURL) {
+    private Composition initializeComposition(Date visitTimestamp, String webURL) {
         Composition composition = new Composition();
 
         composition.setId(UUID.randomUUID().toString());
-        composition.setDate(encounterTimestamp);
+        composition.setDate(visitTimestamp);
         composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), webURL, "document"));
         composition.setStatus(Composition.CompositionStatus.FINAL);
         composition.setType(FHIRUtils.getDiagnosticReportType());
