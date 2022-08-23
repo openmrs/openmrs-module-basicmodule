@@ -48,7 +48,7 @@ public class FhirPrescription {
 
     public static FhirPrescription from(OpenMrsPrescription openMrsPrescription, FHIRResourceMapper fhirResourceMapper) {
 
-        Date encounterDatetime = openMrsPrescription.getEncounter().getVisit().getDateCreated();
+        Date encounterDatetime = openMrsPrescription.getEncounter().getVisit().getStartDatetime();
         Integer encounterId = openMrsPrescription.getEncounter().getId();
         Patient patient = fhirResourceMapper.mapToPatient(openMrsPrescription.getPatient());
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);

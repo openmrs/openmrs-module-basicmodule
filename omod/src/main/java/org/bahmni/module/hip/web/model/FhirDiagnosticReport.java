@@ -70,7 +70,7 @@ public class FhirDiagnosticReport {
         Patient patient = fhirResourceMapper.mapToPatient(openMrsDiagnosticReport.getPatient());
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
         Encounter encounter = fhirResourceMapper.mapToEncounter(openMrsDiagnosticReport.getEncounter());
-        Date visitDateTime = openMrsDiagnosticReport.getEncounter().getVisit().getDateCreated();
+        Date visitDateTime = openMrsDiagnosticReport.getEncounter().getVisit().getStartDatetime();
         Integer encounterId = openMrsDiagnosticReport.getEncounter().getId();
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsDiagnosticReport.getEncounterProviders());
         List<Obs> observationNotDocumentType = openMrsDiagnosticReport.getEncounter().getAllObs().stream()

@@ -76,7 +76,7 @@ public class FhirLabResult {
 
         FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient() ), labresult.getLabOrderResults().get(0).getPanelName(),
                 fhirResourceMapper.mapToEncounter( labresult.getEncounter() ),
-                labresult.getEncounter().getVisit().getDateCreated(), reports, results, practitioners);
+                labresult.getEncounter().getVisit().getStartDatetime(), reports, results, practitioners);
 
         return fhirLabResult;
     }
