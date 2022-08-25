@@ -1,5 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bahmni.module.bahmnicore.dao.OrderDao;
 import org.bahmni.module.hip.api.dao.DiagnosticReportDao;
 import org.bahmni.module.hip.api.dao.EncounterDao;
@@ -44,6 +46,7 @@ public class DiagnosticReportService {
     private static final String RADIOLOGY_TYPE = "RADIOLOGY";
     private static final String PATIENT_DOCUMENT_TYPE = "Patient Document";
     private static final String DOCUMENT_TYPE = "Document";
+    private static Logger logger = LogManager.getLogger(DiagnosticReportService.class);
 
 
     private LabOrderResultsService labOrderResultsService;
@@ -125,18 +128,15 @@ public class DiagnosticReportService {
         return encounterListMap;
     }
 
-    private  Map<Obs , String> getLabUploadsMap(Map<Order,Obs> orderedTestUploads, Map<Encounter,List<Obs>> unorderedUploads, Order order) {
-        Map<Obs , String> labReports = new HashMap<Obs , String>() {{
-            if (orderedTestUploads.get(order) != null) {
-                Obs o = orderedTestUploads.get(order);
-                put(o,diagnosticReportDao.getTestNameForLabReports(o));
-            }
-        }};
+    private  Map<Obs , String> getLabUploadsMap(Map<Encounter,List<Obs>> orderedTestUploads, Map<Encounter,List<Obs>> unorderedUploads, Order order) {
         Encounter encounter = order.getEncounter();
+        Map<Obs , String> labReports = new HashMap<>();
+        putAllObsIntoMap(orderedTestUploads.get(encounter),labReports);
         if(unorderedUploads.containsKey(encounter)) {
             putAllObsIntoMap(unorderedUploads.get(encounter),labReports);
             unorderedUploads.remove(encounter);
         }
+        logger.warn("UPLOAD MAP " + labReports);
         return labReports;
     }
 
@@ -148,7 +148,7 @@ public class DiagnosticReportService {
 
     private List<DiagnosticReportBundle> getLabResults(Patient patient, List<Visit> visitList) {
 
-        Map<Order,Obs> orderedTestUploads = diagnosticReportDao.getAllOrderedTestUploads(visitList);
+        Map<Encounter,List<Obs>> orderedTestUploads = diagnosticReportDao.getAllOrderedTestUploads(patient.getUuid(), visitList.size() != 0 ? visitList.get(0) : null);
         Map<Encounter,List<Obs>> unorderedUploads = diagnosticReportDao.getAllUnorderedUploadsForVisit(patient.getUuid(), visitList.size() != 0 ? visitList.get(0) : null);
 
         LabOrderResults results = labOrderResultsService.getAll(patient, visitList, Integer.MAX_VALUE);

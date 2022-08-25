@@ -55,11 +55,13 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
     }
 
 
-    private List<Obs> getAllObsForDiagnosticReports(String patientUUID) {
+    private List<Obs> getAllObsForDiagnosticReports(String patientUUID, Boolean linkedWithOrder) {
         Person person = personService.getPersonByUuid(patientUUID);
         Concept concept = conceptService.getConcept("LAB_REPORT");
-        List<Obs> obs = obsService.getObservationsByPersonAndConcept(person,concept).stream().filter(o -> o.getOrder() == null).collect(Collectors.toList());
-        return obs;
+        List<Obs> obs = obsService.getObservationsByPersonAndConcept(person,concept);
+        if(linkedWithOrder)
+           return obs.stream().filter(o -> o.getOrder() != null).collect(Collectors.toList());
+        return obs.stream().filter(o -> o.getOrder() == null).collect(Collectors.toList());
     }
 
     @Override
@@ -73,7 +75,7 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
     @Override
     public Map<Encounter,List<Obs>> getAllUnorderedUploadsForVisit(String patientUUID, Visit visit){
         Map<Encounter,List<Obs>> labReportsMap = new HashMap<>();;
-        List<Obs> labReports = getAllObsForDiagnosticReports(patientUUID);
+        List<Obs> labReports = getAllObsForDiagnosticReports(patientUUID,false);
         List<Encounter> encounters = encounterService.getEncountersByVisit(visit,false);
         List<Encounter> nextEncounters = encounterService.getEncountersByPatient(patientService.getPatientByUuid(patientUUID)).stream().filter(e ->
                 encounters.get(encounters.size()-1).getId() < e.getId()
@@ -97,17 +99,31 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
                 }
             }
         }
+        logger.warn("UNORDERED " + labReportsMap);
         return labReportsMap;
     }
 
     @Override
-    public Map<Order,Obs> getAllOrderedTestUploads(List<Visit> visitList) {
-        Map<Order,Obs> documentObs = new HashMap<>();
-        for (Visit visit : visitList) {
-            for (Obs o : encounterDao.GetAllObsForVisit(visit, LAB_RESULT, LAB_REPORT).stream().filter(o -> !o.getVoided()).collect(Collectors.toList())) {
-                documentObs.put(o.getOrder(), o);
+    public Map<Encounter,List<Obs>> getAllOrderedTestUploads(String patientUuid,Visit visit) {
+        Map<Encounter,List<Obs>> documentObs = new HashMap<>();
+        List<Obs> obsList = getAllObsForDiagnosticReports(patientUuid,true);
+        List<Encounter> encounters = encounterService.getEncountersByVisit(visit,false);
+        logger.warn("ENCOUNERS " + encounters);
+
+        for (Obs obs : obsList) {
+            Encounter orderEncounter = obs.getOrder().getEncounter();
+            if(encounters.contains(orderEncounter)) {
+                if (documentObs.containsKey(orderEncounter)) {
+                    documentObs.get(orderEncounter).add(obs);
+                } else {
+                    documentObs.put(orderEncounter, new ArrayList<Obs>() {{
+                        add(obs);
+                    }});
+                }
             }
         }
+        logger.info("ORDERED " + documentObs);
+        logger.warn("ORDERED " + documentObs);
         return documentObs;
     }
 }
