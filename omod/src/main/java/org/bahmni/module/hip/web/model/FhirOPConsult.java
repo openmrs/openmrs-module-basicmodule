@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class FhirOPConsult {
     private final List<Condition> chiefComplaints;
     private final List<Condition> medicalHistory;
-    private final Date encounterTimestamp;
+    private final Date visitTimeStamp;
     private final Integer encounterID;
     private final Encounter encounter;
     private final List<Practitioner> practitioners;
@@ -42,7 +42,7 @@ public class FhirOPConsult {
     private final List<ServiceRequest> serviceRequest;
 
     public FhirOPConsult(List<Condition> chiefComplaints,
-                         List<Condition> medicalHistory, Date encounterTimestamp,
+                         List<Condition> medicalHistory, Date visitTimeStamp,
                          Integer encounterID,
                          Encounter encounter,
                          List<Practitioner> practitioners,
@@ -56,7 +56,7 @@ public class FhirOPConsult {
                          List<ServiceRequest> serviceRequest) {
         this.chiefComplaints = chiefComplaints;
         this.medicalHistory = medicalHistory;
-        this.encounterTimestamp = encounterTimestamp;
+        this.visitTimeStamp = visitTimeStamp;
         this.encounterID = encounterID;
         this.encounter = encounter;
         this.practitioners = practitioners;
@@ -72,7 +72,7 @@ public class FhirOPConsult {
 
     public Bundle bundleOPConsult(String webUrl) {
         String bundleID = String.format("PR-%d", encounterID);
-        Bundle bundle = FHIRUtils.createBundle(encounterTimestamp, bundleID, webUrl);
+        Bundle bundle = FHIRUtils.createBundle(visitTimeStamp, bundleID, webUrl);
         FHIRUtils.addToBundleEntry(bundle, compositionFrom(webUrl), false);
         FHIRUtils.addToBundleEntry(bundle, practitioners, false);
         FHIRUtils.addToBundleEntry(bundle, patient, false);
@@ -92,7 +92,7 @@ public class FhirOPConsult {
         Patient patient = fhirResourceMapper.mapToPatient(openMrsOPConsult.getPatient());
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
         Encounter encounter = fhirResourceMapper.mapToEncounter(openMrsOPConsult.getEncounter());
-        Date encounterDatetime = openMrsOPConsult.getEncounter().getEncounterDatetime();
+        Date visitDatetime = openMrsOPConsult.getEncounter().getVisit().getStartDatetime();
         Integer encounterId = openMrsOPConsult.getEncounter().getId();
         List<MedicationRequest> medicationRequestsList = openMrsOPConsult.getDrugOrders().stream().
                 map(fhirResourceMapper::mapToMedicationRequest).collect(Collectors.toList());
@@ -116,12 +116,12 @@ public class FhirOPConsult {
         List<ServiceRequest> serviceRequest = openMrsOPConsult.getOrders().stream().
                 map(fhirResourceMapper::mapToOrder).collect(Collectors.toList());
 
-        return new FhirOPConsult(fhirChiefComplaintConditionList, fhirMedicalHistoryList, encounterDatetime, encounterId, encounter, practitioners,
+        return new FhirOPConsult(fhirChiefComplaintConditionList, fhirMedicalHistoryList, visitDatetime, encounterId, encounter, practitioners,
                 patient, patientReference, fhirObservationList, medicationRequestsList, medications, procedure, patientDocuments, serviceRequest);
     }
 
     private Composition compositionFrom(String webURL) {
-        Composition composition = initializeComposition(encounterTimestamp, webURL);
+        Composition composition = initializeComposition(visitTimeStamp, webURL);
         composition
                 .setEncounter(FHIRUtils.getReferenceToResource(encounter))
                 .setSubject(patientReference);
@@ -207,10 +207,10 @@ public class FhirOPConsult {
         return composition;
     }
 
-    private Composition initializeComposition(Date encounterTimestamp, String webURL) {
+    private Composition initializeComposition(Date visitTimeStamp, String webURL) {
         Composition composition = new Composition();
         composition.setId(UUID.randomUUID().toString());
-        composition.setDate(encounterTimestamp);
+        composition.setDate(visitTimeStamp);
         composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), webURL, "Composition"));
         composition.setStatus(Composition.CompositionStatus.FINAL);
         composition.setType(FHIRUtils.getOPConsultType());

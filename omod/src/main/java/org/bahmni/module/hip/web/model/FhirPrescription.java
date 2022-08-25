@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class FhirPrescription {
-    private final Date encounterTimestamp;
+    private final Date visitTimeStamp;
     private final Integer encounterID;
     private final Encounter encounter;
     private final List<Practitioner> practitioners;
@@ -32,11 +32,11 @@ public class FhirPrescription {
     private final List<Medication> medications;
     private final List<MedicationRequest> medicationRequests;
 
-    private FhirPrescription(Date encounterTimestamp, Integer encounterID, Encounter encounter,
+    private FhirPrescription(Date visitTimeStamp, Integer encounterID, Encounter encounter,
                              List<Practitioner> practitioners, Patient patient,
                              Reference patientReference, List<Medication> medications,
                              List<MedicationRequest> medicationRequests) {
-        this.encounterTimestamp = encounterTimestamp;
+        this.visitTimeStamp = visitTimeStamp;
         this.encounterID = encounterID;
         this.encounter = encounter;
         this.practitioners = practitioners;
@@ -48,7 +48,7 @@ public class FhirPrescription {
 
     public static FhirPrescription from(OpenMrsPrescription openMrsPrescription, FHIRResourceMapper fhirResourceMapper) {
 
-        Date encounterDatetime = openMrsPrescription.getEncounter().getEncounterDatetime();
+        Date encounterDatetime = openMrsPrescription.getEncounter().getVisit().getStartDatetime();
         Integer encounterId = openMrsPrescription.getEncounter().getId();
         Patient patient = fhirResourceMapper.mapToPatient(openMrsPrescription.getPatient());
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
@@ -62,7 +62,7 @@ public class FhirPrescription {
 
     public Bundle bundle(String webUrl){
         String bundleID = String.format("PR-%d", encounterID);
-        Bundle bundle = FHIRUtils.createBundle(encounterTimestamp, bundleID, webUrl);
+        Bundle bundle = FHIRUtils.createBundle(visitTimeStamp, bundleID, webUrl);
 
         FHIRUtils.addToBundleEntry(bundle, compositionFrom(webUrl), false);
         FHIRUtils.addToBundleEntry(bundle, practitioners, false);
@@ -74,7 +74,7 @@ public class FhirPrescription {
     }
 
     private Composition compositionFrom(String webURL){
-        Composition composition = initializeComposition(encounterTimestamp, webURL);
+        Composition composition = initializeComposition(visitTimeStamp, webURL);
         Composition.SectionComponent compositionSection = composition.addSection();
 
         practitioners
@@ -97,11 +97,11 @@ public class FhirPrescription {
         return composition;
     }
 
-    private Composition initializeComposition(Date encounterTimestamp, String webURL) {
+    private Composition initializeComposition(Date visitTimeStamp, String webURL) {
         Composition composition = new Composition();
 
         composition.setId(UUID.randomUUID().toString());
-        composition.setDate(encounterTimestamp);
+        composition.setDate(visitTimeStamp);
         composition.setIdentifier(FHIRUtils.getIdentifier(composition.getId(), webURL, "document"));
         composition.setStatus(Composition.CompositionStatus.FINAL);
         composition.setType(FHIRUtils.getPrescriptionType());

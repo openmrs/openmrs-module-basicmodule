@@ -33,7 +33,7 @@ public class Constants {
 
     public static final String RADIOLOGY_TYPE = "6";
     public static final String PATIENT_DOCUMENT_TYPE = "9";
-    public static final String DOCUMENT_TYPE = "35";
+    public static final String DOCUMENT_TYPE = "Document";
     public static final String RADIOLOGY_REPORT = "Radiology Report";
     public static final String PATIENT_DOCUMENT = "Patient Document";
 
