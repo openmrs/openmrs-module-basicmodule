@@ -131,7 +131,7 @@ public class DiagnosticReportService {
     private  Map<Obs , String> getLabUploadsMap(Map<Encounter,List<Obs>> orderedTestUploads, Map<Encounter,List<Obs>> unorderedUploads, Order order) {
         Encounter encounter = order.getEncounter();
         Map<Obs , String> labReports = new HashMap<>();
-        putAllObsIntoMap(orderedTestUploads.get(encounter),labReports);
+        if(orderedTestUploads.containsKey(encounter)) putAllObsIntoMap(orderedTestUploads.get(encounter),labReports);
         if(unorderedUploads.containsKey(encounter)) {
             putAllObsIntoMap(unorderedUploads.get(encounter),labReports);
             unorderedUploads.remove(encounter);
