@@ -77,24 +77,26 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
         Map<Encounter,List<Obs>> labReportsMap = new HashMap<>();;
         List<Obs> labReports = getAllObsForDiagnosticReports(patientUUID,false);
         List<Encounter> encounters = encounterService.getEncountersByVisit(visit,false);
-        List<Encounter> nextEncounters = encounterService.getEncountersByPatient(patientService.getPatientByUuid(patientUUID)).stream().filter(e ->
-                encounters.get(encounters.size()-1).getId() < e.getId()
-        ).collect(Collectors.toList());
-        for (Obs obs: labReports) {
-            for (Encounter encounter: encounters) {
-                Encounter nextEncounter;
-                Date nextEncounterDate = nextEncounters.size() != 0 ? nextEncounters.get(0).getDateCreated() : new Date();
-                if(encounters.indexOf(encounter) < (encounters.size() - 1)){
-                    nextEncounter = encounterService.getEncounter(encounters.get(encounters.indexOf(encounter)+1).getId());
-                    nextEncounterDate = nextEncounter.getDateCreated();
-                }
-                if(obs.getDateCreated().equals(encounter.getDateCreated()) || (obs.getDateCreated().before(nextEncounterDate) && obs.getDateCreated().after(encounter.getDateCreated()))){
-                    if (labReportsMap.containsKey(encounter)) {
-                        labReportsMap.get(encounter).add(obs);
-                    } else {
-                        labReportsMap.put(encounter, new ArrayList<Obs>() {{
-                            add(obs);
-                        }});
+        if(encounters.size() != 0) {
+            List<Encounter> nextEncounters = encounterService.getEncountersByPatient(patientService.getPatientByUuid(patientUUID)).stream().filter(e ->
+                    encounters.get(encounters.size() - 1).getId() < e.getId()
+            ).collect(Collectors.toList());
+            for (Obs obs : labReports) {
+                for (Encounter encounter : encounters) {
+                    Encounter nextEncounter;
+                    Date nextEncounterDate = nextEncounters.size() != 0 ? nextEncounters.get(0).getDateCreated() : new Date();
+                    if (encounters.indexOf(encounter) < (encounters.size() - 1)) {
+                        nextEncounter = encounterService.getEncounter(encounters.get(encounters.indexOf(encounter) + 1).getId());
+                        nextEncounterDate = nextEncounter.getDateCreated();
+                    }
+                    if (obs.getDateCreated().equals(encounter.getDateCreated()) || (obs.getDateCreated().before(nextEncounterDate) && obs.getDateCreated().after(encounter.getDateCreated()))) {
+                        if (labReportsMap.containsKey(encounter)) {
+                            labReportsMap.get(encounter).add(obs);
+                        } else {
+                            labReportsMap.put(encounter, new ArrayList<Obs>() {{
+                                add(obs);
+                            }});
+                        }
                     }
                 }
             }
