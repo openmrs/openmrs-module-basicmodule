@@ -136,6 +136,9 @@ public class FhirLabResult {
         Composition.SectionComponent compositionSection = composition.addSection();
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
 
+        practitioners
+                .forEach(practitioner -> composition
+                        .addAuthor().setResource(practitioner).setDisplay(FHIRUtils.getDisplay(practitioner)));
         composition
                 .setEncounter(FHIRUtils.getReferenceToResource(encounter))
                 .setSubject(patientReference);
