@@ -43,11 +43,11 @@ public class FhirLabResult {
     private final Patient patient;
     private final Encounter encounter;
     private final Date visitTime;
-    private final DiagnosticReport report;
+    private final List<DiagnosticReport>  report;
     private final List<Observation> results;
     private final List<Practitioner> practitioners;
 
-    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date visitTime, DiagnosticReport report, List<Observation> results, List<Practitioner> practitioners) {
+    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date visitTime, List<DiagnosticReport> report, List<Observation> results, List<Practitioner> practitioners) {
         this.patient = patient;
         this.encounter = encounter;
         this.visitTime = visitTime;
@@ -73,38 +73,41 @@ public class FhirLabResult {
     }
 
     public static FhirLabResult fromOpenMrsLabResults(OpenMrsLabResults labresult, FHIRResourceMapper fhirResourceMapper) {
-        Patient patient = fhirResourceMapper.mapToPatient(labresult.getPatient());
+        List<DiagnosticReport> reportList = new ArrayList<>();
         List<Practitioner> practitioners = labresult.getEncounterProviders().stream().map(fhirResourceMapper::mapToPractitioner).collect(Collectors.toList());
 
-        DiagnosticReport reports = new DiagnosticReport();
-        LabOrderResult firstresult = labresult.getLabOrderResults().size() != 0 ? labresult.getLabOrderResults().get(0) : null;
+        for(Map.Entry<Map<Obs, String>, List<LabOrderResult>> report : labresult.getLabOrderResults().entrySet()) {
+            Patient patient = fhirResourceMapper.mapToPatient(labresult.getPatient());
+            DiagnosticReport reports = new DiagnosticReport();
+            LabOrderResult firstresult = report.getValue().size() != 0 ? report.getValue().get(0) : null;
+            report.getKey().entrySet().stream().map(entry -> {
+                reports.setCode(new CodeableConcept().setText(entry.getValue()).addCoding(new Coding().setDisplay(entry.getValue())));
+                try {
+                    reports.setPresentedForm(getAttachments(entry.getKey(),entry.getValue()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            } ).collect(Collectors.toList());
 
-        String panelName = null;
-        for(Map.Entry<Obs, String> report : labresult.getObservationsWithTestName().entrySet()){
-            if(panelName == null) panelName = report.getValue();
-            else panelName = panelName + " , " + report.getValue();
+            reports.setId(firstresult != null ? firstresult.getOrderUuid() : UUID.randomUUID().toString());
+
+            reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+            reports.setSubject(FHIRUtils.getReferenceToResource(patient));
+            reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
+
+
+
+            List<Observation> results = new ArrayList<>();
+
+            report.getValue().stream().forEach(result -> FhirLabResult.mapToObsFromLabResult(result, patient, reports, results));
+            reportList.add(reports);
+
         }
 
-        reports.setId(firstresult != null ? firstresult.getOrderUuid() : UUID.randomUUID().toString());
-        reports.setCode(new CodeableConcept().setText(panelName).addCoding(new Coding().setDisplay(panelName)));
-        reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
-        reports.setSubject(FHIRUtils.getReferenceToResource(patient));
-        reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
-        try {
-            reports.setPresentedForm(getAttachments(labresult.getObservationsWithTestName()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<Observation> results = new ArrayList<>();
-
-        labresult.getLabOrderResults().stream().forEach( result -> FhirLabResult.mapToObsFromLabResult(result, patient, reports, results) );
-
-
-
-        FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient() ), panelName,
+        FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient()), null,
                 fhirResourceMapper.mapToEncounter( labresult.getEncounter() ),
-                labresult.getEncounter().getVisit().getStartDatetime(), reports, results, practitioners);
+                labresult.getEncounter().getVisit().getStartDatetime(), reportList, new ArrayList<>(), practitioners);
 
         return fhirLabResult;
     }
@@ -141,7 +144,10 @@ public class FhirLabResult {
                 .setTitle("Diagnostic Report")
                 .setCode(FHIRUtils.getDiagnosticReportType());
 
-        compositionSection.addEntry(FHIRUtils.getReferenceToResource(report));
+        report.stream()
+                .map(FHIRUtils::getReferenceToResource)
+                .forEach(compositionSection::addEntry);
+
 
         return composition;
     }
@@ -158,16 +164,16 @@ public class FhirLabResult {
         return composition;
     }
 
-    private static List<Attachment> getAttachments(Map<Obs, String> obs) throws IOException {
+    private static List<Attachment> getAttachments(Obs obs,String testNmae) throws IOException {
         List<Attachment> attachments = new ArrayList<>();
-        for (Map.Entry<Obs, String> o: obs.entrySet()) {
-            Attachment attachment = new Attachment();
-            attachment.setContentType(getTypeOfTheObsDocument(o.getKey().getValueText()));
-            byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + o.getKey().getValueText()).toPath());
-            attachment.setData(fileContent);
-            attachment.setTitle("LAB REPORT : " + o.getValue());
-            attachments.add(attachment);
-        }
+
+        Attachment attachment = new Attachment();
+        attachment.setContentType(getTypeOfTheObsDocument(obs.getValueText()));
+        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
+        attachment.setData(fileContent);
+        attachment.setTitle("LAB REPORT : " + testNmae);
+        attachments.add(attachment);
+
         return attachments;
     }
 

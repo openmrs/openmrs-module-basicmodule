@@ -17,26 +17,24 @@ import java.util.stream.Collectors;
 @Getter
 public class OpenMrsLabResults {
     private Encounter encounter;
-    private List<LabOrderResult> labOrderResults;
+    private Map<Map<Obs, String>, List<LabOrderResult>>  labOrderResults;
     private Patient patient;
     private final Set<EncounterProvider> encounterProviders;
-    private final Map<Obs , String> observationsWithTestName;
 
 
-    public OpenMrsLabResults(@NotEmpty Encounter encounter, Patient patient, List<LabOrderResult> labOrderResults, Map<Obs, String> observationsWithTestName) {
+    public OpenMrsLabResults(@NotEmpty Encounter encounter, Patient patient, Map<Map<Obs, String>, List<LabOrderResult>> labOrderResults) {
         this.encounter = encounter;
         this.patient = patient;
         this.labOrderResults = labOrderResults;
         this.encounterProviders = encounter.getEncounterProviders();
-        this.observationsWithTestName = observationsWithTestName;
     }
 
 
-    public static List<OpenMrsLabResults> from(Map<Order, List<LabOrderResult>> labOrderResultsMap, Map<Order,Map<Obs, String>> labReportDocuments) {
+    public static List<OpenMrsLabResults> from(Map<Order, List<LabOrderResult>> labOrderResultsMap, Map<Map<Obs, String>, List<LabOrderResult>> labReportDocuments) {
         return labOrderResultsMap
                 .entrySet()
                 .stream()
-                .map(entry -> new OpenMrsLabResults(entry.getKey().getEncounter(), entry.getKey().getPatient(), entry.getValue(),labReportDocuments.get(entry)))
+                .map(entry -> new OpenMrsLabResults(entry.getKey().getEncounter(), entry.getKey().getPatient(),labReportDocuments))
                 .collect(Collectors.toList());
     }
 }

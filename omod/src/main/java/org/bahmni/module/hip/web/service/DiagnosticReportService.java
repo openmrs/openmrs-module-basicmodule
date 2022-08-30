@@ -128,17 +128,6 @@ public class DiagnosticReportService {
         return encounterListMap;
     }
 
-    private  Map<Obs , String> getLabUploadsMap(Map<Encounter,List<Obs>> orderedTestUploads, Map<Encounter,List<Obs>> unorderedUploads, Order order) {
-        Encounter encounter = order.getEncounter();
-        Map<Obs , String> labReports = new HashMap<>();
-        if(orderedTestUploads.containsKey(encounter)) putAllObsIntoMap(orderedTestUploads.get(encounter),labReports);
-        if(unorderedUploads.containsKey(encounter)) {
-            putAllObsIntoMap(unorderedUploads.get(encounter),labReports);
-            unorderedUploads.remove(encounter);
-        }
-        logger.warn("UPLOAD MAP " + labReports);
-        return labReports;
-    }
 
     private void putAllObsIntoMap(List<Obs> obs,Map<Obs , String> labReports) {
         for (Obs o: obs) {
@@ -154,26 +143,27 @@ public class DiagnosticReportService {
         LabOrderResults results = labOrderResultsService.getAll(patient, visitList, Integer.MAX_VALUE);
         Map<String, List<LabOrderResult>> groupedByOrderUUID = results.getResults().stream().collect(Collectors.groupingBy(LabOrderResult::getOrderUuid));
 
-        List<Order> orders = orderDao.getAllOrdersForVisits(new OrderType(4), visitList);
-
-        List<OpenMrsLabResults> labResults = groupedByOrderUUID.entrySet().stream().map(entry -> {
-            Optional<Order> orderForUuid = orders
-                    .stream()
-                    .filter(order -> order.getUuid().equals(entry.getKey()))
-                    .findFirst();
-            if (orderForUuid.isPresent()) {
-                return new OpenMrsLabResults(orderForUuid.get().getEncounter(), orderForUuid.get().getPatient(), entry.getValue(),
-                        getLabUploadsMap(orderedTestUploads,unorderedUploads,orderForUuid.get()));
+        List<OpenMrsLabResults> labResults = new ArrayList<>();
+        Map<Map<Obs, String>, List<LabOrderResult>> labRecordsMap = new HashMap<>();
+        for (Map.Entry<Encounter, List<Obs>> map : orderedTestUploads.entrySet()) {
+            for (Obs obs: map.getValue()) {
+                labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},groupedByOrderUUID.get(obs.getOrder().getUuid()));
             }
-            else return null;
-        } ).filter(Objects::nonNull).collect(Collectors.toList());
-
-
-        labResults.addAll(unorderedUploads.entrySet().stream().map(entry -> {
-            Map<Obs , String> labReports = new HashMap<>();
-            putAllObsIntoMap(entry.getValue(),labReports);
-            return new OpenMrsLabResults(entry.getKey(), entry.getKey().getPatient(), new ArrayList<>(),labReports);
-        } ).collect(Collectors.toList()));
+            if(unorderedUploads.containsKey(map.getKey()))
+            {
+                for (Obs obs: unorderedUploads.get(map.getKey())) {
+                    labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},new ArrayList<>());
+                }
+                unorderedUploads.remove(map.getKey());
+            }
+           labResults.add(new OpenMrsLabResults(map.getKey(),map.getKey().getPatient(),labRecordsMap));
+        }
+        for (Map.Entry<Encounter, List<Obs>> map : unorderedUploads.entrySet()) {
+                for (Obs obs: map.getValue()) {
+                    labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},new ArrayList<>());
+                }
+            labResults.add(new OpenMrsLabResults(map.getKey(),map.getKey().getPatient(),labRecordsMap));
+        }
 
         List<DiagnosticReportBundle> bundles = labResults.stream().map(fhirBundledDiagnosticReportBuilder::fhirBundleResponseFor).collect(Collectors.toList());
         return bundles;
