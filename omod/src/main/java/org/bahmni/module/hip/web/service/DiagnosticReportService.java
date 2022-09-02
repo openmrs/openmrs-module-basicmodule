@@ -129,9 +129,9 @@ public class DiagnosticReportService {
     }
 
 
-    private void putAllObsIntoMap(List<Obs> obs,Map<Obs , String> labReports) {
-        for (Obs o: obs) {
-            labReports.put(o, diagnosticReportDao.getTestNameForLabReports(o));
+    private void putAllUnOrderedObsUploadsIntoMap(List<Obs> observations, Map<Map<Obs, String>, List<LabOrderResult>> labRecordsMap) {
+        for (Obs obs: observations) {
+            labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},new ArrayList<>());
         }
     }
 
@@ -145,23 +145,21 @@ public class DiagnosticReportService {
 
         List<OpenMrsLabResults> labResults = new ArrayList<>();
         Map<Map<Obs, String>, List<LabOrderResult>> labRecordsMap = new HashMap<>();
+
         for (Map.Entry<Encounter, List<Obs>> map : orderedTestUploads.entrySet()) {
             for (Obs obs: map.getValue()) {
                 labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},groupedByOrderUUID.get(obs.getOrder().getUuid()));
             }
             if(unorderedUploads.containsKey(map.getKey()))
             {
-                for (Obs obs: unorderedUploads.get(map.getKey())) {
-                    labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},new ArrayList<>());
-                }
+                putAllUnOrderedObsUploadsIntoMap(unorderedUploads.get(map.getKey()),labRecordsMap);
                 unorderedUploads.remove(map.getKey());
             }
            labResults.add(new OpenMrsLabResults(map.getKey(),map.getKey().getPatient(),labRecordsMap));
         }
+
         for (Map.Entry<Encounter, List<Obs>> map : unorderedUploads.entrySet()) {
-                for (Obs obs: map.getValue()) {
-                    labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},new ArrayList<>());
-                }
+            putAllUnOrderedObsUploadsIntoMap(unorderedUploads.get(map.getKey()),labRecordsMap);
             labResults.add(new OpenMrsLabResults(map.getKey(),map.getKey().getPatient(),labRecordsMap));
         }
 
@@ -175,7 +173,7 @@ public class DiagnosticReportService {
         Visit visit = hipVisitDao.getPatientVisit(patient,visittype,visitStartDate);
         List<Visit> visits = new ArrayList<>();
 
-         visits.add(visit);
+        visits.add(visit);
         return getLabResults(patient, visits);
     }
 
