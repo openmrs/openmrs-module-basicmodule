@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 @Getter
 public class OpenMrsLabResults {
     private Encounter encounter;
-    private Map<Map<Obs, String>, List<LabOrderResult>>  labOrderResults;
+    private Map<Obs, List<LabOrderResult>>  labOrderResults;
     private Patient patient;
     private final Set<EncounterProvider> encounterProviders;
 
 
-    public OpenMrsLabResults(@NotEmpty Encounter encounter, Patient patient, Map<Map<Obs, String>, List<LabOrderResult>> labOrderResults) {
+    public OpenMrsLabResults(@NotEmpty Encounter encounter, Patient patient, Map<Obs, List<LabOrderResult>> labOrderResults) {
         this.encounter = encounter;
         this.patient = patient;
         this.labOrderResults = labOrderResults;
@@ -30,7 +30,7 @@ public class OpenMrsLabResults {
     }
 
 
-    public static List<OpenMrsLabResults> from(Map<Order, List<LabOrderResult>> labOrderResultsMap, Map<Map<Obs, String>, List<LabOrderResult>> labReportDocuments) {
+    public static List<OpenMrsLabResults> from(Map<Order, List<LabOrderResult>> labOrderResultsMap, Map<Obs, List<LabOrderResult>> labReportDocuments) {
         return labOrderResultsMap
                 .entrySet()
                 .stream()

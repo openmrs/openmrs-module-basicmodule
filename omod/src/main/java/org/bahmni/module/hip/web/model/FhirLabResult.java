@@ -76,27 +76,23 @@ public class FhirLabResult {
         List<DiagnosticReport> reportList = new ArrayList<>();
         List<Practitioner> practitioners = labresult.getEncounterProviders().stream().map(fhirResourceMapper::mapToPractitioner).collect(Collectors.toList());
 
-        for(Map.Entry<Map<Obs, String>, List<LabOrderResult>> report : labresult.getLabOrderResults().entrySet()) {
-            Patient patient = fhirResourceMapper.mapToPatient(labresult.getPatient());
+        Patient patient = fhirResourceMapper.mapToPatient(labresult.getPatient());
+
+        for(Map.Entry<Obs, List<LabOrderResult>> report : labresult.getLabOrderResults().entrySet()) {
             DiagnosticReport reports = new DiagnosticReport();
             LabOrderResult firstresult = report.getValue().size() != 0 ? report.getValue().get(0) : null;
-            report.getKey().entrySet().stream().map(entry -> {
-                reports.setCode(new CodeableConcept().setText(entry.getValue()).addCoding(new Coding().setDisplay(entry.getValue())));
-                try {
-                    reports.setPresentedForm(getAttachments(entry.getKey(),entry.getValue()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            } ).collect(Collectors.toList());
+            String testName = report.getKey().getObsGroup().getConcept().getName().getName();
+            reports.setCode(new CodeableConcept().setText(testName).addCoding(new Coding().setDisplay(testName)));
+            try {
+                reports.setPresentedForm(getAttachments(report.getKey(),testName));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             reports.setId(firstresult != null ? firstresult.getOrderUuid() : UUID.randomUUID().toString());
-
             reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
             reports.setSubject(FHIRUtils.getReferenceToResource(patient));
             reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
-
-
 
             List<Observation> results = new ArrayList<>();
 

@@ -129,9 +129,9 @@ public class DiagnosticReportService {
     }
 
 
-    private void putAllUnOrderedObsUploadsIntoMap(List<Obs> observations, Map<Map<Obs, String>, List<LabOrderResult>> labRecordsMap) {
+    private void putAllUnOrderedObsUploadsIntoMap(List<Obs> observations, Map<Obs, List<LabOrderResult>> labRecordsMap) {
         for (Obs obs: observations) {
-            labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},new ArrayList<>());
+            labRecordsMap.put(obs,new ArrayList<>());
         }
     }
 
@@ -144,11 +144,11 @@ public class DiagnosticReportService {
         Map<String, List<LabOrderResult>> groupedByOrderUUID = results.getResults().stream().collect(Collectors.groupingBy(LabOrderResult::getOrderUuid));
 
         List<OpenMrsLabResults> labResults = new ArrayList<>();
-        Map<Map<Obs, String>, List<LabOrderResult>> labRecordsMap = new HashMap<>();
+        Map<Obs, List<LabOrderResult>> labRecordsMap = new HashMap<>();
 
         for (Map.Entry<Encounter, List<Obs>> map : orderedTestUploads.entrySet()) {
             for (Obs obs: map.getValue()) {
-                labRecordsMap.put(new HashMap<Obs,String>() {{ put(obs,diagnosticReportDao.getTestNameForLabReports(obs));}},groupedByOrderUUID.get(obs.getOrder().getUuid()));
+                labRecordsMap.put(obs,groupedByOrderUUID.get(obs.getOrder().getUuid()));
             }
             if(unorderedUploads.containsKey(map.getKey()))
             {
