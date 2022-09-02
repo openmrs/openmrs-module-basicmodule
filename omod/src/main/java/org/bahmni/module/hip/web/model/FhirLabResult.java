@@ -28,15 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.web.service.Constants.GIF;
-import static org.bahmni.module.hip.web.service.Constants.IMAGE;
-import static org.bahmni.module.hip.web.service.Constants.JPEG;
-import static org.bahmni.module.hip.web.service.Constants.JPG;
-import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_IMAGE_JPEG;
-import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_PDF;
 import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
-import static org.bahmni.module.hip.web.service.Constants.PDF;
-import static org.bahmni.module.hip.web.service.Constants.PNG;
 
 public class FhirLabResult {
 
@@ -167,26 +159,12 @@ public class FhirLabResult {
         List<Attachment> attachments = new ArrayList<>();
 
         Attachment attachment = new Attachment();
-        attachment.setContentType(getTypeOfTheObsDocument(obs.getValueText()));
+        attachment.setContentType(FHIRUtils.getTypeOfTheObsDocument(obs.getValueText()));
         byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
         attachment.setData(fileContent);
         attachment.setTitle("LAB REPORT : " + testNmae);
         attachments.add(attachment);
 
         return attachments;
-    }
-
-    private static String getTypeOfTheObsDocument(String valueText) {
-        if (valueText == null) return "";
-        String extension = valueText.substring(valueText.indexOf('.') + 1);
-        if (extension.compareTo(JPEG) == 0 || extension.compareTo(JPG) == 0) {
-            return MIMETYPE_IMAGE_JPEG;
-        } else if (extension.compareTo(PNG) == 0 || extension.compareTo(GIF) == 0) {
-            return IMAGE + extension;
-        } else if (extension.compareTo(PDF) == 0) {
-            return MIMETYPE_PDF;
-        } else {
-            return "";
-        }
     }
 }

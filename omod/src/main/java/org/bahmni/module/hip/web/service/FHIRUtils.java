@@ -16,6 +16,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.bahmni.module.hip.web.service.Constants.GIF;
+import static org.bahmni.module.hip.web.service.Constants.IMAGE;
+import static org.bahmni.module.hip.web.service.Constants.JPEG;
+import static org.bahmni.module.hip.web.service.Constants.JPG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_IMAGE_JPEG;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_PDF;
+import static org.bahmni.module.hip.web.service.Constants.PDF;
+import static org.bahmni.module.hip.web.service.Constants.PNG;
+
 public class FHIRUtils {
     private static Map<String, Enumerations.AdministrativeGender> genderMap = new HashMap<String, Enumerations.AdministrativeGender>() {{
         put("M", Enumerations.AdministrativeGender.MALE);
@@ -181,4 +190,19 @@ public class FHIRUtils {
             return prefixAsSingleString.concat(" ").concat(author.getNameFirstRep().getText());
         }
     }
+
+    public static String getTypeOfTheObsDocument(String valueText) {
+        if (valueText == null) return "";
+        String extension = valueText.substring(valueText.indexOf('.') + 1);
+        if (extension.compareTo(JPEG) == 0 || extension.compareTo(JPG) == 0) {
+            return MIMETYPE_IMAGE_JPEG;
+        } else if (extension.compareTo(PNG) == 0 || extension.compareTo(GIF) == 0) {
+            return IMAGE + extension;
+        } else if (extension.compareTo(PDF) == 0) {
+            return MIMETYPE_PDF;
+        } else {
+            return "";
+        }
+    }
+
 }

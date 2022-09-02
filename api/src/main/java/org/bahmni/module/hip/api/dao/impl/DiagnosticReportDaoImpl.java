@@ -1,15 +1,11 @@
 package org.bahmni.module.hip.api.dao.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bahmni.module.hip.api.dao.DiagnosticReportDao;
-import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
-import org.openmrs.Order;
 import org.openmrs.Person;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
@@ -20,8 +16,14 @@ import org.openmrs.api.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.bahmni.module.hip.api.dao.Constants.LAB_REPORT;
 
 
 @Repository
@@ -32,24 +34,18 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
     private ObsService obsService;
     private ConceptService conceptService;
     private EncounterService encounterService;
-    private EncounterDao encounterDao;
     private PatientService patientService;
-
-    private static Logger logger = LogManager.getLogger(DiagnosticReportDaoImpl.class);
-    private static final String LAB_REPORT = "LAB_REPORT";
-    private static final String LAB_RESULT = "LAB_RESULT";
 
 
     @Autowired
     public DiagnosticReportDaoImpl(PersonService personService, ObsService obsService,
                                    ConceptService conceptService, EncounterService encounterService,
-                                   EncounterDao encounterDao, SessionFactory sessionFactory, PatientService patientService)
+                                   SessionFactory sessionFactory, PatientService patientService)
     {
         this.obsService = obsService;
         this.personService = personService;
         this.conceptService = conceptService;
         this.encounterService = encounterService;
-        this.encounterDao = encounterDao;
         this.sessionFactory = sessionFactory;
         this.patientService = patientService;
     }
@@ -57,19 +53,11 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
 
     private List<Obs> getAllObsForDiagnosticReports(String patientUUID, Boolean linkedWithOrder) {
         Person person = personService.getPersonByUuid(patientUUID);
-        Concept concept = conceptService.getConcept("LAB_REPORT");
+        Concept concept = conceptService.getConcept(LAB_REPORT);
         List<Obs> obs = obsService.getObservationsByPersonAndConcept(person,concept);
         if(linkedWithOrder)
            return obs.stream().filter(o -> o.getOrder() != null).collect(Collectors.toList());
         return obs.stream().filter(o -> o.getOrder() == null).collect(Collectors.toList());
-    }
-
-    @Override
-    public String getTestNameForLabReports(Obs obs){
-        Query query = this.sessionFactory.getCurrentSession().createSQLQuery("select concept_id from fhir_diagnostic_report where date_created = :obsDateTime ;");
-        query.setParameter("obsDateTime", obs.getDateCreated());
-
-        return query.list().size() != 0 ? conceptService.getConcept(query.list().get(0).hashCode()).getName().getName() : null;
     }
 
     @Override
@@ -101,7 +89,6 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
                 }
             }
         }
-        logger.warn("UNORDERED " + labReportsMap);
         return labReportsMap;
     }
 
@@ -110,7 +97,6 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
         Map<Encounter,List<Obs>> documentObs = new HashMap<>();
         List<Obs> obsList = getAllObsForDiagnosticReports(patientUuid,true);
         List<Encounter> encounters = encounterService.getEncountersByVisit(visit,false);
-        logger.warn("ENCOUNERS " + encounters);
 
         for (Obs obs : obsList) {
             Encounter orderEncounter = obs.getOrder().getEncounter();
@@ -124,8 +110,6 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
                 }
             }
         }
-        logger.info("ORDERED " + documentObs);
-        logger.warn("ORDERED " + documentObs);
         return documentObs;
     }
 }

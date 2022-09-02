@@ -1,6 +1,5 @@
 package org.bahmni.module.hip.web.model;
 
-import org.bahmni.module.hip.web.service.Constants;
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
 import org.hl7.fhir.r4.model.Bundle;

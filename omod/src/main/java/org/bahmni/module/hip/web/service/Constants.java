@@ -20,16 +20,17 @@ public class Constants {
 
     static final String FHIR_ENC_CLASS_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 
+
     public static final String PATIENT_DOCUMENTS_PATH = "/home/bahmni/document_images/";
 
-    public static final String MIMETYPE_IMAGE_JPEG = "image/jpeg";
-    public static final String IMAGE = "image/";
-    public static final String JPEG = "jpeg";
-    public static final String JPG = "jpg";
-    public static final String PNG = "png";
-    public static final String GIF = "gif";
-    public static final String PDF = "pdf";
-    public static final String MIMETYPE_PDF = "application/pdf";
+    static final String MIMETYPE_IMAGE_JPEG = "image/jpeg";
+    static final String IMAGE = "image/";
+    static final String JPEG = "jpeg";
+    static final String JPG = "jpg";
+    static final String PNG = "png";
+    static final String GIF = "gif";
+    static final String PDF = "pdf";
+    static final String MIMETYPE_PDF = "application/pdf";
 
     public static final String RADIOLOGY_TYPE = "6";
     public static final String PATIENT_DOCUMENT_TYPE = "9";

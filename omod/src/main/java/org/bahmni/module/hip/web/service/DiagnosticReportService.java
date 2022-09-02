@@ -1,7 +1,5 @@
 package org.bahmni.module.hip.web.service;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bahmni.module.bahmnicore.dao.OrderDao;
 import org.bahmni.module.hip.api.dao.DiagnosticReportDao;
 import org.bahmni.module.hip.api.dao.EncounterDao;
@@ -12,8 +10,6 @@ import org.bahmni.module.hip.web.model.OpenMrsDiagnosticReport;
 import org.bahmni.module.hip.web.model.OpenMrsLabResults;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
-import org.openmrs.Order;
-import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Visit;
 import org.openmrs.api.EncounterService;
@@ -29,8 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,7 +40,6 @@ public class DiagnosticReportService {
     private static final String RADIOLOGY_TYPE = "RADIOLOGY";
     private static final String PATIENT_DOCUMENT_TYPE = "Patient Document";
     private static final String DOCUMENT_TYPE = "Document";
-    private static Logger logger = LogManager.getLogger(DiagnosticReportService.class);
 
 
     private LabOrderResultsService labOrderResultsService;

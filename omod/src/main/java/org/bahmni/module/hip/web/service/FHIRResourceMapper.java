@@ -34,27 +34,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.bahmni.module.hip.web.service.Constants.DOCUMENT_TYPE;
-import static org.bahmni.module.hip.web.service.Constants.GIF;
-import static org.bahmni.module.hip.web.service.Constants.IMAGE;
-import static org.bahmni.module.hip.web.service.Constants.JPEG;
-import static org.bahmni.module.hip.web.service.Constants.JPG;
-import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_IMAGE_JPEG;
-import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_PDF;
 import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT;
 import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
 import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT_TYPE;
-import static org.bahmni.module.hip.web.service.Constants.PDF;
-import static org.bahmni.module.hip.web.service.Constants.PNG;
 import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_REPORT;
 import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_TYPE;
 
@@ -199,7 +191,7 @@ public class FHIRResourceMapper {
         for(Obs obs1 : obsList){
             if(obs1.getConcept().getName().getName().equals(DOCUMENT_TYPE)){
                 valueText.append(obs1.getValueText());
-                contentType.append(getTypeOfTheObsDocument(obs1.getValueText()));
+                contentType.append(FHIRUtils.getTypeOfTheObsDocument(obs1.getValueText()));
             }
         }
         attachment.setContentType(contentType.toString());
@@ -243,20 +235,6 @@ public class FHIRResourceMapper {
         serviceRequest.setCode(concept);
         serviceRequest.setId(order.getUuid());
         return serviceRequest;
-    }
-
-    private String getTypeOfTheObsDocument(String valueText) {
-        if (valueText == null) return "";
-        String extension = valueText.substring(valueText.indexOf('.') + 1);
-        if (extension.compareTo(JPEG) == 0 || extension.compareTo(JPG) == 0) {
-            return MIMETYPE_IMAGE_JPEG;
-        } else if (extension.compareTo(PNG) == 0 || extension.compareTo(GIF) == 0) {
-            return IMAGE + extension;
-        } else if (extension.compareTo(PDF) == 0) {
-            return MIMETYPE_PDF;
-        } else {
-            return "";
-        }
     }
 
     public Patient mapToPatient(org.openmrs.Patient emrPatient) {
