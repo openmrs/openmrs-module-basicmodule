@@ -20,7 +20,8 @@ public class Constants {
 
     static final String FHIR_ENC_CLASS_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 
-    static final String PATIENT_DOCUMENTS_PATH = "/home/bahmni/document_images/";
+
+    public static final String PATIENT_DOCUMENTS_PATH = "/home/bahmni/document_images/";
 
     static final String MIMETYPE_IMAGE_JPEG = "image/jpeg";
     static final String IMAGE = "image/";

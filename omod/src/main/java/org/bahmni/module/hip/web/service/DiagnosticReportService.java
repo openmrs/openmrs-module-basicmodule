@@ -1,6 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.bahmnicore.dao.OrderDao;
+import org.bahmni.module.hip.api.dao.DiagnosticReportDao;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.api.dao.HipVisitDao;
 import org.bahmni.module.hip.web.model.DateRange;
@@ -9,8 +10,6 @@ import org.bahmni.module.hip.web.model.OpenMrsDiagnosticReport;
 import org.bahmni.module.hip.web.model.OpenMrsLabResults;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
-import org.openmrs.Order;
-import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Visit;
 import org.openmrs.api.EncounterService;
@@ -26,8 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +35,7 @@ public class DiagnosticReportService {
     private final EncounterDao encounterDao;
     private HipVisitDao hipVisitDao;
     private OrderDao orderDao;
+    private final DiagnosticReportDao diagnosticReportDao;
     private final String ORDER_TYPE = "Order";
     private static final String RADIOLOGY_TYPE = "RADIOLOGY";
     private static final String PATIENT_DOCUMENT_TYPE = "Patient Document";
@@ -46,6 +44,7 @@ public class DiagnosticReportService {
 
     private LabOrderResultsService labOrderResultsService;
 
+
     @Autowired
     public DiagnosticReportService(FhirBundledDiagnosticReportBuilder fhirBundledDiagnosticReportBuilder,
                                    PatientService patientService,
@@ -53,8 +52,8 @@ public class DiagnosticReportService {
                                    LabOrderResultsService labOrderResultsService,
                                    EncounterDao encounterDao,
                                    HipVisitDao hipVisitDao,
-                                   OrderDao orderDao
-    ) {
+                                   OrderDao orderDao,
+                                   DiagnosticReportDao diagnosticReportDao) {
         this.fhirBundledDiagnosticReportBuilder = fhirBundledDiagnosticReportBuilder;
         this.patientService = patientService;
         this.encounterService = encounterService;
@@ -62,7 +61,7 @@ public class DiagnosticReportService {
         this.hipVisitDao = hipVisitDao;
         this.labOrderResultsService = labOrderResultsService;
         this.orderDao = orderDao;
-
+        this.diagnosticReportDao = diagnosticReportDao;
     }
 
     public List<DiagnosticReportBundle> getDiagnosticReportsForVisit(String patientUuid, String visitType, Date visitStartDate) {
@@ -122,43 +121,65 @@ public class DiagnosticReportService {
         return encounterListMap;
     }
 
-    private List<DiagnosticReportBundle> getLabResults(String patientUuid, List<Integer> visitsForVisitType) {
-        Patient patient = patientService.getPatientByUuid(patientUuid);
 
-        List<Visit> visits, visitsWithOrdersForVisitType ;
+    private void putAllUnOrderedObsUploadsIntoMap(List<Obs> observations, Map<Obs, List<LabOrderResult>> labRecordsMap) {
+        for (Obs obs: observations) {
+            labRecordsMap.put(obs,new ArrayList<>());
+        }
+    }
 
-        visits = orderDao.getVisitsWithAllOrders(patient, ORDER_TYPE, null, null );
-        visitsWithOrdersForVisitType = visits.stream().filter( visit -> visitsForVisitType.contains(visit.getVisitId()) ).collect(Collectors.toList());;
-        List<Order> orders = orderDao.getAllOrdersForVisits(new OrderType(3), visitsWithOrdersForVisitType);
+    private List<DiagnosticReportBundle> getLabResults(Patient patient, List<Visit> visitList) {
 
+        Map<Encounter,List<Obs>> orderedTestUploads = diagnosticReportDao.getAllOrderedTestUploads(patient.getUuid(), visitList.size() != 0 ? visitList.get(0) : null);
+        Map<Encounter,List<Obs>> unorderedUploads = diagnosticReportDao.getAllUnorderedUploadsForVisit(patient.getUuid(), visitList.size() != 0 ? visitList.get(0) : null);
 
-        LabOrderResults results = labOrderResultsService.getAll(patient, visits, Integer.MAX_VALUE);
+        LabOrderResults results = labOrderResultsService.getAll(patient, visitList, Integer.MAX_VALUE);
         Map<String, List<LabOrderResult>> groupedByOrderUUID = results.getResults().stream().collect(Collectors.groupingBy(LabOrderResult::getOrderUuid));
 
+        List<OpenMrsLabResults> labResults = new ArrayList<>();
+        Map<Obs, List<LabOrderResult>> labRecordsMap = new HashMap<>();
 
-        List<OpenMrsLabResults> labResults = groupedByOrderUUID.entrySet().stream().map(entry -> {
-                    Optional<Order> orderForUuid = orders
-                            .stream()
-                            .filter(order -> order.getUuid().equals(entry.getKey()))
-                            .findFirst();
-                    if (orderForUuid.isPresent())
-                    return new OpenMrsLabResults(orderForUuid.get().getEncounter(), orderForUuid.get().getPatient(), entry.getValue());
-                    else return null;
-                } ).filter(Objects::nonNull).collect(Collectors.toList());
+        for (Map.Entry<Encounter, List<Obs>> map : orderedTestUploads.entrySet()) {
+            for (Obs obs: map.getValue()) {
+                labRecordsMap.put(obs,groupedByOrderUUID.get(obs.getOrder().getUuid()));
+            }
+            if(unorderedUploads.containsKey(map.getKey()))
+            {
+                putAllUnOrderedObsUploadsIntoMap(unorderedUploads.get(map.getKey()),labRecordsMap);
+                unorderedUploads.remove(map.getKey());
+            }
+           labResults.add(new OpenMrsLabResults(map.getKey(),map.getKey().getPatient(),labRecordsMap));
+        }
+
+        for (Map.Entry<Encounter, List<Obs>> map : unorderedUploads.entrySet()) {
+            putAllUnOrderedObsUploadsIntoMap(unorderedUploads.get(map.getKey()),labRecordsMap);
+            labResults.add(new OpenMrsLabResults(map.getKey(),map.getKey().getPatient(),labRecordsMap));
+        }
 
         List<DiagnosticReportBundle> bundles = labResults.stream().map(fhirBundledDiagnosticReportBuilder::fhirBundleResponseFor).collect(Collectors.toList());
         return bundles;
     }
+
     public List<DiagnosticReportBundle> getLabResultsForVisits(String patientUuid, String visittype, Date visitStartDate)
     {
-        List<Integer> visitsForVisitType =  hipVisitDao.GetVisitIdsForVisitForLabResults(patientUuid, visittype,visitStartDate );
-        return getLabResults(patientUuid, visitsForVisitType);
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+        Visit visit = hipVisitDao.getPatientVisit(patient,visittype,visitStartDate);
+        List<Visit> visits = new ArrayList<>();
+
+        visits.add(visit);
+        return getLabResults(patient, visits);
     }
 
     public List<DiagnosticReportBundle> getLabResultsForPrograms(String patientUuid, DateRange dateRange, String programName, String programEnrollmentId)
     {
         List<Integer> visitsForProgram =  hipVisitDao.GetVisitIdsForProgramForLabResults(patientUuid, programName, programEnrollmentId, dateRange.getFrom(), dateRange.getTo() );
-        return getLabResults(patientUuid, visitsForProgram);
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+
+        List<Visit> visits, visitsWithOrdersForProgram ;
+
+        visits = orderDao.getVisitsWithAllOrders(patient, ORDER_TYPE, null, null );
+        visitsWithOrdersForProgram = visits.stream().filter( visit -> visitsForProgram.contains(visit.getVisitId()) ).collect(Collectors.toList());;
+        return getLabResults(patient, visitsWithOrdersForProgram);
     }
 
 }

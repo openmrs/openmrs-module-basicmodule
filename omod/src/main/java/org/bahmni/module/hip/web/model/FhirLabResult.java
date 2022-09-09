@@ -2,6 +2,7 @@ package org.bahmni.module.hip.web.model;
 
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -10,29 +11,35 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Practitioner;
+import org.openmrs.Obs;
 import org.openmrs.module.bahmniemrapi.laborder.contract.LabOrderResult;
 
-import javax.validation.constraints.Null;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
 
 public class FhirLabResult {
 
     private final Patient patient;
     private final Encounter encounter;
     private final Date visitTime;
-    private final DiagnosticReport report;
+    private final List<DiagnosticReport>  report;
     private final List<Observation> results;
     private final List<Practitioner> practitioners;
 
-    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date visitTime, DiagnosticReport report, List<Observation> results, List<Practitioner> practitioners) {
+    public FhirLabResult(Patient patient, String panelName, Encounter encounter, Date visitTime, List<DiagnosticReport> report, List<Observation> results, List<Practitioner> practitioners) {
         this.patient = patient;
         this.encounter = encounter;
         this.visitTime = visitTime;
@@ -58,25 +65,37 @@ public class FhirLabResult {
     }
 
     public static FhirLabResult fromOpenMrsLabResults(OpenMrsLabResults labresult, FHIRResourceMapper fhirResourceMapper) {
-        Patient patient = fhirResourceMapper.mapToPatient(labresult.getPatient());
+        List<DiagnosticReport> reportList = new ArrayList<>();
         List<Practitioner> practitioners = labresult.getEncounterProviders().stream().map(fhirResourceMapper::mapToPractitioner).collect(Collectors.toList());
 
-        DiagnosticReport reports = new DiagnosticReport();
-        LabOrderResult firstresult = labresult.getLabOrderResults().get(0);
+        Patient patient = fhirResourceMapper.mapToPatient(labresult.getPatient());
 
-        reports.setId(firstresult.getOrderUuid());
-        reports.setCode(new CodeableConcept().setText(firstresult.getPanelName()).addCoding(new Coding().setDisplay(firstresult.getPanelName())));
-        reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
-        reports.setSubject(FHIRUtils.getReferenceToResource(patient));
-        reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
+        for(Map.Entry<Obs, List<LabOrderResult>> report : labresult.getLabOrderResults().entrySet()) {
+            DiagnosticReport reports = new DiagnosticReport();
+            LabOrderResult firstresult = report.getValue().size() != 0 ? report.getValue().get(0) : null;
+            String testName = report.getKey().getObsGroup().getConcept().getName().getName();
+            reports.setCode(new CodeableConcept().setText(testName).addCoding(new Coding().setDisplay(testName)));
+            try {
+                reports.setPresentedForm(getAttachments(report.getKey(),testName));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        List<Observation> results = new ArrayList<>();
+            reports.setId(firstresult != null ? firstresult.getOrderUuid() : UUID.randomUUID().toString());
+            reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+            reports.setSubject(FHIRUtils.getReferenceToResource(patient));
+            reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
 
-        labresult.getLabOrderResults().stream().forEach( result -> FhirLabResult.mapToObsFromLabResult(result, patient, reports, results) );
+            List<Observation> results = new ArrayList<>();
 
-        FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient() ), labresult.getLabOrderResults().get(0).getPanelName(),
+            report.getValue().stream().forEach(result -> FhirLabResult.mapToObsFromLabResult(result, patient, reports, results));
+            reportList.add(reports);
+
+        }
+
+        FhirLabResult fhirLabResult = new FhirLabResult(fhirResourceMapper.mapToPatient( labresult.getPatient()), null,
                 fhirResourceMapper.mapToEncounter( labresult.getEncounter() ),
-                labresult.getEncounter().getVisit().getStartDatetime(), reports, results, practitioners);
+                labresult.getEncounter().getVisit().getStartDatetime(), reportList, new ArrayList<>(), practitioners);
 
         return fhirLabResult;
     }
@@ -105,6 +124,9 @@ public class FhirLabResult {
         Composition.SectionComponent compositionSection = composition.addSection();
         Reference patientReference = FHIRUtils.getReferenceToResource(patient);
 
+        practitioners
+                .forEach(practitioner -> composition
+                        .addAuthor().setResource(practitioner).setDisplay(FHIRUtils.getDisplay(practitioner)));
         composition
                 .setEncounter(FHIRUtils.getReferenceToResource(encounter))
                 .setSubject(patientReference);
@@ -113,7 +135,10 @@ public class FhirLabResult {
                 .setTitle("Diagnostic Report")
                 .setCode(FHIRUtils.getDiagnosticReportType());
 
-        compositionSection.addEntry(FHIRUtils.getReferenceToResource(report));
+        report.stream()
+                .map(FHIRUtils::getReferenceToResource)
+                .forEach(compositionSection::addEntry);
+
 
         return composition;
     }
@@ -128,5 +153,18 @@ public class FhirLabResult {
         composition.setType(FHIRUtils.getDiagnosticReportType());
         composition.setTitle("Diagnostic Report");
         return composition;
+    }
+
+    private static List<Attachment> getAttachments(Obs obs,String testNmae) throws IOException {
+        List<Attachment> attachments = new ArrayList<>();
+
+        Attachment attachment = new Attachment();
+        attachment.setContentType(FHIRUtils.getTypeOfTheObsDocument(obs.getValueText()));
+        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
+        attachment.setData(fileContent);
+        attachment.setTitle("LAB REPORT : " + testNmae);
+        attachments.add(attachment);
+
+        return attachments;
     }
 }

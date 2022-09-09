@@ -18,4 +18,5 @@ public class Constants {
     public static final String DOCUMENT_TYPE = "Document";
     public static final String CODED_DIAGNOSIS = "Coded Diagnosis";
     public static final String NON_CODED_DIAGNOSIS = "Non-coded Diagnosis";
+    public static final String LAB_REPORT = "LAB_REPORT";
 }
