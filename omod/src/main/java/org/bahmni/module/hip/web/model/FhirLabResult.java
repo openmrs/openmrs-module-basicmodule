@@ -72,7 +72,7 @@ public class FhirLabResult {
 
         for(Map.Entry<Obs, List<LabOrderResult>> report : labresult.getLabOrderResults().entrySet()) {
             DiagnosticReport reports = new DiagnosticReport();
-            LabOrderResult firstresult = report.getValue().size() != 0 ? report.getValue().get(0) : null;
+            LabOrderResult firstresult = (report.getValue() != null && report.getValue().size() != 0) ? report.getValue().get(0) : new LabOrderResult();
             String testName = report.getKey().getObsGroup().getConcept().getName().getName();
             reports.setCode(new CodeableConcept().setText(testName).addCoding(new Coding().setDisplay(testName)));
             try {
@@ -81,14 +81,14 @@ public class FhirLabResult {
                 e.printStackTrace();
             }
 
-            reports.setId(firstresult != null ? firstresult.getOrderUuid() : UUID.randomUUID().toString());
+            reports.setId(firstresult.getOrderUuid() != null ? firstresult.getOrderUuid() : UUID.randomUUID().toString());
             reports.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
             reports.setSubject(FHIRUtils.getReferenceToResource(patient));
             reports.setResultsInterpreter(practitioners.stream().map(FHIRUtils::getReferenceToResource).collect(Collectors.toList()));
 
             List<Observation> results = new ArrayList<>();
 
-            report.getValue().stream().forEach(result -> FhirLabResult.mapToObsFromLabResult(result, patient, reports, results));
+            if(report.getValue() != null) report.getValue().stream().forEach(result -> FhirLabResult.mapToObsFromLabResult(result, patient, reports, results));
             reportList.add(reports);
 
         }
