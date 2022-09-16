@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.api.dao.impl;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.DischargeSummaryDao;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.openmrs.Encounter;
@@ -22,9 +23,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
-import static org.bahmni.module.hip.api.dao.Constants.DISCHARGE_SUMMARY;
-import static org.bahmni.module.hip.api.dao.Constants.PROCEDURE_NOTES;
 
 @Repository
 public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
@@ -44,7 +42,7 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
 
     @Override
     public List<Obs> getCarePlan(Visit visit) {
-        List<Obs> carePlanObs = encounterDao.GetAllObsForVisit(visit, CONSULTATION, DISCHARGE_SUMMARY).stream()
+        List<Obs> carePlanObs = encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.DISCHARGE_SUMMARY.getValue()).stream()
                 .filter(obs -> obs.getConcept().getName().getLocalePreferred())
                 .collect(Collectors.toList());
 
@@ -61,7 +59,7 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
             Set<Encounter> encounterSet = episode.getEncounters();
             for (Encounter encounter : encounterSet) {
                 for (Obs o : encounter.getAllObs()) {
-                    if (DISCHARGE_SUMMARY.equals(o.getConcept().getName().getName())
+                    if (Config.DISCHARGE_SUMMARY.getValue().equals(o.getConcept().getName().getName())
                             &&  o.getConcept().getName().getLocalePreferred()) {
                         carePlanObs.add(o);
                     }
@@ -73,7 +71,7 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
 
     @Override
     public List<Obs> getProcedures(Visit visit) {
-        List<Obs> proceduresObsMap = encounterDao.GetAllObsForVisit(visit,CONSULTATION, PROCEDURE_NOTES).stream()
+        List<Obs> proceduresObsMap = encounterDao.GetAllObsForVisit(visit,Config.CONSULTATION.getValue(), Config.PROCEDURE_NOTES.getValue()).stream()
                 .filter(obs -> obs.getObsGroup() == null)
                 .collect(Collectors.toList());
         return proceduresObsMap;
@@ -89,9 +87,9 @@ public class DischargeSummaryDaoImpl implements DischargeSummaryDao {
             Set<Encounter> encounterSet = episode.getEncounters();
             for (Encounter encounter : encounterSet) {
                 for (Obs o : encounter.getAllObs()) {
-                    if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
+                    if (Objects.equals(o.getEncounter().getEncounterType().getName(), Config.CONSULTATION.getValue())
                             && o.getObsGroup() == null
-                            && Objects.equals(o.getConcept().getName().getName(), PROCEDURE_NOTES)
+                            && Objects.equals(o.getConcept().getName().getName(), Config.PROCEDURE_NOTES.getValue())
                     ) {
                         proceduresObsSet.add(o);
                     }

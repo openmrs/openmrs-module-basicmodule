@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.api.dao.impl;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.DiagnosticReportDao;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.api.dao.Constants.LAB_REPORT;
 
 
 @Repository
@@ -53,7 +53,7 @@ public class DiagnosticReportDaoImpl implements DiagnosticReportDao {
 
     private List<Obs> getAllObsForDiagnosticReports(String patientUUID, Boolean linkedWithOrder) {
         Person person = personService.getPersonByUuid(patientUUID);
-        Concept concept = conceptService.getConcept(LAB_REPORT);
+        Concept concept = conceptService.getConcept(Config.LAB_REPORT.getValue());
         List<Obs> obs = obsService.getObservationsByPersonAndConcept(person,concept);
         if(linkedWithOrder)
            return obs.stream().filter(o -> o.getOrder() != null).collect(Collectors.toList());

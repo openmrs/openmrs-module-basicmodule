@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.service;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
@@ -42,13 +43,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static org.bahmni.module.hip.web.service.Constants.DOCUMENT_TYPE;
-import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT;
-import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
-import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENT_TYPE;
-import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_REPORT;
-import static org.bahmni.module.hip.web.service.Constants.RADIOLOGY_TYPE;
 
 @Service
 public class FHIRResourceMapper {
@@ -189,20 +183,20 @@ public class FHIRResourceMapper {
         StringBuilder valueText = new StringBuilder();
         StringBuilder contentType = new StringBuilder();
         for(Obs obs1 : obsList){
-            if(obs1.getConcept().getName().getName().equals(DOCUMENT_TYPE)){
+            if(obs1.getConcept().getName().getName().equals(Config.DOCUMENT_TYPE.getValue())){
                 valueText.append(obs1.getValueText());
                 contentType.append(FHIRUtils.getTypeOfTheObsDocument(obs1.getValueText()));
             }
         }
         attachment.setContentType(contentType.toString());
-        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + valueText).toPath());
+        byte[] fileContent = Files.readAllBytes(new File(Config.PATIENT_DOCUMENTS_PATH.getValue() + valueText).toPath());
         attachment.setData(fileContent);
         StringBuilder title = new StringBuilder();
-        String encounterId = obs.getEncounter().getEncounterType().getEncounterTypeId().toString();
-        if(encounterId.equals(PATIENT_DOCUMENT_TYPE))
-            title.append(PATIENT_DOCUMENT);
-        else if(encounterId.equals(RADIOLOGY_TYPE))
-            title.append(RADIOLOGY_REPORT);
+        String encounterId = obs.getEncounter().getEncounterType().getName();
+        if(encounterId.equals(Config.PATIENT_DOCUMENT.getValue()))
+            title.append(Config.PATIENT_DOCUMENT.getValue());
+        else if(encounterId.equals(Config.RADIOLOGY_TYPE.getValue()))
+            title.append(Config.RADIOLOGY_REPORT.getValue());
         title.append(": ").append(obs.getConcept().getName().getName());
         attachment.setTitle(title.toString());
         attachments.add(attachment);

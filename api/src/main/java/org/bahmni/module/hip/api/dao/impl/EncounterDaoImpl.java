@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.api.dao.impl;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -16,9 +17,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.api.dao.Constants.DOCUMENT_TYPE;
-import static org.bahmni.module.hip.api.dao.Constants.PATIENT_DOCUMENT_TYPE;
-import static org.bahmni.module.hip.api.dao.Constants.RADIOLOGY_TYPE;
 
 
 @Repository
@@ -106,8 +104,8 @@ public class EncounterDaoImpl implements EncounterDao {
             "              inner join encounter_type as et on et.encounter_type_id = e.encounter_type\n" +
             "            where\n" +
             "              (\n" +
-            "                et.name = '" + RADIOLOGY_TYPE + "'\n" +
-            "                or et.name = '" + PATIENT_DOCUMENT_TYPE + "'\n" +
+            "                et.name = '" + Config.RADIOLOGY_TYPE.getValue() + "'\n" +
+            "                or et.name = '" + Config.PATIENT_DOCUMENT.getValue() + "'\n" +
             "              )\n" +
             "              and visit_id in (\n" +
             "                SELECT\n" +
@@ -120,7 +118,7 @@ public class EncounterDaoImpl implements EncounterDao {
             "      ) as t\n" +
             "      INNER JOIN concept_name AS cn ON cn.concept_id = t.obs_concept_id\n" +
             "    WHERE\n" +
-            "      name = '" + DOCUMENT_TYPE + "'\n" +
+            "      name = '" + Config.DOCUMENT_TYPE.getValue() + "'\n" +
             "      and obs_void_reason is null\n" +
             "      and person_uuid = :patientUUID\n" +
             "      and pro_name = :programName\n" +

@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.service;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.web.model.OrganizationContext;
 import org.hl7.fhir.r4.model.Organization;
 import org.openmrs.api.AdministrationService;
@@ -19,14 +20,14 @@ class OrganizationContextService {
 
     private String webURL() {
         AdministrationService administrationService = Context.getAdministrationService();
-        return administrationService.getGlobalProperty(Constants.PROP_HFR_URL);
+        return administrationService.getGlobalProperty(Config.PROP_HFR_URL.getValue());
     }
 
     private Organization createOrganizationInstance() {
         AdministrationService administrationService = Context.getAdministrationService();
-        String hfrId = administrationService.getGlobalProperty(Constants.PROP_HFR_ID);
-        String hfrName = administrationService.getGlobalProperty(Constants.PROP_HFR_NAME);
-        String hfrSystem = administrationService.getGlobalProperty(Constants.PROP_HFR_SYSTEM);
+        String hfrId = administrationService.getGlobalProperty(Config.PROP_HFR_ID.getValue());
+        String hfrName = administrationService.getGlobalProperty(Config.PROP_HFR_NAME.getValue());
+        String hfrSystem = administrationService.getGlobalProperty(Config.PROP_HFR_SYSTEM.getValue());
         return FHIRUtils.createOrgInstance(hfrId, hfrName, hfrSystem);
     }
 }

@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.model;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
 import org.hl7.fhir.r4.model.Bundle;
@@ -19,7 +20,6 @@ import java.util.UUID;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.web.service.Constants.DOCUMENT_TYPE;
 
 public class FhirDiagnosticReport {
     private final List<DiagnosticReport> diagnosticReports;
@@ -73,7 +73,7 @@ public class FhirDiagnosticReport {
         Integer encounterId = openMrsDiagnosticReport.getEncounter().getId();
         List<Practitioner> practitioners = getPractitionersFrom(fhirResourceMapper, openMrsDiagnosticReport.getEncounterProviders());
         List<Obs> observationNotDocumentType = openMrsDiagnosticReport.getEncounter().getAllObs().stream()
-                .filter(obs -> (!obs.getConcept().getName().getName().equals(DOCUMENT_TYPE))).collect(Collectors.toList());
+                .filter(obs -> (!obs.getConcept().getName().getName().equals(Config.DOCUMENT_TYPE.getValue()))).collect(Collectors.toList());
         List<Observation> observations = observationNotDocumentType.stream()
                 .map(fhirResourceMapper::mapToObs).collect(Collectors.toList());
         List<DiagnosticReport> diagnosticReports = observationNotDocumentType.stream()

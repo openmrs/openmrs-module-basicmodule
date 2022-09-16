@@ -1,4 +1,5 @@
 package org.bahmni.module.hip.api.dao.impl;
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.api.dao.OPConsultDao;
 import org.openmrs.Concept;
@@ -30,10 +31,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.api.dao.Constants.CODED_DIAGNOSIS;
-import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
-import static org.bahmni.module.hip.api.dao.Constants.NON_CODED_DIAGNOSIS;
-import static org.bahmni.module.hip.api.dao.Constants.PROCEDURE_NOTES;
 
 @Repository
 public class OPConsultDaoImpl implements OPConsultDao {
@@ -61,7 +58,7 @@ public class OPConsultDaoImpl implements OPConsultDao {
     public Map<Encounter, List<Condition>> getMedicalHistoryConditions(Visit visit) {
         final String conditionStatusHistoryOf = "HISTORY_OF";
         final String conditionStatusActive = "ACTIVE";
-        List<Encounter> encounters = encounterDao.GetEncountersForVisit(visit, CONSULTATION);
+        List<Encounter> encounters = encounterDao.GetEncountersForVisit(visit, Config.CONSULTATION.getValue());
         if(encounters.size() == 0)
             return new HashMap<>();
         List<org.openmrs.Condition> conditions = conditionService.getActiveConditions(visit.getPatient())
@@ -105,14 +102,14 @@ public class OPConsultDaoImpl implements OPConsultDao {
 
     @Override
     public List<Obs> getMedicalHistoryDiagnosis(Visit visit) {
-        List<Obs> medicalHistoryDiagnosisObsMap = encounterDao.GetAllObsForVisit(visit, CONSULTATION, CODED_DIAGNOSIS);
-        medicalHistoryDiagnosisObsMap.addAll(encounterDao.GetAllObsForVisit(visit, CONSULTATION, NON_CODED_DIAGNOSIS));
+        List<Obs> medicalHistoryDiagnosisObsMap = encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.CODED_DIAGNOSIS.getValue());
+        medicalHistoryDiagnosisObsMap.addAll(encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.NON_CODED_DIAGNOSIS.getValue()));
         return medicalHistoryDiagnosisObsMap;
     }
 
     @Override
     public List<Obs> getProcedures(Visit visit) {
-        List<Obs> proceduresObsMap = encounterDao.GetAllObsForVisit(visit, CONSULTATION, PROCEDURE_NOTES).stream()
+        List<Obs> proceduresObsMap = encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.PROCEDURE_NOTES.getValue()).stream()
                 .filter(o -> !o.getVoided())
                 .collect(Collectors.toList());
 
@@ -129,9 +126,9 @@ public class OPConsultDaoImpl implements OPConsultDao {
             Set<Encounter> encounterSet = episode.getEncounters();
             for (Encounter encounter : encounterSet) {
                 for (Obs o : encounter.getAllObs()) {
-                    if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
+                    if (Objects.equals(o.getEncounter().getEncounterType().getName(), Config.CONSULTATION.getValue())
                             && !o.getVoided()
-                            && Objects.equals(o.getConcept().getName().getName(), PROCEDURE_NOTES)
+                            && Objects.equals(o.getConcept().getName().getName(), Config.PROCEDURE_NOTES.getValue())
                     ) {
                         proceduresObsSet.add(o);
                     }
@@ -202,8 +199,8 @@ public class OPConsultDaoImpl implements OPConsultDao {
             Set<Encounter> encounterSet = episode.getEncounters();
             for (Encounter encounter: encounterSet) {
                 for(Obs o : encounter.getAllObs()){
-                    if(Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                            && Objects.equals(o.getConcept().getName().getName(), CODED_DIAGNOSIS)
+                    if(Objects.equals(o.getEncounter().getEncounterType().getName(), Config.CONSULTATION.getValue())
+                            && Objects.equals(o.getConcept().getName().getName(), Config.CODED_DIAGNOSIS.getValue())
                             && o.getValueCoded() != null
                             && o.getConcept().getName().getLocalePreferred())
                     {
