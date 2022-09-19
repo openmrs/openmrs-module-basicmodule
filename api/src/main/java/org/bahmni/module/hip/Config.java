@@ -4,9 +4,13 @@ public enum Config {
 
 
     PATIENT_DOCUMENTS_PATH("/home/bahmni/document_images/"),
-    ABHA_ADDRESS("ABHA Address"),
-    LOCATION("Bahmni Clinics"),
+    LOCATION("Bahmni Clinic"),
+
+    //attribute name
     PHONE_NUMBER("phoneNumber"),
+
+    //identifier type
+    ABHA_ADDRESS("ABHA Address"),
 
     //encounterType
     CONSULTATION("Consultation"),
