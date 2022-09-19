@@ -49,13 +49,13 @@
         </sql>
     </changeSet>
 
-    <changeSet id="updating-ABHAAddress-globalProperty"  author="Gogia, Swati">
+    <changeSet id="updating-ABHAAddress-globalProperty-190920220517"  author="Gogia, Swati">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='ABHA Address'</sqlCheck>
         </preConditions>
         <comment>Updating global property for ABHA address</comment>
         <sql>
-            update global_property set property_value=(SELECT CONCAT(COALESCE(property_value,''),',',uuid) from patient_identifier_type where name = 'ABHA Address') where property = 'bahmni.extraPatientIdentifierTypes';
+            update global_property set property_value=(SELECT CONCAT(IF(property_value='','',CONCAT(property_value,',')),uuid) from patient_identifier_type where name = 'ABHA Address') where property = 'bahmni.extraPatientIdentifierTypes';
         </sql>
     </changeSet>
 
