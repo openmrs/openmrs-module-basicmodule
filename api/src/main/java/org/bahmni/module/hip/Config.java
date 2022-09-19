@@ -35,7 +35,6 @@ public enum Config {
 
     private final String value;
 
-
     Config(String val) {
         value = val;
     }

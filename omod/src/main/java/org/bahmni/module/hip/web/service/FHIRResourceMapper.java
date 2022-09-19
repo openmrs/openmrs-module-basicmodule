@@ -211,7 +211,7 @@ public class FHIRResourceMapper {
         condition.setSubject(new Reference("Patient/" + patient.getId()));
         condition.setId(openMrsCondition.getUuid());
         condition.setRecordedDate(openMrsCondition.getRecordedDate());
-        condition.setClinicalStatus(new CodeableConcept(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
+        condition.setClinicalStatus(new CodeableConcept(new Coding().setCode("active").setSystem(Constants.FHIR_CONDITION_CLINICAL_STATUS_SYSTEM)));
         return condition;
     }
 
