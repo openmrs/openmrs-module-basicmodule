@@ -89,8 +89,7 @@ public class ConsultationDaoImpl implements ConsultationDao {
 
     @Override
     public List<Obs> getPhysicalExamination(Visit visit) {
-        final String[] formNames = new String[]{"Discharge Summary", "Death Note", "Delivery Note", "Opioid Substitution Therapy - Intake", "Opportunistic Infection",
-                "Safe Abortion", "ECG Notes", "Operative Notes", "USG Notes", "Procedure Notes", "Triage Reference", "History and Examination", "Visit Diagnoses"};
+        final String[] formNames = Config.Forms_To_Ignore_In_Physical_Examination.getValue().split("\\s*,\\s*");
         List<Obs> physicalExaminationObsMap = encounterDao.GetAllObsForVisit(visit,Config.CONSULTATION.getValue(),null)
                 .stream().filter(o -> o.getValueCoded() == null &&  o.getObsGroup() == null
                         && !Arrays.asList(formNames).contains(o.getConcept().getName().getName()) )
@@ -127,8 +126,7 @@ public class ConsultationDaoImpl implements ConsultationDao {
 
     @Override
     public List<Obs> getPhysicalExaminationForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
-        final String[] formNames = new String[]{"Discharge Summary", "Death Note", "Delivery Note", "Opioid Substitution Therapy - Intake", "Opportunistic Infection",
-                "Safe Abortion", "ECG Notes", "Operative Notes", "USG Notes", "Procedure Notes", "Triage Reference", "History and Examination", "Visit Diagnoses"};
+        final String[] formNames = Config.Forms_To_Ignore_In_Physical_Examination.getValue().split("\\s*,\\s*");
         List<Obs> physicalExaminationObsMap = new ArrayList<>();
         List<Obs> obs = getAllObs(programName, fromDate, toDate, patient);
         for (Obs o : obs) {

@@ -30,6 +30,10 @@ public enum Config {
     RADIOLOGY_ORDER( "Radiology Order"),
     LAB_ORDER( "Lab Order"),
 
+    //Physical_Examination_Ignoring_Form_List
+    Forms_To_Ignore_In_Physical_Examination("Discharge Summary, Death Note, Delivery Note, Opioid Substitution Therapy - Intake, Opportunistic Infection, " +
+            "Safe Abortion, ECG Notes, Operative Notes, USG Notes, Procedure Notes,Triage Reference, History and Examination, Visit Diagnoses"),
+
 
     PROP_HFR_ID("bahmniHip.healthFacilityRegistryId"),
     PROP_HFR_NAME( "bahmniHip.healthFacilityName"),
