@@ -1,6 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.bahmnicore.dao.OrderDao;
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.DiagnosticReportDao;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.bahmni.module.hip.api.dao.HipVisitDao;
@@ -36,10 +37,6 @@ public class DiagnosticReportService {
     private HipVisitDao hipVisitDao;
     private OrderDao orderDao;
     private final DiagnosticReportDao diagnosticReportDao;
-    private final String ORDER_TYPE = "Order";
-    private static final String RADIOLOGY_TYPE = "RADIOLOGY";
-    private static final String PATIENT_DOCUMENT_TYPE = "Patient Document";
-    private static final String DOCUMENT_TYPE = "Document";
 
 
     private LabOrderResultsService labOrderResultsService;
@@ -77,8 +74,8 @@ public class DiagnosticReportService {
     }
 
     public HashMap<Encounter, List<Obs>> getAllObservationsForVisits(Visit visit) {
-        List<Obs> patientObs = encounterDao.GetAllObsForVisit(visit, RADIOLOGY_TYPE, DOCUMENT_TYPE);
-        patientObs.addAll(encounterDao.GetAllObsForVisit(visit, PATIENT_DOCUMENT_TYPE, DOCUMENT_TYPE));
+        List<Obs> patientObs = encounterDao.GetAllObsForVisit(visit, Config.RADIOLOGY_TYPE.getValue(), Config.DOCUMENT_TYPE.getValue());
+        patientObs.addAll(encounterDao.GetAllObsForVisit(visit, Config.PATIENT_DOCUMENT.getValue(), Config.DOCUMENT_TYPE.getValue()));
         HashMap<Encounter, List<Obs>> encounterListMap = new HashMap<>();
         for (Obs obs: patientObs) {
             Encounter encounter = obs.getEncounter();
@@ -177,7 +174,7 @@ public class DiagnosticReportService {
 
         List<Visit> visits, visitsWithOrdersForProgram ;
 
-        visits = orderDao.getVisitsWithAllOrders(patient, ORDER_TYPE, null, null );
+        visits = orderDao.getVisitsWithAllOrders(patient, Config.ORDER_TYPE.getValue(), null, null );
         visitsWithOrdersForProgram = visits.stream().filter( visit -> visitsForProgram.contains(visit.getVisitId()) ).collect(Collectors.toList());;
         return getLabResults(patient, visitsWithOrdersForProgram);
     }

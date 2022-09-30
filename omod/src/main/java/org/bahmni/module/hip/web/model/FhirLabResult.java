@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.model;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
 import org.hl7.fhir.r4.model.Attachment;
@@ -28,7 +29,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.web.service.Constants.PATIENT_DOCUMENTS_PATH;
 
 public class FhirLabResult {
 
@@ -160,7 +160,7 @@ public class FhirLabResult {
 
         Attachment attachment = new Attachment();
         attachment.setContentType(FHIRUtils.getTypeOfTheObsDocument(obs.getValueText()));
-        byte[] fileContent = Files.readAllBytes(new File(PATIENT_DOCUMENTS_PATH + obs.getValueText()).toPath());
+        byte[] fileContent = Files.readAllBytes(new File(Config.PATIENT_DOCUMENTS_PATH.getValue() + obs.getValueText()).toPath());
         attachment.setData(fileContent);
         attachment.setTitle("LAB REPORT : " + testNmae);
         attachments.add(attachment);

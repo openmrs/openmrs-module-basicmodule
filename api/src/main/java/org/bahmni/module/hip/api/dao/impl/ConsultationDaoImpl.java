@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.api.dao.impl;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.ConsultationDao;
 import org.bahmni.module.hip.api.dao.EncounterDao;
 import org.openmrs.Encounter;
@@ -25,18 +26,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.bahmni.module.hip.api.dao.Constants.CHIEF_COMPLAINT;
-import static org.bahmni.module.hip.api.dao.Constants.CONSULTATION;
-import static org.bahmni.module.hip.api.dao.Constants.LAB_ORDER;
 import static org.bahmni.module.hip.api.dao.Constants.ORDER_ACTION;
-import static org.bahmni.module.hip.api.dao.Constants.RADIOLOGY_ORDER;
 
 @Repository
 public class ConsultationDaoImpl implements ConsultationDao {
 
     public static final ArrayList<String> ORDER_TYPES = new ArrayList<String>() {{
-        add(LAB_ORDER);
-        add(RADIOLOGY_ORDER);
+        add(Config.LAB_ORDER.getValue());
+        add(Config.RADIOLOGY_ORDER.getValue());
     }};
     private final ProgramWorkflowService programWorkflowService;
     private final EpisodeService episodeService;
@@ -55,7 +52,7 @@ public class ConsultationDaoImpl implements ConsultationDao {
 
     @Override
     public List<Obs> getChiefComplaints(Visit visit) {
-        List<Obs> chiefComplaintObsMap = encounterDao.GetAllObsForVisit(visit,CONSULTATION,CHIEF_COMPLAINT)
+        List<Obs> chiefComplaintObsMap = encounterDao.GetAllObsForVisit(visit,Config.CONSULTATION.getValue(),Config.CHIEF_COMPLAINT.getValue())
                 .stream().filter(o -> o.getValueCoded() != null && o.getConcept().getName().getLocalePreferred())
                 .collect(Collectors.toList());
         return chiefComplaintObsMap;
@@ -66,8 +63,8 @@ public class ConsultationDaoImpl implements ConsultationDao {
         List<Obs> obs = getAllObs(programName, fromDate, toDate, patient);
         List<Obs> obsSet = new ArrayList<>();
         for (Obs o : obs) {
-            if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
-                    && Objects.equals(o.getConcept().getName().getName(), CHIEF_COMPLAINT)
+            if (Objects.equals(o.getEncounter().getEncounterType().getName(), Config.CONSULTATION.getValue())
+                    && Objects.equals(o.getConcept().getName().getName(), Config.CHIEF_COMPLAINT.getValue())
                     && o.getValueCoded() != null
                     && o.getConcept().getName().getLocalePreferred()) {
                 obsSet.add(o);
@@ -92,9 +89,8 @@ public class ConsultationDaoImpl implements ConsultationDao {
 
     @Override
     public List<Obs> getPhysicalExamination(Visit visit) {
-        final String[] formNames = new String[]{"Discharge Summary", "Death Note", "Delivery Note", "Opioid Substitution Therapy - Intake", "Opportunistic Infection",
-                "Safe Abortion", "ECG Notes", "Operative Notes", "USG Notes", "Procedure Notes", "Triage Reference", "History and Examination", "Visit Diagnoses"};
-        List<Obs> physicalExaminationObsMap = encounterDao.GetAllObsForVisit(visit,CONSULTATION,null)
+        final String[] formNames = Config.Forms_To_Ignore_In_Physical_Examination.getValue().split("\\s*,\\s*");
+        List<Obs> physicalExaminationObsMap = encounterDao.GetAllObsForVisit(visit,Config.CONSULTATION.getValue(),null)
                 .stream().filter(o -> o.getValueCoded() == null &&  o.getObsGroup() == null
                         && !Arrays.asList(formNames).contains(o.getConcept().getName().getName()) )
                 .collect(Collectors.toList());
@@ -130,12 +126,11 @@ public class ConsultationDaoImpl implements ConsultationDao {
 
     @Override
     public List<Obs> getPhysicalExaminationForProgram(String programName, Date fromDate, Date toDate, Patient patient) {
-        final String[] formNames = new String[]{"Discharge Summary", "Death Note", "Delivery Note", "Opioid Substitution Therapy - Intake", "Opportunistic Infection",
-                "Safe Abortion", "ECG Notes", "Operative Notes", "USG Notes", "Procedure Notes", "Triage Reference", "History and Examination", "Visit Diagnoses"};
+        final String[] formNames = Config.Forms_To_Ignore_In_Physical_Examination.getValue().split("\\s*,\\s*");
         List<Obs> physicalExaminationObsMap = new ArrayList<>();
         List<Obs> obs = getAllObs(programName, fromDate, toDate, patient);
         for (Obs o : obs) {
-            if (Objects.equals(o.getEncounter().getEncounterType().getName(), CONSULTATION)
+            if (Objects.equals(o.getEncounter().getEncounterType().getName(), Config.CONSULTATION.getValue())
                     && o.getValueCoded() == null
                     && o.getConcept().getName().getLocalePreferred()
                     && o.getObsGroup() == null

@@ -2,6 +2,7 @@ package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.dao.PatientDao;
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.ExistingPatientDao;
 import org.bahmni.module.hip.web.client.model.Status;
 import org.bahmni.module.hip.web.model.ExistingPatient;
@@ -19,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.bahmni.module.hip.web.service.Constants.ABHA_ADDRESS;
 
 @Service
 public class ExistingPatientService {
@@ -28,8 +28,6 @@ public class ExistingPatientService {
     private final PatientDao patientDao;
     private final PatientService patientService;
     private final LocationService locationService;
-    private static final String LOCATION = "Bahmni Clinic";
-    private static final String PHONE_NUMBER = "phoneNumber";
     static final int PHONE_NUMBER_LENGTH = 10;
 
     @Autowired
@@ -51,7 +49,7 @@ public class ExistingPatientService {
     public String getHealthId(Patient patient) {
         String healthId = "";
         try {
-            healthId = patient.getPatientIdentifier(ABHA_ADDRESS).getIdentifier();
+            healthId = patient.getPatientIdentifier(Config.ABHA_ADDRESS.getValue()).getIdentifier();
         } catch (NullPointerException ignored) {
 
         }
@@ -60,7 +58,7 @@ public class ExistingPatientService {
 
     public void perform(String healthId, String action) {
         Patient patient = patientService.getPatientByUuid(getPatientWithHealthId(healthId));
-        PatientIdentifier patientIdentifierPhr = patient.getPatientIdentifier(ABHA_ADDRESS);
+        PatientIdentifier patientIdentifierPhr = patient.getPatientIdentifier(Config.ABHA_ADDRESS.getValue());
         if (action.equals(Status.DELETED.toString())) {
             removeHealthId(patient,patientIdentifierPhr);
         }
@@ -85,7 +83,7 @@ public class ExistingPatientService {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
             for (PatientIdentifier patientIdentifier : patientIdentifiers) {
-                if (patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS)) {
+                if (patientIdentifier.getIdentifierType().getName().equals(Config.ABHA_ADDRESS.getValue())) {
                     if(patientIdentifier.getVoided()){
                         patientIdentifier.setVoided(false);
                         patientService.savePatientIdentifier(patientIdentifier);
@@ -134,7 +132,7 @@ public class ExistingPatientService {
     private List<PatientResponse> filterPatientsByName(String patientName) {
         return patientDao.getPatients("", patientName, null, null, "", 100, 0,
                 null, "", null, null, null,
-                locationService.getLocation(LOCATION).getUuid(), false, false);
+                locationService.getLocation(Config.LOCATION.getValue()).getUuid(), false, false);
     }
 
 
@@ -188,7 +186,7 @@ public class ExistingPatientService {
     private String getPhoneNumber(Patient patient) {
         String phoneNumber = " ";
         try {
-            phoneNumber = patient.getAttribute(PHONE_NUMBER).getValue();
+            phoneNumber = patient.getAttribute(Config.PHONE_NUMBER.getValue()).getValue();
         } catch (NullPointerException ignored) {
 
         }
@@ -213,7 +211,7 @@ public class ExistingPatientService {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
             for (PatientIdentifier patientIdentifier:patientIdentifiers) {
-                if(patientIdentifier.getIdentifierType().getName().equals(ABHA_ADDRESS)){
+                if(patientIdentifier.getIdentifierType().getName().equals(Config.ABHA_ADDRESS.getValue())){
                    return patientIdentifier.getVoided();
                 }
             }

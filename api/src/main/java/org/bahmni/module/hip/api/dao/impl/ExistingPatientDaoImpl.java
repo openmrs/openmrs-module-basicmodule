@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.api.dao.impl;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.ExistingPatientDao;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -15,7 +16,6 @@ import java.util.List;
 public class ExistingPatientDaoImpl implements ExistingPatientDao {
 
     private final SessionFactory sessionFactory;
-    public static final String ABHA_ADDRESS = "ABHA Address";
 
     @Autowired
     public ExistingPatientDaoImpl(SessionFactory sessionFactory) {
@@ -67,7 +67,7 @@ public class ExistingPatientDaoImpl implements ExistingPatientDao {
                 "\tand piy.name = :healthId ;";
         Query query = this.sessionFactory.openSession().createSQLQuery(getPatientHealthId);
         query.setParameter("patientId", patientId);
-        query.setParameter("healthId", ABHA_ADDRESS);
+        query.setParameter("healthId", Config.ABHA_ADDRESS.getValue());
         List<String> healthIds = query.list();
         return healthIds.size() > 0 ? healthIds.get(0) : null;
     }
