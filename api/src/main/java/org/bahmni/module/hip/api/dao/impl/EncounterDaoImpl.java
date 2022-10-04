@@ -2,6 +2,8 @@ package org.bahmni.module.hip.api.dao.impl;
 
 import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.EncounterDao;
+import org.bahmni.module.hip.api.dao.ObsDao;
+import org.bahmni.module.hip.model.PatientObs;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.openmrs.Encounter;
@@ -23,10 +25,12 @@ import java.util.stream.Collectors;
 public class EncounterDaoImpl implements EncounterDao {
 
     private SessionFactory sessionFactory;
+    private final ObsDao obsDao;
 
     @Autowired
-    public EncounterDaoImpl(SessionFactory sessionFactory) {
+    public EncounterDaoImpl(SessionFactory sessionFactory, ObsDao obsDao) {
         this.sessionFactory = sessionFactory;
+        this.obsDao = obsDao;
     }
 
     private String sqlGetEpisodeEncounterIds = "select\n" +
@@ -159,6 +163,26 @@ public class EncounterDaoImpl implements EncounterDao {
                                 .collect(Collectors.toList()));
         }
         return observations;
+    }
+
+    @Override
+    public List<PatientObs> GetAllObservationsForVisit(Visit visit, String encounterType, String conceptName) {
+        List<Obs> observations = new ArrayList<>();
+        List<Encounter> encounters = GetEncountersForVisit(visit,encounterType);
+        for (Encounter encounter : encounters) {
+            if(conceptName == null)
+                observations.addAll(encounter.getAllObs());
+            observations.addAll(encounter.getAllObs().stream()
+                    .filter(o -> Objects.equals(o.getConcept().getName().getName(), conceptName))
+                    .collect(Collectors.toList()));
+        }
+
+        List<PatientObs> patientObs = new ArrayList<>();
+        for(Obs obs: observations){
+            PatientObs patientObs1 = new PatientObs(obsDao.getObsUnits(obs).toString(), obs);
+            patientObs.add(patientObs1);
+        }
+        return patientObs;
     }
 
     @Override
