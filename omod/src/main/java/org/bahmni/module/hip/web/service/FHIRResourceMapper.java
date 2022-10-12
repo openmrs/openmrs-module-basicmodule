@@ -2,6 +2,8 @@ package org.bahmni.module.hip.web.service;
 
 import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
+import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -25,6 +27,7 @@ import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.Concept;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
@@ -216,6 +219,8 @@ public class FHIRResourceMapper {
     }
 
     public Observation mapToObs(Obs obs) {
+        Concept concept = initializeEntityAndUnproxy(obs.getConcept());
+        obs.setConcept(concept);
         return observationTranslator.toFhirResource(obs);
     }
 
@@ -265,5 +270,16 @@ public class FHIRResourceMapper {
             return null;
         }
         return medicationTranslator.toFhirResource(order.getDrug());
+    }
+
+    public static <T> T initializeEntityAndUnproxy(T entity) {
+        if (entity == null) {
+            throw new NullPointerException("Entity passed for initialization is null");
+        }
+        Hibernate.initialize(entity);
+        if (entity instanceof HibernateProxy) {
+            entity = (T) ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
+        }
+        return entity;
     }
 }
