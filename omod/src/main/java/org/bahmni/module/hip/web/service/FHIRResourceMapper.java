@@ -22,6 +22,8 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.MarkdownType;
 
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
@@ -221,7 +223,9 @@ public class FHIRResourceMapper {
     public Observation mapToObs(Obs obs) {
         Concept concept = initializeEntityAndUnproxy(obs.getConcept());
         obs.setConcept(concept);
-        return observationTranslator.toFhirResource(obs);
+        Observation observation = observationTranslator.toFhirResource(obs);
+        observation.addNote(new Annotation(new MarkdownType(obs.getComment())));
+        return observation;
     }
 
     public ServiceRequest mapToOrder(Order order){
