@@ -29,6 +29,8 @@ public enum Config {
     LAB_REPORT( "LAB_REPORT"),
     RADIOLOGY_ORDER( "Radiology Order"),
     LAB_ORDER( "Lab Order"),
+    IMAGE("Image"),
+    PATIENT_VIDEO("Patient Video"),
 
     //Physical_Examination_Ignoring_Form_List
     Forms_To_Ignore_In_Physical_Examination("Discharge Summary, Death Note, Delivery Note, Opioid Substitution Therapy - Intake, Opportunistic Infection, " +

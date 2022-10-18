@@ -75,9 +75,7 @@ public class ConsultationService {
     }
 
     public Map<Encounter, List<Obs>> getEncounterPatientDocumentsMap(Visit visit) {
-        final int patientDocumentEncounterType = 9;
-        Map<Encounter, List<Obs>> encounterDiagnosticReportsMap = diagnosticReportService.getAllObservationsForVisits(visit);
-        return getEncounterListMapForPatientDocument(patientDocumentEncounterType, encounterDiagnosticReportsMap);
+        return opConsultDao.getPatientDocumentsForVisit(visit);
     }
 
     public Map<Encounter, List<Obs>> getEncounterPatientDocumentsMapForProgram(String programName, Date fromDate, Date toDate, Patient patient,String programEnrollmentId) {
