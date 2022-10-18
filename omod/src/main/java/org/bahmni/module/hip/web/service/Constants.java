@@ -12,4 +12,9 @@ public class Constants {
     static final String GIF = "gif";
     static final String PDF = "pdf";
     static final String MIMETYPE_PDF = "application/pdf";
+    static final String MIMETYPE_VIDEO_MPEG = "video/mpeg";
+    static final String MIMETYPE_VIDEO_MP4 = "video/mp4";
+    static final String MP4 = "mp4";
+    static final String MPEG = "mpeg";
+
 }

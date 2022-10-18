@@ -22,6 +22,10 @@ import static org.bahmni.module.hip.web.service.Constants.JPEG;
 import static org.bahmni.module.hip.web.service.Constants.JPG;
 import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_IMAGE_JPEG;
 import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_PDF;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_VIDEO_MP4;
+import static org.bahmni.module.hip.web.service.Constants.MIMETYPE_VIDEO_MPEG;
+import static org.bahmni.module.hip.web.service.Constants.MP4;
+import static org.bahmni.module.hip.web.service.Constants.MPEG;
 import static org.bahmni.module.hip.web.service.Constants.PDF;
 import static org.bahmni.module.hip.web.service.Constants.PNG;
 
@@ -200,6 +204,10 @@ public class FHIRUtils {
             return IMAGE + extension;
         } else if (extension.compareTo(PDF) == 0) {
             return MIMETYPE_PDF;
+        } else if (extension.compareTo(MP4) == 0) {
+            return MIMETYPE_VIDEO_MP4;
+        } else if (extension.compareTo(MPEG) == 0) {
+            return MIMETYPE_VIDEO_MPEG;
         } else {
             return "";
         }
