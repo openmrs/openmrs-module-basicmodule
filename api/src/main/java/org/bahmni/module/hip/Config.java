@@ -34,7 +34,7 @@ public enum Config {
 
     //Physical_Examination_Ignoring_Form_List
     Forms_To_Ignore_In_Physical_Examination("Discharge Summary, Death Note, Delivery Note, Opioid Substitution Therapy - Intake, Opportunistic Infection, " +
-            "Safe Abortion, ECG Notes, Operative Notes, USG Notes, Procedure Notes,Triage Reference, History and Examination, Visit Diagnoses"),
+            "Safe Abortion, ECG Notes, Operative Notes, USG Notes, Procedure Notes,Triage Reference, History and Examination, Visit Diagnoses, Patient Video"),
 
 
     PROP_HFR_ID("bahmniHip.healthFacilityRegistryId"),

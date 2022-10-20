@@ -92,7 +92,6 @@ public class ConsultationDaoImpl implements ConsultationDao {
         final String[] formNames = Config.Forms_To_Ignore_In_Physical_Examination.getValue().split("\\s*,\\s*");
         List<Obs> physicalExaminationObsMap = encounterDao.GetAllObsForVisit(visit,Config.CONSULTATION.getValue(),null)
                 .stream().filter(o -> o.getValueCoded() == null
-                        && o.getValueComplex() == null
                         &&  o.getObsGroup() == null
                         && !Arrays.asList(formNames).contains(o.getConcept().getName().getName()) )
                 .collect(Collectors.toList());
