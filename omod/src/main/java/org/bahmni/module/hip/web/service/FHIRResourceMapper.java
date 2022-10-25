@@ -184,14 +184,15 @@ public class FHIRResourceMapper {
     private List<Attachment> getAttachments(Obs obs) throws IOException {
         List<Attachment> attachments = new ArrayList<>();
         Attachment attachment = new Attachment();
-        Set<Obs> obsList = obs.getGroupMembers();
         StringBuilder valueText = new StringBuilder();
         StringBuilder contentType = new StringBuilder();
-        for(Obs obs1 : obsList){
-            if(obs1.getConcept().getName().getName().equals(Config.DOCUMENT_TYPE.getValue())){
-                valueText.append(obs1.getValueText());
-                contentType.append(FHIRUtils.getTypeOfTheObsDocument(obs1.getValueText()));
-            }
+        if(obs.getConcept().getName().getName().equals(Config.DOCUMENT_TYPE.getValue())){
+            valueText.append(obs.getValueText());
+            contentType.append(FHIRUtils.getTypeOfTheObsDocument(obs.getValueText()));
+        }
+        if(obs.getConcept().getName().getName().equals(Config.IMAGE.getValue()) || obs.getConcept().getName().getName().equals(Config.PATIENT_VIDEO.getValue())){
+            valueText.append(obs.getValueComplex());
+            contentType.append(FHIRUtils.getTypeOfTheObsDocument(obs.getValueComplex()));
         }
         attachment.setContentType(contentType.toString());
         byte[] fileContent = Files.readAllBytes(new File(Config.PATIENT_DOCUMENTS_PATH.getValue() + valueText).toPath());
@@ -202,6 +203,8 @@ public class FHIRResourceMapper {
             title.append(Config.PATIENT_DOCUMENT.getValue());
         else if(encounterId.equals(Config.RADIOLOGY_TYPE.getValue()))
             title.append(Config.RADIOLOGY_REPORT.getValue());
+        else if(encounterId.equals(Config.CONSULTATION.getValue()))
+            title.append("Consultation");
         title.append(": ").append(obs.getConcept().getName().getName());
         attachment.setTitle(title.toString());
         attachments.add(attachment);

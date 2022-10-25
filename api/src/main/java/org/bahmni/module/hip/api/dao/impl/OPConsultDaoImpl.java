@@ -212,6 +212,20 @@ public class OPConsultDaoImpl implements OPConsultDao {
         return obsSet;
     }
 
+    public Map<Encounter, List<Obs>> getPatientDocumentsForVisit(Visit visit){
+        List<Obs> patientObs = encounterDao.GetAllObsForVisit(visit, Config.PATIENT_DOCUMENT.getValue(), Config.DOCUMENT_TYPE.getValue());
+        patientObs.addAll(encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.IMAGE.getValue()));
+        patientObs.addAll(encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.PATIENT_VIDEO.getValue()));
+        HashMap<Encounter, List<Obs>> encounterListMap = new HashMap<>();
+        for (Obs obs: patientObs) {
+            Encounter encounter = obs.getEncounter();
+            if(!encounterListMap.containsKey(encounter))
+                encounterListMap.put(encounter, new ArrayList<Obs>(){{ add(obs); }});
+            else
+                encounterListMap.get(encounter).add(obs);
+        }
+        return encounterListMap;
+    }
 
     private org.openmrs.module.emrapi.conditionslist.Condition convertCoreConditionToEmrapiCondition(org.openmrs.Condition coreCondition) {
         org.openmrs.module.emrapi.conditionslist.Condition cListCondition = new org.openmrs.module.emrapi.conditionslist.Condition();
