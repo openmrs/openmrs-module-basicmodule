@@ -185,10 +185,13 @@ public class FHIRResourceMapper {
         List<Attachment> attachments = new ArrayList<>();
         Attachment attachment = new Attachment();
         StringBuilder valueText = new StringBuilder();
+        Set<Obs> obsList = obs.getGroupMembers();
         StringBuilder contentType = new StringBuilder();
-        if(obs.getConcept().getName().getName().equals(Config.DOCUMENT_TYPE.getValue())){
-            valueText.append(obs.getValueText());
-            contentType.append(FHIRUtils.getTypeOfTheObsDocument(obs.getValueText()));
+        for(Obs obs1 : obsList) {
+            if (obs1.getConcept().getName().getName().equals(Config.DOCUMENT_TYPE.getValue())) {
+                valueText.append(obs1.getValueText());
+                contentType.append(FHIRUtils.getTypeOfTheObsDocument(obs1.getValueText()));
+            }
         }
         if(obs.getConcept().getName().getName().equals(Config.IMAGE.getValue()) || obs.getConcept().getName().getName().equals(Config.PATIENT_VIDEO.getValue())){
             valueText.append(obs.getValueComplex());

@@ -213,7 +213,8 @@ public class OPConsultDaoImpl implements OPConsultDao {
     }
 
     public Map<Encounter, List<Obs>> getPatientDocumentsForVisit(Visit visit){
-        List<Obs> patientObs = encounterDao.GetAllObsForVisit(visit, Config.PATIENT_DOCUMENT.getValue(), Config.DOCUMENT_TYPE.getValue());
+        List<Obs> patientObs = encounterDao.GetAllObsForVisit(visit, Config.PATIENT_DOCUMENT.getValue(),null)
+                .stream().filter(o -> !o.getConcept().getName().getName().equals(Config.DOCUMENT_TYPE.getValue()) ).collect(Collectors.toList());
         patientObs.addAll(encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.IMAGE.getValue()));
         patientObs.addAll(encounterDao.GetAllObsForVisit(visit, Config.CONSULTATION.getValue(), Config.PATIENT_VIDEO.getValue()));
         HashMap<Encounter, List<Obs>> encounterListMap = new HashMap<>();
