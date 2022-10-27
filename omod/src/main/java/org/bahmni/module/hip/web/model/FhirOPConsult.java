@@ -1,5 +1,7 @@
 package org.bahmni.module.hip.web.model;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bahmni.module.hip.web.service.FHIRResourceMapper;
 import org.bahmni.module.hip.web.service.FHIRUtils;
 import org.hl7.fhir.r4.model.Condition;
@@ -17,6 +19,8 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.ServiceRequest;
 
 import org.openmrs.EncounterProvider;
+import org.openmrs.Obs;
+
 import java.util.List;
 import java.util.Date;
 import java.util.Objects;
@@ -40,6 +44,7 @@ public class FhirOPConsult {
     private final Procedure procedure;
     private final List<DocumentReference> patientDocuments;
     private final List<ServiceRequest> serviceRequest;
+    private static Logger logger = LogManager.getLogger(FhirOPConsult.class);
 
     public FhirOPConsult(List<Condition> chiefComplaints,
                          List<Condition> medicalHistory, Date visitTimeStamp,
@@ -107,8 +112,14 @@ public class FhirOPConsult {
         for(int i=0;i<openMrsOPConsult.getMedicalHistoryConditions().size();i++){
             fhirMedicalHistoryList.add(fhirResourceMapper.mapToCondition(openMrsOPConsult.getMedicalHistoryConditions().get(i), patient));
         }
+        for(Obs obs:openMrsOPConsult.getObservations()){
+            logger.warn("openMrsOPConsult.getObservations() ----- "+obs.getConcept().getName());
+        }
         List<Observation> fhirObservationList = openMrsOPConsult.getObservations().stream().
                     map(fhirResourceMapper::mapToObs).collect(Collectors.toList());
+        for(Observation obs:fhirObservationList) {
+            logger.warn("fhirObservationList ----- " + obs.getValue());
+        }
         Procedure procedure = openMrsOPConsult.getProcedure() != null ?
                 fhirResourceMapper.mapToProcedure(openMrsOPConsult.getProcedure()) : null;
         List<DocumentReference> patientDocuments = openMrsOPConsult.getPatientDocuments().stream().

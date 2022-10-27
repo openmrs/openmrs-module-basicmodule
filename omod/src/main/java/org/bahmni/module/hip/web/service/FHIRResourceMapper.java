@@ -1,5 +1,7 @@
 package org.bahmni.module.hip.web.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
 import org.hibernate.Hibernate;
@@ -59,6 +61,8 @@ public class FHIRResourceMapper {
     private final EncounterTranslatorImpl encounterTranslator;
     private final ObservationTranslatorImpl observationTranslator;
     public static Set<String> conceptNames = new HashSet<>(Arrays.asList("Follow up Date", "Additional Advice on Discharge", "Discharge Summary, Plan for follow up"));
+    public static final String CONCEPT_DETAILS_CONCEPT_CLASS = "Concept Details";
+    private static Logger logger = LogManager.getLogger(FHIRResourceMapper.class);
 
     @Autowired
     public FHIRResourceMapper(PatientTranslator patientTranslator, PractitionerTranslatorProviderImpl practitionerTranslatorProvider, MedicationRequestTranslator medicationRequestTranslator, MedicationTranslator medicationTranslator, EncounterTranslatorImpl encounterTranslator, ObservationTranslatorImpl observationTranslator) {
@@ -229,8 +233,15 @@ public class FHIRResourceMapper {
     public Observation mapToObs(Obs obs) {
         Concept concept = initializeEntityAndUnproxy(obs.getConcept());
         obs.setConcept(concept);
+        if (obs.getGroupMembers().size() > 0 && CONCEPT_DETAILS_CONCEPT_CLASS.equals(obs.getConcept().getConceptClass().getName()) && obs.getFormFieldNamespace() != null) {
+            Obs[] groupMembersArray = new Obs[obs.getGroupMembers().size()];
+            groupMembersArray = obs.getGroupMembers().toArray(groupMembersArray);
+            obs.setValueText(groupMembersArray[2].getValueCoded().getDisplayString() + " " + "since" + " " + groupMembersArray[0].getValueNumeric() + " " + groupMembersArray[1].getValueCoded().getDisplayString());
+            logger.warn("obs.getConcept().getName() ----- "+obs.getConcept().getName());
+        }
         Observation observation = observationTranslator.toFhirResource(obs);
         observation.addNote(new Annotation(new MarkdownType(obs.getComment())));
+        logger.warn("observation.getValue() ----- "+observation.getValue());
         return observation;
     }
 
