@@ -1,7 +1,5 @@
 package org.bahmni.module.hip.web.service;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bahmni.module.hip.api.dao.ConsultationDao;
 import org.bahmni.module.hip.api.dao.OPConsultDao;
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
@@ -31,7 +29,6 @@ public class ConsultationService {
     private final ConsultationDao consultationDao;
     private final OPConsultDao opConsultDao;
     private final DiagnosticReportService diagnosticReportService;
-    private static Logger logger = LogManager.getLogger(ConsultationService.class);
     public static final String CONCEPT_DETAILS_CONCEPT_CLASS = "Concept Details";
 
     public static Set<String> conceptNames = new HashSet<>(Arrays.asList("Image","Tuberculosis, Treatment Plan","Tuberculosis, Next Followup Visit","Tuberculosis, Plan for next visit","Tuberculosis, Patient Category","Current Followup Visit After",
@@ -169,7 +166,6 @@ public class ConsultationService {
     }
 
     private void getGroupMembersOfObs(Obs physicalExamination, List<Obs> groupMembers) {
-        logger.warn("getGroupMembersOfObs ----- "+physicalExamination.getConcept().getName()+" ------ class ------ "+physicalExamination.getConcept().getConceptClass().getName());
         if (physicalExamination.getGroupMembers().size() > 0 && !CONCEPT_DETAILS_CONCEPT_CLASS.equals(physicalExamination.getConcept().getConceptClass().getName())) {
             for (Obs groupMember : physicalExamination.getGroupMembers()) {
                 if (conceptNames.contains(groupMember.getConcept().getDisplayString())) continue;
