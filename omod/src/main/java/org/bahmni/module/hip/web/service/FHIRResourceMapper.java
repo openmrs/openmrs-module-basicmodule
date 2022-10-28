@@ -236,6 +236,7 @@ public class FHIRResourceMapper {
         if (obs.getGroupMembers().size() > 0 && CONCEPT_DETAILS_CONCEPT_CLASS.equals(obs.getConcept().getConceptClass().getName()) && obs.getFormFieldNamespace() != null) {
             Obs[] groupMembersArray = new Obs[obs.getGroupMembers().size()];
             groupMembersArray = obs.getGroupMembers().toArray(groupMembersArray);
+            logger.warn("obs.getValueText() ----- "+obs.getValueText());
             obs.setValueText(groupMembersArray[2].getValueCoded().getDisplayString() + " " + "since" + " " + groupMembersArray[0].getValueNumeric() + " " + groupMembersArray[1].getValueCoded().getDisplayString());
             logger.warn("obs.getConcept().getName() ----- "+obs.getConcept().getName());
         }
