@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.ServiceRequest;
 
 import org.openmrs.EncounterProvider;
-
 import java.util.List;
 import java.util.Date;
 import java.util.Objects;

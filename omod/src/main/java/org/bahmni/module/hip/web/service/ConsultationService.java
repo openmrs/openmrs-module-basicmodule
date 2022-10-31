@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.service;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.ConsultationDao;
 import org.bahmni.module.hip.api.dao.OPConsultDao;
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
@@ -29,7 +30,6 @@ public class ConsultationService {
     private final ConsultationDao consultationDao;
     private final OPConsultDao opConsultDao;
     private final DiagnosticReportService diagnosticReportService;
-    public static final String CONCEPT_DETAILS_CONCEPT_CLASS = "Concept Details";
 
     public static Set<String> conceptNames = new HashSet<>(Arrays.asList("Image","Tuberculosis, Treatment Plan","Tuberculosis, Next Followup Visit","Tuberculosis, Plan for next visit","Tuberculosis, Patient Category","Current Followup Visit After",
             "Tuberculosis, Plan for next visit","Malaria, Parents Name","Malaria, Death Date", "Childhood Illness, Vitamin A Capsules Provided","Childhood Illness, Albendazole Given","Childhood Illness, Referred out",
@@ -166,7 +166,7 @@ public class ConsultationService {
     }
 
     private void getGroupMembersOfObs(Obs physicalExamination, List<Obs> groupMembers) {
-        if (physicalExamination.getGroupMembers().size() > 0 && !CONCEPT_DETAILS_CONCEPT_CLASS.equals(physicalExamination.getConcept().getConceptClass().getName())) {
+        if (physicalExamination.getGroupMembers().size() > 0 && Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(physicalExamination.getConcept().getConceptClass().getName())) {
             for (Obs groupMember : physicalExamination.getGroupMembers()) {
                 if (conceptNames.contains(groupMember.getConcept().getDisplayString())) continue;
                 getGroupMembersOfObs(groupMember, groupMembers);
