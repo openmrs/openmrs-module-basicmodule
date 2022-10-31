@@ -165,6 +165,7 @@ public class FHIRResourceMapper {
         DocumentReference documentReference = new DocumentReference();
         documentReference.setId(obs.getUuid());
         documentReference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+        documentReference.setDescription(obs.getComment());
         List<DocumentReference.DocumentReferenceContentComponent> contents = new ArrayList<>();
         try {
             List<Attachment> attachments = getAttachments(obs);
