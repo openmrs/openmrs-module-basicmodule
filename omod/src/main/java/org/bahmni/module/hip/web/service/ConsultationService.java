@@ -1,5 +1,6 @@
 package org.bahmni.module.hip.web.service;
 
+import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.ConsultationDao;
 import org.bahmni.module.hip.api.dao.OPConsultDao;
 import org.bahmni.module.hip.web.model.OpenMrsCondition;
@@ -165,7 +166,7 @@ public class ConsultationService {
     }
 
     private void getGroupMembersOfObs(Obs physicalExamination, List<Obs> groupMembers) {
-        if (physicalExamination.getGroupMembers().size() > 0) {
+        if (physicalExamination.getGroupMembers().size() > 0 && Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(physicalExamination.getConcept().getConceptClass().getName())) {
             for (Obs groupMember : physicalExamination.getGroupMembers()) {
                 if (conceptNames.contains(groupMember.getConcept().getDisplayString())) continue;
                 getGroupMembersOfObs(groupMember, groupMembers);

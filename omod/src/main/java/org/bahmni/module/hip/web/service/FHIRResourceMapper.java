@@ -230,6 +230,11 @@ public class FHIRResourceMapper {
     public Observation mapToObs(Obs obs) {
         Concept concept = initializeEntityAndUnproxy(obs.getConcept());
         obs.setConcept(concept);
+        if (obs.getGroupMembers().size() > 0 && Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(obs.getConcept().getConceptClass().getName()) && obs.getFormFieldNamespace() != null) {
+            Obs[] groupMembersArray = new Obs[obs.getGroupMembers().size()];
+            groupMembersArray = obs.getGroupMembers().toArray(groupMembersArray);
+            obs.setValueText(groupMembersArray[2].getValueCoded().getDisplayString() + " " + "since" + " " + groupMembersArray[0].getValueNumeric() + " " + groupMembersArray[1].getValueCoded().getDisplayString());
+        }
         Observation observation = observationTranslator.toFhirResource(obs);
         observation.addNote(new Annotation(new MarkdownType(obs.getComment())));
         return observation;

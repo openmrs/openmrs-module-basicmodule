@@ -31,6 +31,7 @@ public enum Config {
     LAB_ORDER( "Lab Order"),
     IMAGE("Image"),
     PATIENT_VIDEO("Patient Video"),
+    CONCEPT_DETAILS_CONCEPT_CLASS("Concept Details"),
 
     //Physical_Examination_Ignoring_Form_List
     Forms_To_Ignore_In_Physical_Examination("Discharge Summary, Death Note, Delivery Note, Opioid Substitution Therapy - Intake, Opportunistic Infection, " +
