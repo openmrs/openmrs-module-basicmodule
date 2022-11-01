@@ -166,7 +166,7 @@ public class ConsultationService {
     }
 
     private void getGroupMembersOfObs(Obs physicalExamination, List<Obs> groupMembers) {
-        if (physicalExamination.getGroupMembers().size() > 0 && Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(physicalExamination.getConcept().getConceptClass().getName())) {
+        if (physicalExamination.getGroupMembers().size() > 0 && !Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(physicalExamination.getConcept().getConceptClass().getName())) {
             for (Obs groupMember : physicalExamination.getGroupMembers()) {
                 if (conceptNames.contains(groupMember.getConcept().getDisplayString())) continue;
                 getGroupMembersOfObs(groupMember, groupMembers);
