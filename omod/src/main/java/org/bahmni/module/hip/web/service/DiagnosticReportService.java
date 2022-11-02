@@ -134,9 +134,10 @@ public class DiagnosticReportService {
         Map<String, List<LabOrderResult>> groupedByOrderUUID = results.getResults().stream().collect(Collectors.groupingBy(LabOrderResult::getOrderUuid));
 
         List<OpenMrsLabResults> labResults = new ArrayList<>();
-        Map<Obs, List<LabOrderResult>> labRecordsMap = new HashMap<>();
+        Map<Obs, List<LabOrderResult>> labRecordsMap;
 
         for (Map.Entry<Encounter, List<Obs>> map : orderedTestUploads.entrySet()) {
+            labRecordsMap = new HashMap<>();
             for (Obs obs: map.getValue()) {
                 labRecordsMap.put(obs,groupedByOrderUUID.get(obs.getOrder().getUuid()));
             }
@@ -149,6 +150,7 @@ public class DiagnosticReportService {
         }
 
         for (Map.Entry<Encounter, List<Obs>> map : unorderedUploads.entrySet()) {
+            labRecordsMap = new HashMap<>();
             putAllUnOrderedObsUploadsIntoMap(unorderedUploads.get(map.getKey()),labRecordsMap);
             labResults.add(new OpenMrsLabResults(map.getKey(),map.getKey().getPatient(),labRecordsMap));
         }
