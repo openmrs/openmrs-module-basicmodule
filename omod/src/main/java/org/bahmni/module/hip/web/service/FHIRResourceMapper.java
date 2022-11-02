@@ -233,16 +233,7 @@ public class FHIRResourceMapper {
         obs.setConcept(concept);
         Observation observation = observationTranslator.toFhirResource(obs);
         if (obs.getGroupMembers().size() > 0 && Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(obs.getConcept().getConceptClass().getName()) && obs.getFormFieldNamespace() != null) {
-            String chiefComplaintCoded = null, signOrSymptomDuration = null, chiefComplaintDuration = null;
-            for (Obs childObs : obs.getGroupMembers()) {
-                if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_CODED.getValue()))
-                    chiefComplaintCoded = childObs.getValueCoded().getDisplayString();
-                if(childObs.getConcept().getName().getName().equals(Config.SIGN_SYMPTOM_DURATION.getValue()))
-                    signOrSymptomDuration = childObs.getValueNumeric().toString();
-                if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_DURATION.getValue()))
-                    chiefComplaintDuration = childObs.getValueCoded().getDisplayString();
-            }
-            observation.setValue(new StringType(chiefComplaintCoded + " " + "since" + " " + signOrSymptomDuration + " " + chiefComplaintDuration));
+            observation.setValue(new StringType(getCustomDisplayStringForChiefComplaint(obs.getGroupMembers())));
         }
         observation.addNote(new Annotation(new MarkdownType(obs.getComment())));
         return observation;
@@ -305,5 +296,18 @@ public class FHIRResourceMapper {
             entity = (T) ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
         }
         return entity;
+    }
+
+    public String getCustomDisplayStringForChiefComplaint(Set<Obs> groupMembers) {
+        String chiefComplaintCoded = null, signOrSymptomDuration = null, chiefComplaintDuration = null;
+        for (Obs childObs : groupMembers) {
+            if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_CODED.getValue()))
+                chiefComplaintCoded = childObs.getValueCoded().getDisplayString();
+            if(childObs.getConcept().getName().getName().equals(Config.SIGN_SYMPTOM_DURATION.getValue()))
+                signOrSymptomDuration = childObs.getValueNumeric().toString();
+            if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_DURATION.getValue()))
+                chiefComplaintDuration = childObs.getValueCoded().getDisplayString();
+        }
+        return (chiefComplaintCoded + " " + "since" + " " + signOrSymptomDuration + " " + chiefComplaintDuration);
     }
 }
