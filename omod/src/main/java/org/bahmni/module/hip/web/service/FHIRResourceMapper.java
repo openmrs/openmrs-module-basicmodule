@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.MarkdownType;
+import org.hl7.fhir.r4.model.StringType;
 
 import org.openmrs.DrugOrder;
 import org.openmrs.EncounterProvider;
@@ -230,12 +231,19 @@ public class FHIRResourceMapper {
     public Observation mapToObs(Obs obs) {
         Concept concept = initializeEntityAndUnproxy(obs.getConcept());
         obs.setConcept(concept);
-//        if (obs.getGroupMembers().size() > 0 && Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(obs.getConcept().getConceptClass().getName()) && obs.getFormFieldNamespace() != null) {
-//            Obs[] groupMembersArray = new Obs[obs.getGroupMembers().size()];
-//            groupMembersArray = obs.getGroupMembers().toArray(groupMembersArray);
-//            obs.setValueText(groupMembersArray[0].getValueCoded().getDisplayString() + " " + "since" + " " + groupMembersArray[2].getValueNumeric() + " " + groupMembersArray[1].getValueCoded().getDisplayString());
-//        }
         Observation observation = observationTranslator.toFhirResource(obs);
+        if (obs.getGroupMembers().size() > 0 && Config.CONCEPT_DETAILS_CONCEPT_CLASS.getValue().equals(obs.getConcept().getConceptClass().getName()) && obs.getFormFieldNamespace() != null) {
+            String chiefComplaintCoded = null, signOrSymptomDuration = null, chiefComplaintDuration = null;
+            for (Obs childObs : obs.getGroupMembers()) {
+                if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_CODED.getValue()))
+                    chiefComplaintCoded = childObs.getValueCoded().getDisplayString();
+                if(childObs.getConcept().getName().getName().equals(Config.SIGN_SYMPTOM_DURATION.getValue()))
+                    signOrSymptomDuration = childObs.getValueNumeric().toString();
+                if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_DURATION.getValue()))
+                    chiefComplaintDuration = childObs.getValueCoded().getDisplayString();
+            }
+            observation.setValue(new StringType(chiefComplaintCoded + " " + "since" + " " + signOrSymptomDuration + " " + chiefComplaintDuration));
+        }
         observation.addNote(new Annotation(new MarkdownType(obs.getComment())));
         return observation;
     }
