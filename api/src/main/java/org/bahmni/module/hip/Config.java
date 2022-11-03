@@ -32,6 +32,9 @@ public enum Config {
     IMAGE("Image"),
     PATIENT_VIDEO("Patient Video"),
     CONCEPT_DETAILS_CONCEPT_CLASS("Concept Details"),
+    CHIEF_COMPLAINT_CODED("Chief Complaint Coded"),
+    SIGN_SYMPTOM_DURATION("Sign/symptom duration"),
+    CHIEF_COMPLAINT_DURATION("Chief Complaint Duration"),
 
     //Physical_Examination_Ignoring_Form_List
     Forms_To_Ignore_In_Physical_Examination("Discharge Summary, Death Note, Delivery Note, Opioid Substitution Therapy - Intake, Opportunistic Infection, " +
