@@ -304,7 +304,7 @@ public class FHIRResourceMapper {
             if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_CODED.getValue()))
                 chiefComplaintCoded = childObs.getValueCoded().getDisplayString();
             if(childObs.getConcept().getName().getName().equals(Config.SIGN_SYMPTOM_DURATION.getValue()))
-                signOrSymptomDuration = childObs.getValueNumeric().toString();
+                signOrSymptomDuration = String.valueOf(Math.round(childObs.getValueNumeric()));
             if(childObs.getConcept().getName().getName().equals(Config.CHIEF_COMPLAINT_DURATION.getValue()))
                 chiefComplaintDuration = childObs.getValueCoded().getDisplayString();
         }
