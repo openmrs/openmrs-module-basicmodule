@@ -1,15 +1,20 @@
 package org.bahmni.module.hip.web.service;
 
-import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
-import org.bahmni.module.bahmnicore.dao.PatientDao;
+import org.apache.commons.lang3.StringUtils;
+import org.bahmni.module.bahmnicommons.api.contract.patient.PatientSearchParameters;
+import org.bahmni.module.bahmnicommons.api.contract.patient.response.PatientResponse;
+import org.bahmni.module.bahmnicommons.api.dao.PatientDao;
+import org.bahmni.module.bahmnicommons.api.visitlocation.BahmniVisitLocationServiceImpl;
 import org.bahmni.module.hip.Config;
 import org.bahmni.module.hip.api.dao.ExistingPatientDao;
 import org.bahmni.module.hip.web.client.model.Status;
 import org.bahmni.module.hip.web.model.ExistingPatient;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +24,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 
 @Service
@@ -130,9 +136,11 @@ public class ExistingPatientService {
     }
 
     private List<PatientResponse> filterPatientsByName(String patientName) {
-        return patientDao.getPatients("", patientName, null, null, "", 100, 0,
-                null, "", null, null, null,
-                locationService.getLocation(Config.LOCATION.getValue()).getUuid(), false, false);
+        PatientSearchParameters searchParameters = getPatientSearchParameters(patientName);
+        Supplier<Location> visitLocation = () -> getVisitLocation(searchParameters.getLoginLocationUuid());
+        Supplier<List<String>> configuredAddressFields = () -> patientDao.getConfiguredPatientAddressFields();
+
+        return patientDao.getPatients(searchParameters, visitLocation, configuredAddressFields);
     }
 
 
@@ -218,5 +226,35 @@ public class ExistingPatientService {
         } catch (NullPointerException ignored) {
         }
         return false;
+    }
+
+    private PatientSearchParameters getPatientSearchParameters(String patientName) {
+        PatientSearchParameters searchParameters = new PatientSearchParameters();
+        searchParameters.setIdentifier("");
+        searchParameters.setName(patientName);
+        searchParameters.setCustomAttribute(null);
+
+        searchParameters.setAddressFieldName(null);
+        searchParameters.setAddressFieldValue("");
+        searchParameters.setLength(100);
+        searchParameters.setStart(0);
+
+        searchParameters.setPatientAttributes(null);
+        searchParameters.setProgramAttributeFieldName("");
+        searchParameters.setProgramAttributeFieldValue(null);
+        searchParameters.setAddressSearchResultFields(null);
+        searchParameters.setPatientSearchResultFields(null);
+
+        searchParameters.setLoginLocationUuid(locationService.getLocation(Config.LOCATION.getValue()).getUuid());
+        searchParameters.setFilterPatientsByLocation(false);
+        searchParameters.setFilterOnAllIdentifiers(false);
+        return searchParameters;
+    }
+    private Location getVisitLocation(String loginLocationUuid) {
+        if (StringUtils.isBlank(loginLocationUuid)) {
+            return null;
+        }
+        BahmniVisitLocationServiceImpl bahmniVisitLocationService = new BahmniVisitLocationServiceImpl(Context.getLocationService());
+        return bahmniVisitLocationService.getVisitLocation(loginLocationUuid);
     }
 }
