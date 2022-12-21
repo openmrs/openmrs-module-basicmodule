@@ -44,10 +44,10 @@ public class ExistingPatientService {
         this.locationService = locationService;
     }
 
-    public Set<Patient> getMatchingPatients(String phoneNumber, String patientName, int patientYearOfBirth, String patientGender) {
+    public Set<Patient> getMatchingPatients(String locationUuid,String phoneNumber, String patientName, int patientYearOfBirth, String patientGender) {
         Set<Patient> matchingPatients = new HashSet<>();
         matchingPatients.addAll(getMatchingPatients(phoneNumber));
-        matchingPatients.addAll(getMatchingPatients(patientName, patientYearOfBirth, patientGender));
+        matchingPatients.addAll(getMatchingPatients(locationUuid,patientName, patientYearOfBirth, patientGender));
         matchingPatients.removeIf(patient -> !getHealthId(patient).equals(""));
         return matchingPatients;
     }
@@ -115,8 +115,8 @@ public class ExistingPatientService {
         return new ArrayList<>();
     }
 
-    public List<Patient> getMatchingPatients(String patientName, int patientYearOfBirth, String patientGender) {
-        List<PatientResponse> patients = getPatients(patientName, patientYearOfBirth, patientGender);
+    public List<Patient> getMatchingPatients(String locationUuid, String patientName, int patientYearOfBirth, String patientGender) {
+        List<PatientResponse> patients = getPatients(locationUuid,patientName, patientYearOfBirth, patientGender);
         List<Patient> existingPatients = new ArrayList<>();
         for (PatientResponse patient : patients) {
             existingPatients.add(patientService.getPatientByUuid(patient.getUuid()));
@@ -124,8 +124,8 @@ public class ExistingPatientService {
         return existingPatients;
     }
 
-    private List<PatientResponse> getPatients(String patientName, int patientYearOfBirth, String patientGender) {
-        List<PatientResponse> patientsMatchedWithName = filterPatientsByName(patientName);
+    private List<PatientResponse> getPatients(String locationUuid, String patientName, int patientYearOfBirth, String patientGender) {
+        List<PatientResponse> patientsMatchedWithName = filterPatientsByName(locationUuid,patientName);
         if (patientsMatchedWithName.size() != 1) {
             List<PatientResponse> patientsMatchedWithNameAndAge = filterPatientsByAge(patientYearOfBirth, patientsMatchedWithName);
             if (patientsMatchedWithNameAndAge.size() != 1)
@@ -135,9 +135,9 @@ public class ExistingPatientService {
         return patientsMatchedWithName;
     }
 
-    private List<PatientResponse> filterPatientsByName(String patientName) {
-        PatientSearchParameters searchParameters = getPatientSearchParameters(patientName);
-        Supplier<Location> visitLocation = () -> getVisitLocation(searchParameters.getLoginLocationUuid());
+    private List<PatientResponse> filterPatientsByName(String locationUuid,String patientName) {
+        PatientSearchParameters searchParameters = getPatientSearchParameters(locationUuid,patientName);
+        Supplier<Location> visitLocation = () -> getVisitLocation(locationUuid);
         Supplier<List<String>> configuredAddressFields = () -> patientDao.getConfiguredPatientAddressFields();
 
         return patientDao.getPatients(searchParameters, visitLocation, configuredAddressFields);
@@ -228,7 +228,7 @@ public class ExistingPatientService {
         return false;
     }
 
-    private PatientSearchParameters getPatientSearchParameters(String patientName) {
+    private PatientSearchParameters getPatientSearchParameters(String locationUuid,String patientName) {
         PatientSearchParameters searchParameters = new PatientSearchParameters();
         searchParameters.setIdentifier("");
         searchParameters.setName(patientName);
@@ -245,7 +245,7 @@ public class ExistingPatientService {
         searchParameters.setAddressSearchResultFields(null);
         searchParameters.setPatientSearchResultFields(null);
 
-        searchParameters.setLoginLocationUuid(locationService.getLocation(Config.LOCATION.getValue()).getUuid());
+        searchParameters.setLoginLocationUuid(locationUuid);
         searchParameters.setFilterPatientsByLocation(false);
         searchParameters.setFilterOnAllIdentifiers(false);
         return searchParameters;

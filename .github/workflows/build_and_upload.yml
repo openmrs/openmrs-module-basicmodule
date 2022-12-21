@@ -7,6 +7,7 @@ on:
  push:
     branches:
      - master
+     - BAH-2711
  workflow_dispatch:
 env:
   ORG_NAME: BahmniIndiaDistro
