@@ -24,6 +24,7 @@
 		<openmrs.platform.version>2.4.2</openmrs.platform.version>
 		<hapifhirVersion>5.0.0</hapifhirVersion>
 		<bahmniCommons.version>1.0.0-SNAPSHOT</bahmniCommons.version>
+		<fhir2ModuleVersion>1.8.0</fhir2ModuleVersion>
 	</properties>
 
 
@@ -65,13 +66,13 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>fhir2-api-2.1</artifactId>
-				<version>1.5.0</version>
+				<version>${fhir2ModuleVersion}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>fhir2-api</artifactId>
-				<version>1.5.0</version>
+				<version>${fhir2ModuleVersion}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>

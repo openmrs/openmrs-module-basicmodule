@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>fhir2-omod</artifactId>
-            <version>1.5.0</version>
+            <version>${fhir2ModuleVersion}</version>
             <scope>provided</scope>
         </dependency>
 
