@@ -17,7 +17,6 @@ import org.openmrs.Patient;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -27,6 +26,7 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.http.Cookie;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -68,7 +68,7 @@ public class PatientControllerTest extends TestCase {
         ExistingPatient existingPatient = new ExistingPatient("sam tom", "35", "null, null", "M", "3f81c3b4-04fc-4311-9b50-b863fbe023dc", "9123456780");
         when(existingPatientService.getMatchingPatients("+91-9876543210"))
                 .thenReturn(new ArrayList<>());
-        when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
+        when(existingPatientService.getMatchingPatients(anyString(),anyString(), anyInt(), anyString()))
                 .thenReturn(patients);
         when(existingPatientService.getMatchingPatientDetails(new HashSet<>(patients)))
                 .thenReturn(Collections.singletonList(existingPatient));
@@ -78,6 +78,7 @@ public class PatientControllerTest extends TestCase {
                 .param("patientYearOfBirth", "1985")
                 .param("patientGender", "M")
                 .param("phoneNumber", "+91-9876543210")
+                .cookie(new Cookie("bahmni.user.location", "{\"name\":\"General Ward\",\"uuid\":\"baf7bd38-d225-11e4-9c67-080027b662ec\"}"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -87,7 +88,7 @@ public class PatientControllerTest extends TestCase {
         List<Patient> patients = new ArrayList<>();
         when(existingPatientService.getMatchingPatients("+91-9876543210"))
                 .thenReturn(new ArrayList<>());
-        when(existingPatientService.getMatchingPatients(anyString(), anyInt(), anyString()))
+        when(existingPatientService.getMatchingPatients(anyString(),anyString(), anyInt(), anyString()))
                 .thenReturn(patients);
 
         MvcResult mvcResult = mockMvc.perform(get(String.format("/rest/%s/hip/existingPatients", RestConstants.VERSION_1))
@@ -95,6 +96,7 @@ public class PatientControllerTest extends TestCase {
                 .param("patientYearOfBirth", "1985")
                 .param("patientGender", "M")
                 .param("phoneNumber", "+91-9876543210")
+                .cookie(new Cookie("bahmni.user.location", "{\"name\":\"General Ward\",\"uuid\":\"baf7bd38-d225-11e4-9c67-080027b662ec\"}"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
 
