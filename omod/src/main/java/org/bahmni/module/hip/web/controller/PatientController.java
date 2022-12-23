@@ -5,8 +5,10 @@ import org.bahmni.module.hip.web.client.model.Error;
 import org.bahmni.module.hip.web.client.model.ErrorCode;
 import org.bahmni.module.hip.web.client.model.ErrorRepresentation;
 import org.bahmni.module.hip.web.model.ExistingPatient;
+import org.bahmni.module.hip.web.model.Location;
 import org.bahmni.module.hip.web.service.ExistingPatientService;
 import org.bahmni.module.hip.web.service.ValidationService;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.Patient;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.CookieValue;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -39,8 +44,10 @@ public class PatientController {
     ResponseEntity<?> getExistingPatients(@RequestParam(required = false) String patientName,
                                           @RequestParam String patientYearOfBirth,
                                           @RequestParam String patientGender,
-                                          @RequestParam String phoneNumber) {
-        Set<Patient> matchingPatients = existingPatientService.getMatchingPatients(phoneNumber,patientName,
+                                          @RequestParam String phoneNumber,
+                                          @CookieValue(name = "bahmni.user.location") String location) throws IOException {
+        String locationUuid = new ObjectMapper().readValue(location,Location.class).getUuid();
+        Set<Patient> matchingPatients = existingPatientService.getMatchingPatients(locationUuid,phoneNumber,patientName,
                 Integer.parseInt(patientYearOfBirth), patientGender);
         if (matchingPatients.size() == 0) {
             return ResponseEntity.ok().body(new ErrorRepresentation(new Error(
