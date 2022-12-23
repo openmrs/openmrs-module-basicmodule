@@ -173,6 +173,14 @@
 			<name>OpenMRS Nexus Repository</name>
 			<url>https://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
 		</repository>
+		<repository>
+			<id>repo.mybahmni.org</id>
+			<name>bahmni-artifactory-snapshots</name>
+			<url>https://repo.mybahmni.org.s3.amazonaws.com/artifactory/snapshot</url>
+			<snapshots>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
