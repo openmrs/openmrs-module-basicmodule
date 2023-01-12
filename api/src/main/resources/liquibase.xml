@@ -101,5 +101,14 @@
             insert into global_property(property,description,property_value,uuid) values('abdm.conceptsTypesToBeIgnored','Concept types to be ignored for hip atomfeeds','',uuid());
         </sql>
     </changeSet>
+    <changeSet id="Adding-Permission-for-abdm-services"  author="swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='app:abdm'</sqlCheck>
+        </preConditions>
+        <comment>Adding new privilage for ABDM services</comment>
+        <sql>
+            insert into privilege(privilege,description,uuid) values('app:abdm','privilege to view abdm services',uuid());
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
