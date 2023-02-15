@@ -11,6 +11,7 @@ public enum Config {
 
     //identifier type
     ABHA_ADDRESS("ABHA Address"),
+    ABHA_NUMBER("ABHA Number"),
 
     //encounterType
     CONSULTATION("Consultation"),

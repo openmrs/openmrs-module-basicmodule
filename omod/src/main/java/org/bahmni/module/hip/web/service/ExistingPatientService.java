@@ -65,31 +65,36 @@ public class ExistingPatientService {
     public void perform(String healthId, String action) {
         Patient patient = patientService.getPatientByUuid(getPatientWithHealthId(healthId));
         PatientIdentifier patientIdentifierPhr = patient.getPatientIdentifier(Config.ABHA_ADDRESS.getValue());
+        PatientIdentifier patientIdentifierHealthId = patient.getPatientIdentifier(Config.ABHA_NUMBER.getValue());
         if (action.equals(Status.DELETED.toString())) {
-            removeHealthId(patient,patientIdentifierPhr);
+            removeHealthId(patient,patientIdentifierPhr,patientIdentifierHealthId);
         }
         if (action.equals(Status.DEACTIVATED.toString())) {
-            voidHealthId(patientIdentifierPhr);
+            voidHealthId(patientIdentifierPhr,patientIdentifierHealthId);
         }
         if (action.equals(Status.REACTIVATED.toString())) {
-            unVoidHealthId(patient,healthId);
+            unVoidHealthId(patient);
         }
     }
 
-    private void voidHealthId(PatientIdentifier patientIdentifierPHR) {
+    private void voidHealthId(PatientIdentifier patientIdentifierPHR, PatientIdentifier patientIdentifierHealthId) {
         try {
             if (!patientIdentifierPHR.getVoided()) {
                 patientService.voidPatientIdentifier(patientIdentifierPHR, Status.DEACTIVATED.toString());
+            }
+            if (!patientIdentifierHealthId.getVoided()) {
+                patientService.voidPatientIdentifier(patientIdentifierHealthId, Status.DEACTIVATED.toString());
             }
         } catch (NullPointerException ignored) {
         }
     }
 
-    private void unVoidHealthId(Patient patient, String phrAddress) {
+    private void unVoidHealthId(Patient patient) {
         Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
         try {
             for (PatientIdentifier patientIdentifier : patientIdentifiers) {
-                if (patientIdentifier.getIdentifierType().getName().equals(Config.ABHA_ADDRESS.getValue())) {
+                if (patientIdentifier.getIdentifierType().getName().equals(Config.ABHA_ADDRESS.getValue()) ||
+                     patientIdentifier.getIdentifierType().getName().equals(Config.ABHA_NUMBER.getValue())) {
                     if(patientIdentifier.getVoided()){
                         patientIdentifier.setVoided(false);
                         patientService.savePatientIdentifier(patientIdentifier);
@@ -100,10 +105,12 @@ public class ExistingPatientService {
         }
     }
 
-    private void removeHealthId(Patient patient,PatientIdentifier patientIdentifierPHR) {
+    private void removeHealthId(Patient patient,PatientIdentifier patientIdentifierPHR,PatientIdentifier patientIdentifierHealthId) {
         try {
             if(patientIdentifierPHR != null)
                 patient.removeIdentifier(patientIdentifierPHR);
+            if (patientIdentifierHealthId != null)
+                patient.removeIdentifier(patientIdentifierHealthId);
             patientService.savePatient(patient);
         } catch (NullPointerException ignored) {
         }
