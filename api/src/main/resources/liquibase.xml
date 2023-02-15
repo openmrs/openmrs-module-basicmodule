@@ -110,5 +110,24 @@
             insert into privilege(privilege,description,uuid) values('app:abdm','privilege to view abdm services',uuid());
         </sql>
     </changeSet>
+    <changeSet id="Adding-role-for-abdm-services"  author="Sameera">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from role where role='ABDM'</sqlCheck>
+        </preConditions>
+        <comment>Adding new role for ABDM services</comment>
+        <sql>
+            insert into role(role,description,uuid) values('ABDM','Will have full access to abdm services',uuid());
+        </sql>
+    </changeSet>
+    <changeSet id="Providing-abdm-privilege-to-ABDM-role"  author="Sameera">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from role where role='ABDM'</sqlCheck>
+            <sqlCheck expectedResult="1">select count(*) from privilege where privilege='app:abdm'</sqlCheck>
+        </preConditions>
+        <comment>Providing abdm privilege to ABDM role</comment>
+        <sql>
+            insert into role_privilege(role,privilege) values('ABDM','app:abdm');
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
