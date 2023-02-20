@@ -235,6 +235,20 @@ public class ExistingPatientService {
         return false;
     }
 
+    public boolean checkIfHealthIdExists(String patientUuid) {
+        Patient patient = patientService.getPatientByUuid(patientUuid);
+        Set<PatientIdentifier> patientIdentifiers = patient.getIdentifiers();
+        try {
+            for (PatientIdentifier patientIdentifier:patientIdentifiers) {
+                if(patientIdentifier.getIdentifierType().getName().equals(Config.ABHA_ADDRESS.getValue()) && !patientIdentifier.getVoided()) {
+                    return true;
+                }
+            }
+        } catch (NullPointerException ignored) {
+        }
+        return false;
+    }
+
     private PatientSearchParameters getPatientSearchParameters(String locationUuid,String patientName) {
         PatientSearchParameters searchParameters = new PatientSearchParameters();
         searchParameters.setIdentifier("");

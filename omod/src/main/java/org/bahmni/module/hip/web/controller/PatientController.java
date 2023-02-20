@@ -92,4 +92,13 @@ public class PatientController {
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .body(isHealthIdVoided);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/existingPatients/checkHealthId/{patientUuid}")
+    @ResponseBody
+    public ResponseEntity<?> checkIfHealthIdExists (@PathVariable String patientUuid) {
+        boolean isHealthIdExists =  existingPatientService.checkIfHealthIdExists(patientUuid);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(isHealthIdExists);
+    }
 }
