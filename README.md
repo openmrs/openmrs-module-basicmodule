@@ -1,25 +1,18 @@
-openmrs-module-basicmodule
+openmrs-module-hipmodule
 ==========================
 
-A demonstration module for new OpenMRS module developers
+HIP module for exposing HIP specific features from OpenMRS.
 
 Description
 -----------
-This is a very basic module which can be used as a starting point in creating a new module.
+This module is supporting the HIP service with all necessary endpoints exposed that are required by the HIP service.
 
 Building from Source
 --------------------
-You will need to have Java 1.6+ and Maven 2.x+ installed.  Use the command 'mvn package' to 
-compile and package the module.  The .omod file will be in the omod/target folder.
+You will need to have Java 1.6+ and Maven 2.x+ installed. 
+You need to install the OpenMrs module SDK from https://github.com/openmrs/openmrs-sdk (see Readme for installation instructions)
 
-Alternatively you can add the snippet provided in the [Creating Modules](https://wiki.openmrs.org/x/cAEr) page to your 
-omod/pom.xml and use the mvn command:
-
-    mvn package -P deploy-web -D deploy.path="../../openmrs-1.8.x/webapp/src/main/webapp"
-
-It will allow you to deploy any changes to your web 
-resources such as jsp or js files without re-installing the module. The deploy path says 
-where OpenMRS is deployed.
+Use the command `mvn clean install` to build the module, the .omod file will be in the omod/target folder.
 
 Installation
 ------------
@@ -30,3 +23,32 @@ If uploads are not allowed from the web (changable via a runtime property), you 
 into the ~/.OpenMRS/modules folder.  (Where ~/.OpenMRS is assumed to be the Application 
 Data Directory that the running openmrs is currently using.)  After putting the file in there 
 simply restart OpenMRS/tomcat and the module will be loaded and started.
+
+Configure values 
+------------
+## Vagrant setup
+
+You can configure values like, say location, concept and attribute names. you can check **api/src/main/java/org/bahmni/module/hip/Config.java** to know what are the values you can configure and default values.
+
+### One time setup
+
+1. create a file. For example, created `env_file` in `/etc/openmrs/` directory. 
+2. To create conf file for openmrs service,`systemctl edit openmrs`. It will open blank file. paste the following lines in it
+```
+[Service]
+EnvironmentFile=/etc/openmrs/env_file
+```
+Note: You need to specify your created file path from 1st step in `EnvironmentFile` variable
+
+### To configure values
+
+You need to add values to the `env_file`. For example, if you need to specify custom values for Location and Phone Number attribute.
+```
+LOCATION=your_location
+PHONE_NUMBER=your_phoneNumber_attribute_name
+```
+Note: Attribute Name should be exactly same as enum keys from **api/src/main/java/org/bahmni/module/hip/Config.java**
+
+## Docker setup
+
+You can add values to the openmrs Environment variables, specifying same attribute name.

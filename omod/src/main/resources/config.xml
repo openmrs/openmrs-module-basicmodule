@@ -3,28 +3,30 @@
 <module configVersion="1.2">
 	
 	<!-- Base Module Properties -->
-	<id>${project.parent.artifactId}</id>
-	<name>${project.parent.name}</name>
-	<version>${project.parent.version}</version>
-	<package>${MODULE_PACKAGE}</package>
-	<author>Ben Wolfe</author>
+	<id>hipmodule</id>
+	<name>HIP Module OMOD</name>
+	<version>0.1-SNAPSHOT</version>
+	<package>org.bahmni.module.hip</package>
+
+	<author>Stream 1</author>
 	<description>
-			${project.parent.description}
+		Hip module omod
 	</description>
 
-	<activator>${MODULE_PACKAGE}.BasicModuleActivator</activator>
+	<activator>org.bahmni.module.hip.BasicModuleActivator</activator>
 	
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 	
 	<require_version>${openmrs.platform.version}</require_version>
-	
-	<!-- Extensions -->
-	<extension>
-		<point>org.openmrs.admin.list</point>
-		<class>${MODULE_PACKAGE}.extension.html.AdminList</class>
-	</extension>
-	
+
+	<require_modules>
+		<require_module>org.openmrs.module.webservices.rest</require_module>
+		<require_module version="1.8.0">org.openmrs.module.fhir2</require_module>
+		<require_module>org.openmrs.module.emrapi</require_module>
+		<require_module>org.bahmni.module.bahmnicore</require_module>
+		<require_module>org.bahmni.module.bahmnicommons</require_module>
+	</require_modules>
 	
 	<!-- AOP
 	<advice>
@@ -41,18 +43,43 @@
 	</privilege>
 	 /Required Privileges -->
 
-
-	<!-- Required Global Properties 
+	<!-- Required Global Properties -->
 	<globalProperty>
-		<property>@MODULE_ID@.someProperty</property>
-		<defaultValue></defaultValue>
+		<property>bahmniHip.healthFacilityRegistryId</property>
+		<defaultValue>HFR_ID</defaultValue>
 		<description>
-			A description of the global property goes here.  The description
-			should explain enough for administrators to understand the purpose
-			and possible values for the global property.
+			Unique identifier from the Health Facility Registry
 		</description>
 	</globalProperty>
-	/Required Global Properties -->
+	<globalProperty>
+		<property>bahmniHip.healthFacilityName</property>
+		<defaultValue>HFR_NAME</defaultValue>
+		<description>
+			Name of the facility as in Health Facility Registry
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmniHip.healthFacilitySystem</property>
+		<defaultValue>http://affinitydomain.com/hfr</defaultValue>
+		<description>
+			The system URL where Health Facility Registry is registered
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmniHip.practitionerSystem</property>
+		<defaultValue>http://affinitydomain.com/practitioner</defaultValue>
+		<description>
+			The system URL where Practitioners are registered
+		</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmniHip.healthFacilityUrl</property>
+		<defaultValue>http://www.myorg.com/</defaultValue>
+		<description>
+			Website URL of the organization/hip
+		</description>
+	</globalProperty>
+	<!-- Required Global Properties -->
 	
 	<!--
 	<dwr>

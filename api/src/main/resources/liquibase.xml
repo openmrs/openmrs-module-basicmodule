@@ -1,40 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
- 
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
-                  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
- 
-    <!--
-    	See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
-    	documentation on this file.
-    
-        See http://www.liquibase.org/manual/home#available_database_refactorings
-        for a list of supported elements and attributes
-    -->
- 
- 	<!-- Uncomment this and edit the values below to use this file
- 	
-	<changeSet id="mymoduleid-2010-05-25-15:50" author="bwolfe">
-		<preConditions onFail="MARK_RAN">
-			<not><tableExists tableName="mymoduleid_myobject"/></not>
-		</preConditions>
-		<comment>
-			Creating the mymoduleid_myobject table
-		</comment>
-		<createTable tableName="mymoduleid_myobject">
-			<column name="mymoduleid_myobject_id" type="int">
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="firstname" type="varchar(255)"/>
-			<column name="lastname" type="varchar(255)"/>
-			<column name="username" type="varchar(255)">
-				<constraints unique="true" nullable="false"/>
-			</column>
-			<column name="testid" type="int" />
-		</createTable>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="Updating_Users-260620220317" author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM users where username = 'admin'
+            </sqlCheck>
+        </preConditions>
+        <comment>Populate username for admin user</comment>
+        <update tableName="users">
+            <column name="username" value="admin"/>
+            <where>system_id='admin'</where>
+        </update>
     </changeSet>
-    
-    -->
- 
+
+    <changeSet id="Adding-ABHA-Number-IdentifierType-190120231610"  author="Sameera">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from patient_identifier_type where name='ABHA Number'</sqlCheck>
+        </preConditions>
+        <comment>Adding ABHA Number Identifier type</comment>
+        <sql>
+            insert into patient_identifier_type( name, description,creator, uuid, uniqueness_behavior, location_behavior, date_created) Select 'ABHA Number','Health Id identifier type',creator,uuid(),'UNIQUE','NOT_USED',now() from users where username='admin';
+        </sql>
+    </changeSet>
+
+    <changeSet id="updating-ABHA-Number-globalProperty-190120231612"  author="Sameera">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='ABHA Number'</sqlCheck>
+            <sqlCheck expectedResult="0">select count(*) from global_property where property = 'bahmni.extraPatientIdentifierTypes' and property_value LIKE CONCAT('%', (Select uuid from patient_identifier_type where name = 'ABHA Number'))</sqlCheck>
+        </preConditions>
+        <comment>Updating global property for ABHA Number</comment>
+        <sql>
+            update global_property set property_value=(SELECT CONCAT(IF(ISNULL(property_value),'',CONCAT(property_value,',')),uuid) from patient_identifier_type where name = 'ABHA Number') where property = 'bahmni.extraPatientIdentifierTypes';
+        </sql>
+    </changeSet>
+
+    <changeSet id="Adding-ABHA-Address-IdentifierType-220420210516"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from patient_identifier_type where name='ABHA Address'</sqlCheck>
+        </preConditions>
+        <comment>Adding ABHA Address Identifier type</comment>
+        <sql>
+            insert into patient_identifier_type( name, description,creator, uuid, uniqueness_behavior, location_behavior, date_created) Select 'ABHA Address','PHR Address identifier type',creator,uuid(),'UNIQUE','NOT_USED',now() from users where username='admin';
+        </sql>
+    </changeSet>
+
+    <changeSet id="updating-ABHAAddress-globalProperty-210920221730"  author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from patient_identifier_type where name='ABHA Address'</sqlCheck>
+            <sqlCheck expectedResult="0">select count(*) from global_property where property = 'bahmni.extraPatientIdentifierTypes' and property_value LIKE CONCAT('%', (Select uuid from patient_identifier_type where name = 'ABHA Address'))</sqlCheck>
+        </preConditions>
+        <comment>Updating global property for ABHA address</comment>
+        <sql>
+            update global_property set property_value=(SELECT CONCAT(IF(ISNULL(property_value),'',CONCAT(property_value,',')),uuid) from patient_identifier_type where name = 'ABHA Address') where property = 'bahmni.extraPatientIdentifierTypes';
+        </sql>
+    </changeSet>
+
+    <changeSet id="adding-undisclosed-to-gender-global-property" author="Mahesh">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                select count(*) from global_property where property = 'mrs.genders' and property_value='{"M":"Male", "F":"Female","O":"Other"}'
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding Undisclosed to gender</comment>
+        <sql>
+            update global_property set property_value='{"M":"Male", "F":"Female","O":"Other", "U":"Undisclosed"}' where property = 'mrs.genders';
+        </sql>
+    </changeSet>
+
+    <changeSet id="Adding-global-property-encounterTypesToBeIgnored"  author="Sameera, Kavitha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from global_property where property='abdm.encounterTypesToBeIgnored'</sqlCheck>
+        </preConditions>
+        <comment>Adding global property for encounter types to be ignored</comment>
+        <sql>
+            insert into global_property(property,description,property_value,uuid) values('abdm.encounterTypesToBeIgnored','Encounter types to be ignored for hip atomfeeds','ADMISSION,REG,TRANSFER,VALIDATION NOTES',uuid());
+        </sql>
+    </changeSet>
+
+    <changeSet id="Adding-global-property-formFieldsToBeIgnored"  author="Sameera, Kavitha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from global_property where property='abdm.formFieldsToBeIgnored'</sqlCheck>
+        </preConditions>
+        <comment>Adding global property for form fields to be ignored</comment>
+        <sql>
+            insert into global_property(property,description,property_value,uuid) values('abdm.formFieldsToBeIgnored','Form fields to be ignored for hip atomfeeds','',uuid());
+        </sql>
+    </changeSet>
+
+    <changeSet id="Adding-global-property-conceptsTypesToBeIgnored"  author="Sameera, Kavitha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from global_property where property='abdm.conceptsTypesToBeIgnored'</sqlCheck>
+        </preConditions>
+        <comment>Adding global property for concept types to be ignored</comment>
+        <sql>
+            insert into global_property(property,description,property_value,uuid) values('abdm.conceptsTypesToBeIgnored','Concept types to be ignored for hip atomfeeds','',uuid());
+        </sql>
+    </changeSet>
+    <changeSet id="Adding-Permission-for-abdm-services"  author="swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='app:abdm'</sqlCheck>
+        </preConditions>
+        <comment>Adding new privilage for ABDM services</comment>
+        <sql>
+            insert into privilege(privilege,description,uuid) values('app:abdm','privilege to view abdm services',uuid());
+        </sql>
+    </changeSet>
+    <changeSet id="Adding-role-for-abdm-services"  author="Sameera">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from role where role='ABDM'</sqlCheck>
+        </preConditions>
+        <comment>Adding new role for ABDM services</comment>
+        <sql>
+            insert into role(role,description,uuid) values('ABDM','Will have full access to abdm services',uuid());
+        </sql>
+    </changeSet>
+    <changeSet id="Providing-abdm-privilege-to-ABDM-role"  author="Sameera">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from role where role='ABDM'</sqlCheck>
+            <sqlCheck expectedResult="1">select count(*) from privilege where privilege='app:abdm'</sqlCheck>
+        </preConditions>
+        <comment>Providing abdm privilege to ABDM role</comment>
+        <sql>
+            insert into role_privilege(role,privilege) values('ABDM','app:abdm');
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
