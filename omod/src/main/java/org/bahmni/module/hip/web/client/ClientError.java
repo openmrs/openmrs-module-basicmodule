@@ -51,4 +51,11 @@ public class ClientError {
         return new ClientError(ErrorCode.PATIENT_IDENTIFIER_NOT_FOUND.getValue(),"Patient identifier not found");
     }
 
+    public static ClientError invalidStartDate() {
+        return new ClientError(ErrorCode.INVALID_START_DATE_SUPPLIED.getValue(),"Invalid start date specified");
+    }
+    public static ClientError invalidEndDate() {
+        return new ClientError(ErrorCode.INVALID_END_DATE_SUPPLIED.getValue(),"Invalid end date specified");
+    }
+
 }
